@@ -53,6 +53,7 @@ namespace AirlyAPI.handling
             throw error;
         }
 
+        // Handling the malformed request and throwing a new error
         private void handleMalformed(string rawJSON)
         {
             try
@@ -73,7 +74,8 @@ namespace AirlyAPI.handling
             if(code == 301)
             {
                 handleMalformed(response.rawJSON);
-
+                // Working on it!
+                // ...
             }
 
             int limit = utils.calculateRateLimit(response);
