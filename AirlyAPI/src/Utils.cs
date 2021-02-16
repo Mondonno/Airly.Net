@@ -2,9 +2,7 @@
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
-using System.Net.Http;
 using System.Linq;
-using System.Timers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Dynamic;
@@ -136,13 +134,19 @@ namespace AirlyAPI
             
         }
 
-        public static T DynamicParser<T>(JObject json)
+        public static T DynamicParserCore<T>(JObject json)
         {
             var rawjson = JsonConvert.SerializeObject(json);
             IEnumerable<T> collection;
+            List<dynamic[]> dynamics = new List<dynamic[]>();
             foreach (var item in collection)
             {
+                string type = item.GetType().ToString().Replace("System.", "").ToLower();
+                JToken JSONvalue = json.GetValue(nameof(item));
 
+
+
+                if(type.ToString() != )
             }
         }
 

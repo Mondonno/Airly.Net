@@ -49,6 +49,8 @@
     <Compile Include="src\interactions\Installations.cs" />
     <Compile Include="src\interactions\Meta.cs" />
     <Compile Include="src\interactions\InteractionBase.cs" />
+    <Compile Include="src\rest\RequestQueuers.cs" />
+    <Compile Include="src\AirlyConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
