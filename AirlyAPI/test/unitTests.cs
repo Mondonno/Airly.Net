@@ -8,9 +8,28 @@ namespace AirlyAPI.test
     public class unitTests
     {
         //[TestMethod]
-        public void RunTests()
+        public async void RunTests()
         {
-            
+            string apiKey = "121§324323c231xdsadI21OE";
+            Airly airly = new Airly(apiKey);
+            airly.
+            int id = 1;
+            Installation results = null;
+            try
+            {
+                 _ = results != null ? results = await airly.installations.Info(id, true) : null;
+            }
+            catch (AirlyError ex)
+            {
+                if(ex.Data["succesor"].ToString() != null)
+                {
+                    Console.WriteLine($"The new succesor id: {ex.Data["succesor"]}");
+                }
+            }
+            if(results != null)
+            {
+                
+            }
         }
         public async void RunBasicAirlyTest()
         {

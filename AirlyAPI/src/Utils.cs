@@ -15,6 +15,7 @@ namespace AirlyAPI
     { }
     public class Utils : IUtils
     {
+
         public static string domain = "airly.eu";
 
         // The ratelimits headers names
@@ -138,11 +139,11 @@ namespace AirlyAPI
         public static T DynamicParser<T>(JObject json)
         {
             var rawjson = JsonConvert.SerializeObject(json);
-            //IEnumerable<T> props = T;
-            //foreach (var item in props)
-            //{
+            IEnumerable<T> collection;
+            foreach (var item in collection)
+            {
 
-            //}
+            }
         }
 
         // Simple parsing wrapper

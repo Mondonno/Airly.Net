@@ -218,8 +218,15 @@ namespace AirlyAPI
             RequestClient.DefaultRequestHeaders.Authorization = auth_key;
 
             RequestClient.Timeout = TimeSpan.FromMilliseconds(timeout);
-
-            HttpResponseMessage response = await RequestClient.GetAsync(RequestUri);
+            HttpResponseMessage response = new HttpResponseMessage();
+            try
+            {
+                 response = await RequestClient.GetAsync(RequestUri);
+            }
+            catch (Exception ex)
+            {
+                throw new HttpError(REQ_RL + "\n" + ex.Message.ToString());
+            }
             string responseBody = await response.Content.ReadAsStringAsync();
 
             RequestClient.Dispose();

@@ -6,6 +6,8 @@ namespace AirlyAPI.Interactions
 {
     public class Measurments : InteractionBase
     {
+        public Measurments(Airly airly) : base(airly) { }
+
         public enum IndexType
         {
             AirlyCAQI,
@@ -25,7 +27,9 @@ namespace AirlyAPI.Interactions
         });
 
         public async Task<Measurement> Point(double lat, double lng, IndexType type = IndexType.AirlyCAQI) => await api<Measurement>("measurements/point", new { lat, lng, indexType = resolveIndexType(type) });
-        public async Task<Measurement> Installation(int installationId, IndexType type = IndexType.AirlyCAQI) => await api<Measurement>("measurements/installation", new { installationId, indexType = resolveIndexType(type) });
+
+        // Se what is the redirect in the Installations.cs file
+        public async Task<Measurement> Installation(int installationId, bool redirect = false, IndexType type = IndexType.AirlyCAQI) => await api<Measurement>("measurements/installation", new { installationId, indexType = resolveIndexType(type) });
 
         //public async Task<Measurement> Area(LocationArea area) =>
     }

@@ -27,7 +27,7 @@ namespace AirlyAPI.Interactions
             measurements = "measurements"
         };
 
-        public InteractionBase()
+        public InteractionBase(Airly airly)
         {
             rest = new RESTManager(airly);
         }

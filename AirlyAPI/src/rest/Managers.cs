@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using AirlyAPI.handling;
 
 namespace AirlyAPI
 {
@@ -7,14 +9,54 @@ namespace AirlyAPI
     //  TODO: Zobaczenie na githubie projektu wrappera do discord API w C# (analiza)
     // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ TODO ////////////////////////////////////
 
+    // Simple github.com/kyranet AsyncQueue wrapper in C#
+    // Prevents lock-ups and infinity loops in threads
+    public class Waiter
+    {
+        public List<Task> tasks { get; set; }
+
+        public int remaining { get => tasks.Count; }
+
+        public async Task wait()
+        {
+            Task next = this.remaining != 0 ? this.tasks[this.remaining] : new Task(() => { });
+            
+            this.tasks.Add((Task) next);
+
+            next.Wait();
+            next.Start();
+        }
+
+        public void shift()
+        {
+            Task task = this.tasks[0];
+            task = tasks.Find((e) => e == task);
+            tasks.Remove(task);
+            if (task != null) task.Dispose();
+        }
+    }
+    // The queuer make the same what do waiter but waiter is a core for queuer
     public class RequestQueuer
     {
-        public RequestQueuer(){
+        public List<RequestModule> queue { get; set; }
+        public Waiter waiter { get; set; }
+        public RESTManager manager { get; set; }
 
+        public RequestQueuer(RESTManager manager){
+            this.manager = manager;
         }
-        public void push(RequestModule request)
+        public async void push(RequestModule request)
         {
-            
+            await waiter.wait();
+
+            try { this.make(request); }
+            finally{ waiter.shift(); }
+        }
+
+        public void make(RequestModule request)
+        {
+            Handler handler = new Handler();
+
         }
     }
 
@@ -26,7 +68,7 @@ namespace AirlyAPI
     public class RESTManager : BasicRoutes
     {
         private string apiKey { get; set; }
-        private AirlyLanguage lang { get; set; }
+        public AirlyLanguage lang { get; set; }
 
         public RESTManager(AirlyProps airlyProperties, string key)
         {

@@ -81,6 +81,12 @@ namespace AirlyAPI
         public HttpResponseHeaders headers { get;  }
     }
 
+    public class RawResponse
+    {
+        public HttpResponseMessage response { get; set; }
+        public string rawJSON { get; set; }
+    }
+
     public class RateLimitMessage
     {
         public RateLimitMessage(bool rateLimited, string message)

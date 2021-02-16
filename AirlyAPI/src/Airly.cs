@@ -14,23 +14,29 @@ namespace AirlyAPI
     public class Airly
     {
         public string apiKey { get; }
-        public string language { get; set; }
 
         private RESTManager rest { get; set; }
 
-        public Installations installations { get; }
-        public Measurments measurments { get; }
-        public Meta meta { get; }
+        public Installations installations { get; set; }
+        public Measurments measurments { get; set; }
+        public Meta meta { get; set; }
 
-        private void InitProperties()
+        public AirlyLanguage language { get => language; set => rest.lang = value; }
+
+        private void Init()
         {
+            language = AirlyLanguage.en;
 
+            rest = new RESTManager(this);
+            installations = new Installations(this);
+            meta = new Meta(this);
+            measurments = new Measurments(this);
         }
 
         public Airly(string apiKey)
         {
            this.apiKey = apiKey;
-           InitProperties(); // Initializing properties on client (eg. creating new classes instances)
+           Init();
         }
     }
 }
