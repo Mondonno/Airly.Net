@@ -134,6 +134,11 @@ namespace AirlyAPI
             
         }
 
+        public static Type GetTokenType(JTokenType type)
+        {
+            return type.GetType();
+        }
+
         public static T DynamicParserCore<T>(JObject json)
         {
             var rawjson = JsonConvert.SerializeObject(json);
@@ -144,9 +149,12 @@ namespace AirlyAPI
                 string type = item.GetType().ToString().Replace("System.", "").ToLower();
                 JToken JSONvalue = json.GetValue(nameof(item));
 
+                Type rawType = GetTokenType(JSONvalue.Type);
 
+                if(type.ToString() != rawType.ToString())
+                {
 
-                if(type.ToString() != )
+                }
             }
         }
 

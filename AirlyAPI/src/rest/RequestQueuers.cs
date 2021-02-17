@@ -2,34 +2,14 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace AirlyAPI.handling
 {
-    // Simple github.com/kyranet AsyncQueue wrapper in C#
-    // Prevents lock-ups and infinity loops in threads
-    public class Waiter
+    // Simple wrapper for sempahores slim to handle threads in requests
+    public class Waiter : SemaphoreSlim
     {
-        public List<Task> tasks { get; set; }
-
-        public int remaining { get => tasks.Count; }
-
-        public async Task wait()
-        {
-            Task next = this.remaining != 0 ? this.tasks[this.remaining] : new Task(() => { });
-
-            this.tasks.Add((Task)next);
-            
-            next.Start();
-            next.Wait();
-        }
-
-        public void shift()
-        {
-            Task task = this.tasks[0];
-            task = tasks.Find((e) => e == task);
-            tasks.Remove(task);
-            if (task != null) task.Dispose();
-        }
+        public Waiter() : base(1){}
     }
 
     // The queuer make the same what do waiter but waiter is a core for queuer
@@ -45,16 +25,24 @@ namespace AirlyAPI.handling
         }
         public async void push(RequestModule request)
         {
-            await waiter.wait();
+            await waiter.WaitAsync();
 
             try { this.make(request); }
-            finally { waiter.shift(); }
+            finally { waiter.Release(); }
         }
 
-        private void make(RequestModule request)
+        private async void make(RequestModule request)
         {
             Handler handler = new Handler();
-          
+            AirlyResponse res = null;
+            try
+            {
+                res = await request.MakeRequest();
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
     }
 }
