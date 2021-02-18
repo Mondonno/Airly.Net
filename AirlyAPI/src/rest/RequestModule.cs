@@ -87,68 +87,6 @@ namespace AirlyAPI
             apiToken = airlyProperties.API_KEY; // Setting the api key to the props storage value
         }
 
-        private HttpMethod GetMethod(string Method) {
-            HttpMethod hmethod;
-            string method = Method.ToUpper();
-
-            // Providing support only for delete, post and get (Airly API does not have more requiments)
-            if (method == "GET") hmethod = HttpMethod.Get;
-            else if (method == "POST") hmethod = HttpMethod.Post;
-            else if (method == "DELETE") hmethod = HttpMethod.Delete;
-            else hmethod = HttpMethod.Get;
-
-            return hmethod;
-        }
-
-        public void setKey(string key)
-        {
-            string[][] hdd = (string[][])((string[][])deafultHeaders).Clone();
-            string[] apiKey = { API_KEY_HEADER_NAME, key };
-            moduleUtil.ArrayPush(ref hdd, apiKey);
-            deafultHeaders = hdd;
-        }
-
-        public void setLanguage(AirlyLanguage language = AirlyLanguage.en)
-        {
-            var en = AirlyLanguage.en;
-            var pl = AirlyLanguage.pl;
-
-            if (language == en) this.LANGUAGE_CODE = "pl";
-            else if (language == pl) this.LANGUAGE_CODE = "en";
-            else this.LANGUAGE_CODE = "en";
-        }
-
-        public void setLanguage(string language) => setLanguage(language == "en" ? AirlyLanguage.en : (language == "pl" ? AirlyLanguage.pl : AirlyLanguage.en));
-
-        /// <summary>
-        /// Adding the custom headers to deafult headers
-        /// </summary>
-        /// <param name="headers"></param>
-        private HttpClient SetHeaders(string[][] headers, HttpClient client = null)
-        {
-            if (headers.Length == 0) {
-                throw new Exception("The headers length is 0");
-            }
-
-            foreach (var header in headers) {
-                string name = header[0] != "" ? header[0] : "Unknown";
-                string value = header[1] != "" ? header[1] : "Unknown";
-
-                // Removing if already exists
-                if (this.deafultHttpHeaders.Contains(name)) this.deafultHttpHeaders.Remove(name);
-                if (client.DefaultRequestHeaders.Contains(name)) client.DefaultRequestHeaders.Remove(name);
-
-                // Adding the header to local headers
-                this.deafultHttpHeaders.Add(name, value);
-
-                // Adding the headers to provided client
-                if (client != null) {
-                    client.DefaultRequestHeaders.Add(name, value);
-                }
-            }
-            return client;
-        }
-
         /// <summary>Makeing a request to the Airly API.
         /// Settings:                        
         /// 
@@ -218,7 +156,7 @@ namespace AirlyAPI
             RequestClient.DefaultRequestHeaders.Authorization = auth_key;
 
             RequestClient.Timeout = TimeSpan.FromMilliseconds(timeout);
-            HttpResponseMessage response = new HttpResponseMessage();
+            HttpResponseMessage response;
             try
             {
                  response = await RequestClient.GetAsync(RequestUri);
@@ -240,13 +178,72 @@ namespace AirlyAPI
                 DateTime.Now // Only for the raw requests
             );
 
-            // Working on rate limiter
-            //RateLimiter.makeLimit(airlyResponse);
-            //RateLimitMessage rateLimit = RateLimiter.limitMessage ?? null;
-            //object retrunValue;
-            //_ = rateLimit == null ? retrunValue = airlyResponse : retrunValue = rateLimit;
-
             return airlyResponse;
         }
+
+        // ===========================================
+
+        private HttpMethod GetMethod(string Method)
+        {
+            HttpMethod hmethod;
+            string method = Method.ToUpper();
+
+            // Providing support only for delete, post and get (Airly API does not have more requiments)
+            if (method == "GET") hmethod = HttpMethod.Get;
+            else if (method == "POST") hmethod = HttpMethod.Post;
+            else if (method == "DELETE") hmethod = HttpMethod.Delete;
+            else hmethod = HttpMethod.Get;
+
+            return hmethod;
+        }
+
+        public void setKey(string key)
+        {
+            string[][] hdd = (string[][])((string[][])deafultHeaders).Clone();
+            string[] apiKey = { API_KEY_HEADER_NAME, key };
+            moduleUtil.ArrayPush(ref hdd, apiKey);
+            deafultHeaders = hdd;
+        }
+
+        public void setLanguage(AirlyLanguage language = AirlyLanguage.en)
+        {
+            var en = AirlyLanguage.en;
+            var pl = AirlyLanguage.pl;
+
+            if (language == en) this.LANGUAGE_CODE = "pl";
+            else if (language == pl) this.LANGUAGE_CODE = "en";
+            else this.LANGUAGE_CODE = "en";
+        }
+
+        public void setLanguage(string language) => setLanguage(language == "en" ? AirlyLanguage.en : (language == "pl" ? AirlyLanguage.pl : AirlyLanguage.en));
+
+        private HttpClient SetHeaders(string[][] headers, HttpClient client = null)
+        {
+            if (headers.Length == 0)
+            {
+                throw new Exception("The headers length is 0");
+            }
+
+            foreach (var header in headers)
+            {
+                string name = header[0] != "" ? header[0] : "Unknown";
+                string value = header[1] != "" ? header[1] : "Unknown";
+
+                // Removing if already exists
+                if (this.deafultHttpHeaders.Contains(name)) this.deafultHttpHeaders.Remove(name);
+                if (client.DefaultRequestHeaders.Contains(name)) client.DefaultRequestHeaders.Remove(name);
+
+                // Adding the header to local headers
+                this.deafultHttpHeaders.Add(name, value);
+
+                // Adding the headers to provided client
+                if (client != null)
+                {
+                    client.DefaultRequestHeaders.Add(name, value);
+                }
+            }
+            return client;
+        }
+
     }
 }

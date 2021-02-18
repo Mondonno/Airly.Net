@@ -73,30 +73,26 @@ namespace AirlyAPI
         }
 
         public dynamic JSON { get; }
-
         public string rawJSON { get; }
 
         public DateTime timestamp { get; }
+        public HttpResponseHeaders headers { get; }
 
-        public HttpResponseHeaders headers { get;  }
+        public HttpResponseMessage response { get; }
     }
 
+    // Handler raw response (with converted JSON)
+    public class RawHandlerResponse
+    {
+        public dynamic convertedJSON { get; set; }
+        public HttpResponseMessage response { get; set; }
+    }
+
+    // Raw Response (for RequestModule.cs) with raw (in string) JSON
     public class RawResponse
     {
         public HttpResponseMessage response { get; set; }
         public string rawJSON { get; set; }
-    }
-
-    public class RateLimitMessage
-    {
-        public RateLimitMessage(bool rateLimited, string message)
-        {
-            this.rateLimited = rateLimited;
-            this.message = message;
-        }
-
-        public bool rateLimited { get; set; }
-        public string message { get; set; }
     }
 
     public enum AirlyLanguage

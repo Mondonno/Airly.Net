@@ -2,6 +2,8 @@
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
+using System.Net.Http;
+using System.Net;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -120,6 +122,30 @@ namespace AirlyAPI
             return textReturn;
         }
 
+        // Simple resolving from enum the code of the request
+        [Obsolete("unused for the request Module")]
+        public int resolveStatusCode(HttpStatusCode code)
+        {
+            Type enumType = code.GetType();
+
+            string[] codesNames = Enum.GetNames(enumType);
+            int[] codes = (int[]) Enum.GetValues(enumType);
+
+            string codeName = code.ToString();
+            string validCodeName = null;
+
+            foreach (var cd in codesNames)
+            {
+                if (cd == codeName) validCodeName = cd;
+                else continue;
+            }
+
+            int validIndex = Array.IndexOf(codesNames, validCodeName);
+            var checkedValue = $"{codes[validIndex]}";
+
+            return Convert.ToInt32(checkedValue);
+        }
+
         // Parsing query to string[][]
         public string[][] ParseQuery(IEnumerable<dynamic> query)
         {
@@ -132,6 +158,16 @@ namespace AirlyAPI
             }
             return queryTable;
             
+        }
+
+        public JObject[] convertTokens(JToken[] tokens)
+        {
+            JObject[] jObjects = new JObject[0];
+            foreach (var token in tokens)
+            {
+                ArrayPush(ref jObjects, (JObject)token);
+            }
+            return jObjects;
         }
 
         public static Type GetTokenType(JTokenType type)

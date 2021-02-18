@@ -12,7 +12,6 @@ namespace AirlyAPI.test
         {
             string apiKey = "121§324323c231xdsadI21OE";
             Airly airly = new Airly(apiKey);
-            airly.
             int id = 1;
             Installation results = null;
             try

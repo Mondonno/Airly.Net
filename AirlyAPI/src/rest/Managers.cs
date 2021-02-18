@@ -5,10 +5,6 @@ using AirlyAPI.handling;
 
 namespace AirlyAPI
 {
-    // //////////////////////////////////// TODO \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-    //  TODO: Zobaczenie na githubie projektu wrappera do discord API w C# (analiza)
-    // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ TODO ////////////////////////////////////
-
     public interface IBaseRouter { }
     
     // The routes is the wrapper for the Request Module with the prered useful methods
@@ -17,7 +13,7 @@ namespace AirlyAPI
     public class RESTManager : BasicRoutes
     {
         private string apiKey { get; set; }
-        public AirlyLanguage lang { get; set; }
+        public AirlyLanguage lang { get; set; } = AirlyLanguage.en;
 
         public RESTManager(AirlyProps airlyProperties, string key)
         {
@@ -51,6 +47,7 @@ namespace AirlyAPI
         }
 
         // Making the request to the API
+        // Something like "core" wrapper
         public async Task<AirlyResponse> request(string end, string method, object options = null)
         {
             var util = new Utils();
@@ -78,7 +75,7 @@ namespace AirlyAPI
             return new AirlyResponse(response, date);
         }
 
-        // Simple get wrapper
+        // Simple get wrapper (because only GET requests Airly API accepts)
         public async Task<T> api<T>(string end, dynamic query) => Utils.ParseToClassJSON<T>((await request(end, "get", new RequestOptions(new Utils().ParseQuery(query)))).JSON);
     }
 

@@ -1,6 +1,4 @@
-﻿// Simple error models and handling errors logic here!
-
-using System;
+﻿using System;
 using System.Runtime.Serialization;
 using Newtonsoft.Json.Linq;
 
@@ -19,6 +17,7 @@ namespace AirlyAPI
     public class HttpError : BaseError
     {
         public HttpError(string content) : base(string.Format("[HTTP_ERROR] New http (web) error {0}", content)) { }
+        public HttpError(Exception rawError) : base("[HTTP_ERROR] New http(web) error WITH the unknown stack trace", rawError) { }
     }
     
     public class AirlyError : BaseError
@@ -71,6 +70,8 @@ namespace AirlyAPI.handling
             var utils = new Utils();
             if (code > 0 && code <= 200) return;
 
+            // MOVED_PERMANETLY response code
+            // Obosolete for now
             if(code == 301)
             {
                 handleMalformed(response.rawJSON);
@@ -103,11 +104,14 @@ namespace AirlyAPI.handling
         {
             bool errorCheck = json["errorCode"] == null;
             if (errorCheck) return null;
-            JObject[] errors = {
-                (JObject) json["errorCode"],
-                (JObject) json["message"],
-                (JObject) json["details"]
+
+            JToken[] tokens = {
+                json["errorCode"],
+                json["message"],
+                json["details"]
             };
+            JObject[] errors = new Utils().convertTokens(tokens);
+
             string code = errors[0].ToString();
             string message = errors[1].ToString();
 

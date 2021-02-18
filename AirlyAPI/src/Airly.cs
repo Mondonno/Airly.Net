@@ -28,6 +28,7 @@ namespace AirlyAPI
             language = AirlyLanguage.en;
 
             rest = new RESTManager(this);
+
             installations = new Installations(this);
             meta = new Meta(this);
             measurments = new Measurments(this);

@@ -3,19 +3,19 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Net;
 
 namespace AirlyAPI.handling
 {
-    // Simple wrapper for sempahores slim to handle threads in requests
+    // Simple wrapper for semaphore slim to handle threads in requests
     public class Waiter : SemaphoreSlim
     {
-        public Waiter() : base(1){}
+        public Waiter() : base(0){} // Limiting to one action per push and one thread
     }
 
     // The queuer make the same what do waiter but waiter is a core for queuer
     public class RequestQueuer
     {
-        public List<RequestModule> queue { get; set; }
         public Waiter waiter { get; set; }
         public RESTManager manager { get; set; }
 
@@ -23,26 +23,41 @@ namespace AirlyAPI.handling
         {
             this.manager = manager;
         }
-        public async void push(RequestModule request)
+        public async Task<string> Push(RequestModule request)
         {
             await waiter.WaitAsync();
 
-            try { this.make(request); }
+            try { return await this.Make(request); }
             finally { waiter.Release(); }
         }
 
-        private async void make(RequestModule request)
+        private async Task<string> Make(RequestModule request)
         {
             Handler handler = new Handler();
-            AirlyResponse res = null;
+            AirlyResponse res;
             try
             {
                 res = await request.MakeRequest();
             }
             catch (Exception ex)
             {
-
+                throw new AirlyError(new HttpError(ex));
             }
+            if (res == null) throw new HttpError("Can not resolve the Airly api response");
+
+            ErrorModel convertedError = handler.getErrorFromJSON(res.JSON);
+
+            int? succesor = convertedError.succesor;
+            var convertCheck = !(succesor == 0 || succesor == null);
+            //if (convertCheck) return succesor.ToString();
+
+            //if(res.me)
+
+            int statusCode = 111;
+            handler.handleError(statusCode, res);
+
+
+            return null;
         }
     }
 }
