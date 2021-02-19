@@ -175,25 +175,6 @@ namespace AirlyAPI
             return type.GetType();
         }
 
-        public static T DynamicParserCore<T>(JObject json)
-        {
-            var rawjson = JsonConvert.SerializeObject(json);
-            IEnumerable<T> collection;
-            List<dynamic[]> dynamics = new List<dynamic[]>();
-            foreach (var item in collection)
-            {
-                string type = item.GetType().ToString().Replace("System.", "").ToLower();
-                JToken JSONvalue = json.GetValue(nameof(item));
-
-                Type rawType = GetTokenType(JSONvalue.Type);
-
-                if(type.ToString() != rawType.ToString())
-                {
-
-                }
-            }
-        }
-
         // Simple parsing wrapper
         public static JObject ParseJson(string json)
         {
@@ -203,8 +184,14 @@ namespace AirlyAPI
         }
         public static T ParseToClassJSON<T>(JObject json)
         {
+            // Some date handlings
+            JsonSerializerSettings settings = new JsonSerializerSettings() {
+                DateFormatString = "yyyy-MM-ddTH:mm:ss.fffK",
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc
+            };
+
             var rawjson = JsonConvert.SerializeObject(json);
-            T classment = JsonConvert.DeserializeObject<T>(rawjson);
+            T classment = JsonConvert.DeserializeObject<T>(rawjson, settings);
             return classment;
         }
 

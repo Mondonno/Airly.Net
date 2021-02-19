@@ -7,6 +7,16 @@ namespace AirlyAPI
         // ...
     }
 
+    public class EndPoints
+    {
+        public string meta { get; } = "meta";
+        public string installations { get; } = "installations";
+        public string measurements { get; } = "measurements";
+
+        public string api { get; } = "airapi";
+        public string cdn { get; } = "cdn";
+    }
+
     public class AirlyConfiguration : AirlyRawConfiguration
     {
         public string agent { get; } = "Airly-C#-Wrapper";
@@ -20,17 +30,11 @@ namespace AirlyAPI
 
         public int version { get; set; } = 2;
 
-        public dynamic endPoints = new
-        {
-            meta = "meta",
-            installations = "installations",
-            measurements = "measurements",
-            api = "airapi",
-            cdn = "cdn"
-        };
+        public EndPoints endPoints { get; set; }
 
         public AirlyConfiguration()
         {
+            endPoints = new EndPoints();
             apiDomain = $"{endPoints.api}.{domain}";
             cdn = $"{endPoints.cdn}.{domain}";
         }

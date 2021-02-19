@@ -171,6 +171,8 @@ namespace AirlyAPI
 
             JObject convertedJSON = Utils.ParseJson(responseBody);
 
+            //RawResponse response = new RawResponse()
+
             AirlyResponse airlyResponse = new AirlyResponse(
                 convertedJSON,
                 response.Headers,
@@ -185,16 +187,18 @@ namespace AirlyAPI
 
         private HttpMethod GetMethod(string Method)
         {
-            HttpMethod hmethod;
-            string method = Method.ToUpper();
+            HttpMethod test = HttpMethod["xd"];
 
-            // Providing support only for delete, post and get (Airly API does not have more requiments)
-            if (method == "GET") hmethod = HttpMethod.Get;
-            else if (method == "POST") hmethod = HttpMethod.Post;
-            else if (method == "DELETE") hmethod = HttpMethod.Delete;
-            else hmethod = HttpMethod.Get;
+            //HttpMethod hmethod;
+            //string method = Method.ToUpper();
 
-            return hmethod;
+            //// Providing support only for delete, post and get (Airly API does not have more requiments)
+            //if (method == "GET") hmethod = HttpMethod.Get;
+            //else if (method == "POST") hmethod = HttpMethod.Post;
+            //else if (method == "DELETE") hmethod = HttpMethod.Delete;
+            //else hmethod = HttpMethod.Get;
+
+            //return hmethod;
         }
 
         public void setKey(string key)

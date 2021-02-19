@@ -14,20 +14,23 @@ namespace AirlyAPI.test
             Airly airly = new Airly(apiKey);
             int id = 1;
             Installation results = null;
+
+            // Recommended to use try catch when u want to use the redirect option
+            // (Throwing error if the new Installation ID does not exists)
             try
             {
                  _ = results != null ? results = await airly.installations.Info(id, true) : null;
             }
             catch (AirlyError ex)
             {
+                // Console Line Writing the new succesor ID if the succesor is in the new of new Response
+                // (To prevent infinity loops and the inifnity limit usage we throw error if the new succesor id does not exists)
                 if(ex.Data["succesor"].ToString() != null)
-                {
                     Console.WriteLine($"The new succesor id: {ex.Data["succesor"]}");
-                }
             }
             if(results != null)
             {
-                
+                // Some actions with results
             }
         }
         public async void RunBasicAirlyTest()

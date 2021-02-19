@@ -7,6 +7,10 @@ using System.Net;
 
 namespace AirlyAPI.handling
 {
+    // == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
+    //   TODO: Przekształcić zwracaną wartość z RequestModule na RawResponse i parsowanie zrobić z poziomu queuera (parse method)
+    // == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
+
     // Simple wrapper for semaphore slim to handle threads in requests
     public class Waiter : SemaphoreSlim
     {
@@ -27,6 +31,7 @@ namespace AirlyAPI.handling
         {
             await waiter.WaitAsync();
 
+            // Simple thread locks handlings
             try { return await this.Make(request); }
             finally { waiter.Release(); }
         }
@@ -35,6 +40,7 @@ namespace AirlyAPI.handling
         {
             Handler handler = new Handler();
             AirlyResponse res;
+
             try
             {
                 res = await request.MakeRequest();
@@ -43,7 +49,8 @@ namespace AirlyAPI.handling
             {
                 throw new AirlyError(new HttpError(ex));
             }
-            if (res == null) throw new HttpError("Can not resolve the Airly api response");
+
+            if (res == null || res.rawJSON == String.Empty) throw new HttpError("Can not resolve the Airly api response");
 
             ErrorModel convertedError = handler.getErrorFromJSON(res.JSON);
 
@@ -55,7 +62,6 @@ namespace AirlyAPI.handling
 
             int statusCode = 111;
             handler.handleError(statusCode, res);
-
 
             return null;
         }

@@ -68,15 +68,15 @@ namespace AirlyAPI.handling
         public void handleError(int code, AirlyResponse response)
         {
             var utils = new Utils();
+            string rawJSON = response.rawJSON;
             if (code > 0 && code <= 200) return;
 
             // MOVED_PERMANETLY response code
             // Obosolete for now
             if(code == 301)
             {
-                handleMalformed(response.rawJSON);
-                // Working on it!
-                // ...
+                handleMalformed(rawJSON);
+                return;
             }
 
             int limit = utils.calculateRateLimit(response);
@@ -94,8 +94,8 @@ namespace AirlyAPI.handling
                     makeRateLimitError(utils.getHeader(response.headers, "X-RateLimit-Limit-day"), $"{utils.calculateRateLimit(response)}", "");
                     return;
                 }
-                handleMalformed(response.rawJSON);
-                throw new AirlyError($"[AIRLY_INVALID] [{response.timestamp.ToString()}] {response.rawJSON}");
+                handleMalformed(rawJSON);
+                throw new AirlyError($"[AIRLY_INVALID] [{response.timestamp.ToString()}] {rawJSON}");
             }
             if (code >= 500 && code < 600) throw new HttpError("[AIRLY] INTERNAL PROBLEM WITH AIRLY API");
         }

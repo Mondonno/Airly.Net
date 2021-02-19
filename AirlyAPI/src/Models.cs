@@ -91,14 +91,20 @@ namespace AirlyAPI
     // Raw Response (for RequestModule.cs) with raw (in string) JSON
     public class RawResponse
     {
+        public RawResponse(HttpResponseMessage response, string rawJSON)
+        {
+            this.response = response;
+            this.rawJSON = rawJSON;
+        }
+
         public HttpResponseMessage response { get; set; }
         public string rawJSON { get; set; }
     }
 
     public enum AirlyLanguage
     {
-        pl,
-        en
+        pl = 0,
+        en = 1
     }
 
     /* <<=============================>>
