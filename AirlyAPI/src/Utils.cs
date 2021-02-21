@@ -145,7 +145,7 @@ namespace AirlyAPI
 
             return Convert.ToInt32(checkedValue);
         }
-
+        //HttpMethod
         // Parsing query to string[][]
         public string[][] ParseQuery(IEnumerable<dynamic> query)
         {

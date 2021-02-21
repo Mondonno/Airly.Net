@@ -19,7 +19,7 @@ namespace AirlyAPI.test
             // (Throwing error if the new Installation ID does not exists)
             try
             {
-                 _ = results != null ? results = await airly.installations.Info(id, true) : null;
+                 _ = results != null ? results = await airly.Installations.Info(id, true) : null;
             }
             catch (AirlyError ex)
             {
@@ -42,7 +42,7 @@ namespace AirlyAPI.test
             double lng = 13.01;
             double maxDistance = 12.334;
 
-            var measurements = await airly.measurments.Nearest(lat, lng, maxDistance, Interactions.Measurments.IndexType.CAQI);
+            var measurements = await airly.Measurments.Nearest(lat, lng, maxDistance, Interactions.Measurments.IndexType.CAQI);
             List<DateTime> datetimes = new List<DateTime>();
             foreach (var item in measurements)
             {
@@ -58,7 +58,7 @@ namespace AirlyAPI.test
             double lat = 12.035;
             double lng = 13.01;
             double maxDistance = 12.334;
-            var Measurements = await airly.measurments.Point(lat, lng, Interactions.Measurments.IndexType.AirlyCAQI);
+            var Measurements = await airly.Measurments.Point(lat, lng, Interactions.Measurments.IndexType.AirlyCAQI);
 
         }
 

@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
+using System.Reflection;
 
+// Todo end upgrading the setlanguage method
 namespace AirlyAPI
 {
     [DnsPermission(System.Security.Permissions.SecurityAction.Assert)]
@@ -96,7 +98,7 @@ namespace AirlyAPI
         ///
         public async Task<AirlyResponse> MakeRequest(string[][] customHeaders = null, string body = null)
         {
-            if (API_KEY.Replace(" ", "") == "" || API_KEY == null) throw new AirlyError(new HttpError("The provided airly api key is empty"));
+            if (API_KEY.Replace(" ", "") == "" || string.IsNullOrEmpty(API_KEY)) throw new AirlyError(new HttpError("The provided airly api key is empty"));
 
             // Initializing the request headers used in initializing the HttpClient
             string[][] requestHeaders;
@@ -163,7 +165,7 @@ namespace AirlyAPI
             }
             catch (Exception ex)
             {
-                throw new HttpError(REQ_RL + "\n" + ex.Message.ToString());
+                throw new HttpError(string.Format("{0}\n{1}", REQ_RL, ex.Message.ToString()));
             }
             string responseBody = await response.Content.ReadAsStringAsync();
 
@@ -187,18 +189,15 @@ namespace AirlyAPI
 
         private HttpMethod GetMethod(string Method)
         {
-            HttpMethod test = HttpMethod["xd"];
+            HttpMethod httpMethod;
+            try
+            {
+                httpMethod = new HttpMethod(Method.Replace(" ", "").ToUpper());
+            }
+            catch (Exception)
+            { httpMethod = HttpMethod.Get;} // Using GET if the method in string is invalid
 
-            //HttpMethod hmethod;
-            //string method = Method.ToUpper();
-
-            //// Providing support only for delete, post and get (Airly API does not have more requiments)
-            //if (method == "GET") hmethod = HttpMethod.Get;
-            //else if (method == "POST") hmethod = HttpMethod.Post;
-            //else if (method == "DELETE") hmethod = HttpMethod.Delete;
-            //else hmethod = HttpMethod.Get;
-
-            //return hmethod;
+            return httpMethod;
         }
 
         public void setKey(string key)
@@ -208,15 +207,20 @@ namespace AirlyAPI
             moduleUtil.ArrayPush(ref hdd, apiKey);
             deafultHeaders = hdd;
         }
-
+        
         public void setLanguage(AirlyLanguage language = AirlyLanguage.en)
-        {
-            var en = AirlyLanguage.en;
-            var pl = AirlyLanguage.pl;
+        { 
+            string actualCode = Enum.GetName(language.GetType(), language);
+            actualCode = actualCode.ToLower();
 
-            if (language == en) this.LANGUAGE_CODE = "pl";
-            else if (language == pl) this.LANGUAGE_CODE = "en";
-            else this.LANGUAGE_CODE = "en";
+            this.LANGUAGE_CODE = actualCode;
+            
+            //var en = AirlyLanguage.en;
+            //var pl = AirlyLanguage.pl;
+
+            //if (language == en) this.LANGUAGE_CODE = "pl";
+            //else if (language == pl) this.LANGUAGE_CODE = "en";
+            //else this.LANGUAGE_CODE = "en";
         }
 
         public void setLanguage(string language) => setLanguage(language == "en" ? AirlyLanguage.en : (language == "pl" ? AirlyLanguage.pl : AirlyLanguage.en));
