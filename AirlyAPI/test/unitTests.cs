@@ -42,7 +42,7 @@ namespace AirlyAPI.test
             double lng = 13.01;
             double maxDistance = 12.334;
 
-            var measurements = await airly.Measurments.Nearest(lat, lng, maxDistance, Interactions.Measurments.IndexType.CAQI);
+            var measurements = await airly.Measurments.Nearest(lat, lng, maxDistance, IndexQueryType.CAQI);
             List<DateTime> datetimes = new List<DateTime>();
             foreach (var item in measurements)
             {
@@ -58,7 +58,7 @@ namespace AirlyAPI.test
             double lat = 12.035;
             double lng = 13.01;
             double maxDistance = 12.334;
-            var Measurements = await airly.Measurments.Point(lat, lng, Interactions.Measurments.IndexType.AirlyCAQI);
+            var Measurements = await airly.Measurments.Point(lat, lng, IndexQueryType.AirlyCAQI);
 
         }
 

@@ -65,18 +65,20 @@ namespace AirlyAPI
 
             string queryString = "";
             string virtualHost = $"https://{API_DOMAIN}"; // Declaring the virtual host to get the query from URI
+
             Uri param = new Uri(virtualHost);
+
             if (options.query != null && options.query.Length != 0)
             {
-                options.query = new Utils().ParseQuery(options.query);
                 for (int i = 0; i < options.query.Length; i++)
                 {
                     string key = options.query[i][0];
                     string value = options.query[i][1];
 
                     queryString += string.Format("{0}={1}&", key, value);
+                    if (i >= (options.query.Length - 1)) queryString = queryString.Substring(0, queryString.Length - 1);
                 }
-               
+
                 param = new Uri(string.Format("{0}{1}{2}", virtualHost, this.endPoint,
                     (queryString != "" ? string.Format("?{0}",
                     queryString.Replace("#", "%23").Replace("@", "%40")) // Replacing # and @ to the own URL code (Uri does not support # and @ in query)
@@ -86,7 +88,7 @@ namespace AirlyAPI
             // Eg. Retruns from https://example.com/?test=Absurdal_test --> /?test=Absurdal_test
             this.path = $"{param.AbsolutePath}{param.Query}";
 
-            apiToken = airlyProperties.API_KEY; // Setting the api key to the props storage value
+            //apiToken = airlyProperties.API_KEY; // Setting the api key to the props storage value
         }
 
         /// <summary>Makeing a request to the Airly API.
@@ -98,7 +100,7 @@ namespace AirlyAPI
         ///
         public async Task<AirlyResponse> MakeRequest(string[][] customHeaders = null, string body = null)
         {
-            if (API_KEY.Replace(" ", "") == "" || string.IsNullOrEmpty(API_KEY)) throw new AirlyError(new HttpError("The provided airly api key is empty"));
+            if (string.IsNullOrEmpty(API_KEY) || API_KEY.Replace(" ", "") == "") throw new AirlyError(new HttpError("The provided airly api key is empty"));
 
             // Initializing the request headers used in initializing the HttpClient
             string[][] requestHeaders;
@@ -204,7 +206,9 @@ namespace AirlyAPI
         {
             string[][] hdd = (string[][])((string[][])deafultHeaders).Clone();
             string[] apiKey = { API_KEY_HEADER_NAME, key };
+
             moduleUtil.ArrayPush(ref hdd, apiKey);
+
             deafultHeaders = hdd;
         }
         

@@ -28,7 +28,7 @@ namespace AirlyAPI
         public string apiDomain { get; set; }
         public string cdn { get; set; }
 
-        public int version { get; set; } = 2;
+        public int version { get; } = 2;
 
         public EndPoints endPoints { get; set; }
 

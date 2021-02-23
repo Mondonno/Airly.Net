@@ -107,6 +107,13 @@ namespace AirlyAPI
         en = 1
     }
 
+    public enum IndexQueryType
+    {
+        AirlyCAQI,
+        CAQI,
+        PJP
+    }
+
     /* <<=============================>>
     *   Models for airly api responses
     *  <<=============================>>

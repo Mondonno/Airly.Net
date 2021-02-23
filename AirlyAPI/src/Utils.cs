@@ -8,6 +8,8 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Dynamic;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace AirlyAPI
 {
@@ -145,20 +147,86 @@ namespace AirlyAPI
 
             return Convert.ToInt32(checkedValue);
         }
-        //HttpMethod
-        // Parsing query to string[][]
-        public string[][] ParseQuery(IEnumerable<dynamic> query)
+
+        public class NormalizedProperty
         {
-            string[][] queryTable = new string[1][];
-            foreach (dynamic q in query)
+            public NormalizedProperty(string name, object value)
             {
-                string name = nameof(q);
-                string[] table = { name, $"{q}" };
-                ArrayPush(ref queryTable, table);
+                this.name = name;
+                this.value = value;
             }
-            return queryTable;
-            
+
+            public string name { get; set; }
+            public object value { get; set; }
         }
+
+        // Klasy anonimowe sa odczytywane jako normalne klasy bez dziedziczenia oraz bez konstruktora. system wartości PropertyInfo jest identyczny
+        public List<NormalizedProperty> GetClassProperties<T>(T classObject)
+        {
+            Type classType = classObject.GetType();
+            PropertyInfo[] props = classType.GetProperties();
+            List<NormalizedProperty> normalizedProperties = new List<NormalizedProperty>();
+
+            foreach (var prop in props)
+            {
+                var name = prop.Name;
+                MethodInfo method = prop.GetGetMethod();
+
+                if (!prop.CanRead) continue;
+                if (method == null) continue;
+
+                var propType = prop.PropertyType; // cs-unused
+                var desiredValue = method.Invoke(classObject, null);
+
+                object[] values = new object[2] { name, desiredValue };
+
+                NormalizedProperty normalized = new NormalizedProperty((string)values[0], values[1]);
+                normalizedProperties.Add(normalized);
+            }
+
+            return normalizedProperties;
+        }
+
+        public string[][] ParseQuery(dynamic query)
+        {
+            List<NormalizedProperty> properties = GetClassProperties(query);
+
+            string[][] convertedQuery = { };
+            foreach (var p in properties)
+            {
+                string name = p.name;
+                string value = string.Format("{0}", p.value);
+
+                _ = value == null ? value = "" : null;
+
+                string[] constructedArray = { name, value };
+                this.ArrayPush(ref convertedQuery, constructedArray);
+            }
+
+            return convertedQuery;
+        }
+
+        // Simple copying the one dictonary to another
+        public void CopyDictonaryValues(ref IDictionary<object, object> target, IDictionary<object, object> toCopyInto)
+        {
+            foreach (var pair in toCopyInto)
+                target.Add(pair.Key, pair.Value);
+        }
+
+        ////HttpMethod
+        //// Parsing query to string[][]
+        //public string[][] ParseQuery(IEnumerable<dynamic> query)
+        //{
+        //    string[][] queryTable = new string[1][];
+        //    foreach (dynamic q in query)
+        //    {
+        //        string name = nameof(q);
+        //        string[] table = { name, $"{q}" };
+        //        ArrayPush(ref queryTable, table);
+        //    }
+        //    return queryTable;
+            
+        //}
 
         public JObject[] convertTokens(JToken[] tokens)
         {

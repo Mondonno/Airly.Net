@@ -6,7 +6,7 @@ using AirlyAPI.handling;
 namespace AirlyAPI
 {
     public interface IBaseRouter { }
-    
+
     // The routes is the wrapper for the Request Module with the prered useful methods
     // The reuqest manager is the manager of all API operations
     // :)
@@ -24,18 +24,12 @@ namespace AirlyAPI
         public RESTManager(Airly airly)
         {
             this.apiKey = airly.apiKey;
+            this.airlyProperties = new AirlyProps();
         }
 
-        public string Endpoint {
-            get { return this.Endpoint; }
-            set { Endpoint = value; }
-        }
-        
-        public AirlyProps airlyProperties
-        {
-            get { return this.airlyProperties; }
-            set { airlyProperties = value; }
-        }
+        public string Endpoint { get; set; }
+
+        public AirlyProps airlyProperties { get; set; }
 
         public string Cdn { get => $"cdn.{Utils.domain}"; }
 
@@ -48,7 +42,7 @@ namespace AirlyAPI
 
         // Making the request to the API
         // Something like "core" wrapper
-        public async Task<AirlyResponse> request(string end, string method, object options = null)
+        public async Task<AirlyResponse> request(string end, string method, RequestOptions options = null)
         {
             var util = new Utils();
 
@@ -57,15 +51,15 @@ namespace AirlyAPI
             string[][] wrapped = { wrap };
             if (options == null) options = new RequestOptions(wrapped);
 
-            var requestManager = new RequestModule(end, method, (RequestOptions) options, airlyProperties);
-            requestManager.airlyProperties.API_KEY = airlyProperties.API_KEY;
+            var requestManager = new RequestModule(end, method, (RequestOptions)options, airlyProperties);
+            //requestManager.setKey
 
             if (airlyProperties.API_KEY == null) this.airlyProperties.API_KEY = "";
 
             requestManager.setKey(apiKey);
 
             object lang = this.lang;
-            requestManager.setLanguage((AirlyLanguage) validateLang(lang));
+            requestManager.setLanguage((AirlyLanguage)validateLang(lang));
 
             var response = await requestManager.MakeRequest();
 

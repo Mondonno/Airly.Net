@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Newtonsoft.Json.Linq;
 
@@ -24,6 +25,9 @@ namespace AirlyAPI
     {
         public AirlyError(string content) : base(string.Format("The airly get following error.\nMessage: {0}", content)) { }
         public AirlyError(HttpError error) : base(string.Format("Airly get the following http error {0}", error.ToString())) { }
+        public AirlyError(string link, string content) : base(string.Format("The airly get following error.\nMessage: {0}", content)) {
+            this.HelpLink = link;
+        }
     }
 }
 

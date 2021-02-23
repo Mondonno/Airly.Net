@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -13,4 +13,10 @@
     <PackageReference Include="coverlet.collector" Version="1.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AirlyAPI\AirlyAPI.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
 </Project>
