@@ -7,10 +7,13 @@ using System.Collections.Generic;
 using System.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
 using System.Reflection;
+using System.Threading;
 
-// Todo end upgrading the setlanguage method
+// todo delete from project deafultHttpHeaders and replace them other and better stuff
+
 namespace AirlyAPI
 {
+
     [DnsPermission(System.Security.Permissions.SecurityAction.Assert)]
     [WebPermission(System.Security.Permissions.SecurityAction.Assert)]
     /// <summary>Raw request module for Airly API Wrapper *(Do not use this in yours project, just check API manager)</summary>
@@ -27,6 +30,7 @@ namespace AirlyAPI
 
         public AirlyProps airlyProperties { get; set; }
         public HttpRequestHeaders deafultHttpHeaders { get; set; }
+
         private Utils moduleUtil = new Utils();
 
         public object options { get; set; }
@@ -79,10 +83,12 @@ namespace AirlyAPI
                     if (i >= (options.query.Length - 1)) queryString = queryString.Substring(0, queryString.Length - 1);
                 }
 
-                param = new Uri(string.Format("{0}{1}{2}", virtualHost, this.endPoint,
+                Uri constructedQuery = new Uri(string.Format("{0}{1}{2}", virtualHost, this.endPoint,
                     (queryString != "" ? string.Format("?{0}",
                     queryString.Replace("#", "%23").Replace("@", "%40")) // Replacing # and @ to the own URL code (Uri does not support # and @ in query)
                     : ""))); // no need to parse the Query (eg. % === %25) (the Uri class do this for me)
+
+                param = constructedQuery;
 
             }
             // Eg. Retruns from https://example.com/?test=Absurdal_test --> /?test=Absurdal_test
@@ -97,10 +103,12 @@ namespace AirlyAPI
         ///    - endpoint(optional) -- Custom Endpoint(Change if required custom request on the same options)
         ///    - body(optional) -- Body of the request(Used on post). Throw please to your type(eg.FormData)</summary>
         ///<param name="endpoint">Endpoint (optional param)</param>
+        ///<param name="body">Obosolete (actually the requester supports al lot of methods but only streaming the text (json))</param>
         ///
         public async Task<AirlyResponse> MakeRequest(string[][] customHeaders = null, string body = null)
         {
             if (string.IsNullOrEmpty(API_KEY) || API_KEY.Replace(" ", "") == "") throw new AirlyError(new HttpError("The provided airly api key is empty"));
+            if(customHeaders == null) customHeaders = new string[0][];
 
             // Initializing the request headers used in initializing the HttpClient
             string[][] requestHeaders;
@@ -110,32 +118,24 @@ namespace AirlyAPI
 
             string[] apiKey = { API_KEY_HEADER_NAME, "unknown-api-key" };
             string[] contentType = { "Content-Type", "application/json" };
-            string[] language = { "Accept-Language", LANGUAGE_CODE ?? "en" };
+            //string[] language = { "Accept-Language", LANGUAGE_CODE ?? "en" };
             // Accept Languages:
             // * pl
             // * en
 
-            moduleUtil.ArrayPush(ref customHeaders, language);
+            //moduleUtil.ArrayPush(ref customHeaders, language);
             if (body != null || body != "") moduleUtil.ArrayPush(ref customHeaders, contentType);
 
-            // Checking if the custom headers contains the api key and then setting them to the apiKey header
-            if (deafultHttpHeaders.Contains(API_KEY_HEADER_NAME)) {
-                string firstValue = moduleUtil.getHeader(deafultHttpHeaders, API_KEY_HEADER_NAME);
-
-                _ = apiKey[0] == API_KEY_HEADER_NAME ? apiKey[1] = firstValue : apiKey[1] = "";
-            }
-            else if (moduleUtil.Exists(customHeaders, API_KEY_HEADER_NAME) > -1)
-            {
-                string key = customHeaders[(moduleUtil.Exists(customHeaders, API_KEY_HEADER_NAME))][1];
-                apiKey[1] = key;
-            }
-
-            if (apiKey[1] != null || apiKey[1] != "") apiKey[1] = apiToken.ToString();
+            if (apiKey[1] == null || apiKey[1] == "") apiKey[1] = API_KEY.ToString();
 
             // when the custom headers exists we assigning the on array to another
             string[][] copiedDeafultHeaders = (string[][])((string[][])deafultHeaders).Clone();
+
+            var customKey = Array.Find(customHeaders, (e) => e[0] == API_KEY_HEADER_NAME);
+
+            if (customKey != null) apiKey[1] = string.Format("{0}", customKey);
             if ((customHeaders.Length - 1) >= 0) {
-                customHeaders = moduleUtil.assignStringArray(ref copiedDeafultHeaders, ref customHeaders);
+                customHeaders = moduleUtil.assignArray(copiedDeafultHeaders, customHeaders);
             }
             else customHeaders = copiedDeafultHeaders;
 
@@ -146,9 +146,11 @@ namespace AirlyAPI
             AuthenticationHeaderValue auth_key = new AuthenticationHeaderValue(apiKey[0], apiKey[1]);
 
             HttpRequestMessage RequestParams = new HttpRequestMessage();
+
             HttpClient RequestClient = new HttpClient();
 
             requestHeaders = customHeaders;
+
             RequestClient = SetHeaders(requestHeaders, RequestClient);
 
             RequestParams.Method = GetMethod(this.method);
@@ -160,15 +162,15 @@ namespace AirlyAPI
             RequestClient.DefaultRequestHeaders.Authorization = auth_key;
 
             RequestClient.Timeout = TimeSpan.FromMilliseconds(timeout);
+
             HttpResponseMessage response;
             try
             {
                  response = await RequestClient.GetAsync(RequestUri);
             }
             catch (Exception ex)
-            {
-                throw new HttpError(string.Format("{0}\n{1}", REQ_RL, ex.Message.ToString()));
-            }
+            { throw new HttpError(string.Format("{0}\n{1}", REQ_RL, ex.Message.ToString())); }
+
             string responseBody = await response.Content.ReadAsStringAsync();
 
             RequestClient.Dispose();
@@ -197,62 +199,60 @@ namespace AirlyAPI
                 httpMethod = new HttpMethod(Method.Replace(" ", "").ToUpper());
             }
             catch (Exception)
-            { httpMethod = HttpMethod.Get;} // Using GET if the method in string is invalid
+            { httpMethod = HttpMethod.Get; } // Using GET if the method in string is invalid
 
             return httpMethod;
         }
 
         public void setKey(string key)
         {
-            string[][] hdd = (string[][])((string[][])deafultHeaders).Clone();
+            API_KEY = key;
+
+            string[][] copiedHeaders = (string[][])((string[][])deafultHeaders).Clone();
             string[] apiKey = { API_KEY_HEADER_NAME, key };
 
-            moduleUtil.ArrayPush(ref hdd, apiKey);
+            moduleUtil.ArrayPush(ref copiedHeaders, apiKey);
 
-            deafultHeaders = hdd;
+            deafultHeaders = copiedHeaders;
         }
         
         public void setLanguage(AirlyLanguage language = AirlyLanguage.en)
         { 
             string actualCode = Enum.GetName(language.GetType(), language);
+
+            if(string.IsNullOrEmpty(actualCode))
+                return;
+
             actualCode = actualCode.ToLower();
-
             this.LANGUAGE_CODE = actualCode;
-            
-            //var en = AirlyLanguage.en;
-            //var pl = AirlyLanguage.pl;
-
-            //if (language == en) this.LANGUAGE_CODE = "pl";
-            //else if (language == pl) this.LANGUAGE_CODE = "en";
-            //else this.LANGUAGE_CODE = "en";
         }
 
         public void setLanguage(string language) => setLanguage(language == "en" ? AirlyLanguage.en : (language == "pl" ? AirlyLanguage.pl : AirlyLanguage.en));
 
         private HttpClient SetHeaders(string[][] headers, HttpClient client = null)
         {
-            if (headers.Length == 0)
-            {
-                throw new Exception("The headers length is 0");
-            }
+            if (headers.Length == 0) throw new Exception("The headers length is 0");
 
             foreach (var header in headers)
             {
-                string name = header[0] != "" ? header[0] : "Unknown";
-                string value = header[1] != "" ? header[1] : "Unknown";
+                string name = header[0] != "" ? header[0] : "unknown";
+                string value = header[1] != "" ? header[1] : "unknown";
+
+                name = new Utils().replaceDashUpper(name);
+
+                bool deafultCheck = this.deafultHttpHeaders != null;
 
                 // Removing if already exists
-                if (this.deafultHttpHeaders.Contains(name)) this.deafultHttpHeaders.Remove(name);
-                if (client.DefaultRequestHeaders.Contains(name)) client.DefaultRequestHeaders.Remove(name);
+                if (deafultCheck && this.deafultHttpHeaders.Contains(name)) this.deafultHttpHeaders.Remove(name);
+
+                bool clientCheck = client.DefaultRequestHeaders.Contains(name);
+                if (clientCheck) client.DefaultRequestHeaders.Remove(name);
 
                 // Adding the header to local headers
-                this.deafultHttpHeaders.Add(name, value);
+                if (deafultCheck) this.deafultHttpHeaders.TryAddWithoutValidation(name, value);
 
                 // Adding the headers to provided client
-                if (client != null)
-                {
-                    client.DefaultRequestHeaders.Add(name, value);
-                }
+                if (client != null) client.DefaultRequestHeaders.TryAddWithoutValidation(name, value);
             }
             return client;
         }

@@ -51,7 +51,7 @@ namespace AirlyAPI
             string[][] wrapped = { wrap };
             if (options == null) options = new RequestOptions(wrapped);
 
-            var requestManager = new RequestModule(end, method, (RequestOptions)options, airlyProperties);
+            var requestManager = new RequestModule(end, method, options, airlyProperties);
             //requestManager.setKey
 
             if (airlyProperties.API_KEY == null) this.airlyProperties.API_KEY = "";

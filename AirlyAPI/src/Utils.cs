@@ -24,6 +24,7 @@ namespace AirlyAPI
         private string XRemainingName = "X-RateLimit-Remaining-day";
         private string XLimitName = "X-RateLimit-Limit-day";
 
+        // Checking if the ratelimit is reached
         private bool getRateLimitBase(string XRemaining, string XLimit)
         {
             int rateLimitRemaining;
@@ -74,6 +75,7 @@ namespace AirlyAPI
             return (bool)rateLimit;
         }
 
+        // Calculating the ratelimits diffrents
         public int calculateRateLimit(AirlyResponse response)
         {
             var headers = response.headers;
@@ -90,19 +92,7 @@ namespace AirlyAPI
             return calculated;
         }
 
-        private string getHeaderBase(IEnumerable<string> values)
-        {
-            string firstValue = "";
-            int index = 0;
-
-            foreach (var value in values)
-            {
-                if (index == 0) firstValue = value;
-                index++;
-            }
-
-            return firstValue;
-        }
+        private string getHeaderBase(IEnumerable<string> values) => this.getFirstEnumarable(values);
 
         // For response headers
         // Getting the header first value because the headers can have multiple values (Airly API always return one value headers)
@@ -148,6 +138,17 @@ namespace AirlyAPI
             return Convert.ToInt32(checkedValue);
         }
 
+        public string replaceDashUpper(string str)
+        {
+            string finalString = "";
+            string[] strs = str.Split('-');
+            foreach (string nm in strs)
+            {
+                finalString += string.Format("{0}{1}", nm[0].ToString().ToUpper(), nm.Remove(0, 1));
+            }
+            return finalString;
+        }
+
         public class NormalizedProperty
         {
             public NormalizedProperty(string name, object value)
@@ -169,14 +170,14 @@ namespace AirlyAPI
 
             foreach (var prop in props)
             {
-                var name = prop.Name;
+                string name = prop.Name;
                 MethodInfo method = prop.GetGetMethod();
 
                 if (!prop.CanRead) continue;
                 if (method == null) continue;
 
-                var propType = prop.PropertyType; // cs-unused
-                var desiredValue = method.Invoke(classObject, null);
+                Type propType = prop.PropertyType; // cs-unused
+                object desiredValue = method.Invoke(classObject, null);
 
                 object[] values = new object[2] { name, desiredValue };
 
@@ -195,7 +196,7 @@ namespace AirlyAPI
             foreach (var p in properties)
             {
                 string name = p.name;
-                string value = string.Format("{0}", p.value);
+                string value = string.Format("{0}", p.value); // Converting the object value to string (without the explict type)
 
                 _ = value == null ? value = "" : null;
 
@@ -206,27 +207,21 @@ namespace AirlyAPI
             return convertedQuery;
         }
 
-        // Simple copying the one dictonary to another
+        // Validating the 
+        public bool validateKey(string key)
+        {
+
+            return false;
+        }
+
+        public T getFirstEnumarable<T>(IEnumerable<T> enumarable) => enumarable.First((e) => true);
+
+        // Simple coping the one dictonary to another without the overwriting
         public void CopyDictonaryValues(ref IDictionary<object, object> target, IDictionary<object, object> toCopyInto)
         {
             foreach (var pair in toCopyInto)
                 target.Add(pair.Key, pair.Value);
         }
-
-        ////HttpMethod
-        //// Parsing query to string[][]
-        //public string[][] ParseQuery(IEnumerable<dynamic> query)
-        //{
-        //    string[][] queryTable = new string[1][];
-        //    foreach (dynamic q in query)
-        //    {
-        //        string name = nameof(q);
-        //        string[] table = { name, $"{q}" };
-        //        ArrayPush(ref queryTable, table);
-        //    }
-        //    return queryTable;
-            
-        //}
 
         public JObject[] convertTokens(JToken[] tokens)
         {
@@ -310,8 +305,7 @@ namespace AirlyAPI
             {
                 var ii = item;
                 int index = Array.IndexOf(newTabel, ii);
-                if (ii == null) ii = "";
-                if (ii != "") {
+                if (!string.IsNullOrEmpty(ii)) {
                     newTabel = removeArrayValue(newTabel, index);
                 }
             }
@@ -328,13 +322,13 @@ namespace AirlyAPI
             return compiledString;
         }
 
-        public T[] assignStringArray<T>(ref T[] source, ref T[] target) {
+        public T[] assignArray<T>(T[] source, T[] target) {
             T[] newArray = (T[]) target.Clone();
 
             int calculatedLength = target.Length + source.Length;
             int oldLength = target.Length;
 
-            Array.Resize(ref target, calculatedLength);
+            Array.Resize(ref newArray, calculatedLength);
             Array.ConstrainedCopy(source, 0, newArray, oldLength, source.Length);
 
             return newArray;

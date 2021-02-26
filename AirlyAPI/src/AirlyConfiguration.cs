@@ -25,12 +25,12 @@ namespace AirlyAPI
         public string domain { get; set; } = "airly.eu";
         public AirlyLanguage language { get; set; } = AirlyLanguage.en;
 
-        public string apiDomain { get; set; }
-        public string cdn { get; set; }
+        public string apiDomain { get; private set; }
+        public string cdn { get; private set; }
 
         public int version { get; } = 2;
 
-        public EndPoints endPoints { get; set; }
+        public EndPoints endPoints { get; private set; }
 
         public AirlyConfiguration()
         {

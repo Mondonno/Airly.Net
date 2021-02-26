@@ -14,7 +14,8 @@ namespace AirlyAPI.handling
     // Simple wrapper for semaphore slim to handle threads in requests
     public class Waiter : SemaphoreSlim
     {
-        public Waiter() : base(0){} // Limiting to one action per push and one thread
+        public Waiter() : base(0){} // Limiting to one action per push and one thread (so user can make a lot of threads and the thread does not have childs)
+        public int Tasks() => this.CurrentCount; // Shortcut
     }
 
     // The queuer make the same what do waiter but waiter is a core for queuer

@@ -1,4 +1,8 @@
-﻿using System;
+﻿// It is not unit tests but this is my codes trash xD
+// If you are looking for tests just look for the tests dir in the Project overlook
+// And also you can not see this folder and file because the folder is in git ignore xD (so idk why I'm writing this lol)
+
+using System;
 using System.Collections.Generic;
 using AirlyAPI;
 

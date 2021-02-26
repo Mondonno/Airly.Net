@@ -4,10 +4,12 @@
 // Dependecies of Airly API
 // -- Newtonsoft.Json
 // -- Lastest C# & LINQ
-
+ 
 using System.Threading.Tasks;
 using System;
 using AirlyAPI.Interactions;
+
+// Todo please look to Managers.cs for todo :) (IMPORTANT !!!)
 
 namespace AirlyAPI
 {
@@ -32,7 +34,7 @@ namespace AirlyAPI
 
         private void setLanguage(AirlyLanguage lang) => rest.lang = lang;
 
-        private void Init()
+        private void Init(bool lang)
         {
             rest = new RESTManager(this);
 
@@ -40,13 +42,21 @@ namespace AirlyAPI
             Meta = new Meta(this);
             Measurments = new Measurments(this);
 
-            language = AirlyLanguage.en;
+            _ = lang ? language = AirlyLanguage.en : AirlyLanguage.en; 
         }
 
         public Airly(string apiKey)
         {
            this.apiKey = apiKey;
-           Init();
+           Init(true);
+        }
+
+        public Airly(string apiKey, AirlyLanguage language)
+        {
+            this.apiKey = apiKey;
+            Init(false);
+
+            this.language = language;
         }
     }
 }
