@@ -1,23 +1,73 @@
 ﻿using System;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
-using System.Net.Http;
 using System.Net;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Dynamic;
 using System.Reflection;
+
+using System.Text.RegularExpressions;
+using System.Net.Http;
+using System.Dynamic;
 using System.Threading.Tasks;
 
 namespace AirlyAPI
 {
+    // Simple Geo Util for the wrapper comaptiblity
+    // Made by github.com/Mondonno
+    public static class GeoUtil
+    {
+        private static double ToRadians(double angel) => (angel / 360) * (2 * Math.PI);
+        private static double ToDegrees(double radians) => (radians / (2 * Math.PI)) * 360;
+
+        public static double GetMidpoint(double pointOne, double pointTwo) => (Math.Min(pointOne, pointTwo)) + (Math.Abs(pointOne - pointTwo) / 2);
+        public static bool Contains(double point, double begin, double end) => (point >= Math.Min(begin, end)) && (point <= Math.Max(begin, end));
+        public static double GreatCircleDistanceInKm(Location pointOne, Location pointTwo)
+        {
+            bool simmilarCheck = (pointOne.lat == pointTwo.lat) && (pointOne.lng == pointTwo.lng);
+            if (simmilarCheck) return 0.0;
+
+            double oneLat = pointOne.lat;
+            double twoLat = pointTwo.lat;
+
+            double oneRadian = ToRadians(oneLat);
+            double twoRadian = ToRadians(twoLat);
+
+            double theta = pointOne.lng - pointTwo.lng;
+            double dist = Math.Sin(oneRadian) *
+                Math.Sin(twoRadian) +
+                Math.Cos(oneRadian) *
+                Math.Cos(twoRadian) *
+
+                Math.Cos(ToRadians(theta));
+
+            dist = Math.Acos(dist);
+            dist = ToDegrees(dist);
+
+            double finalDist = dist * 60.0 * 1.1515 * 1.609344;
+            return finalDist;
+        }
+
+        public static double GetKmInArea(LocationArea area)
+        {
+            Location sw = area.sw;
+            Location ne = area.ne;
+            Location barycenter = area.GetBarycenter();
+
+            double km = Math.Max(
+                GreatCircleDistanceInKm(sw, barycenter),
+                GreatCircleDistanceInKm(ne, barycenter)
+            );
+
+            return km;
+        }
+    }
+
     public interface IUtils
     { }
     public class Utils : IUtils
     {
-
         public static string domain = "airly.eu";
 
         // The ratelimits headers names
@@ -138,6 +188,21 @@ namespace AirlyAPI
             return Convert.ToInt32(checkedValue);
         }
 
+        // Formmatting web query
+        public string formatQuery(string query)
+        {
+            if (query.StartsWith("?")) query = query.Remove(0, 1);
+
+            string virtualHost = "https://example.com";
+            Uri constructedQuery = new Uri(string.Format("{0}{1}{2}", virtualHost, "/",
+                    (!string.IsNullOrEmpty(query) ? string.Format("?{0}",
+                    query.Replace("#", "%23").Replace("@", "%40")) // Replacing # and @ to the own URL code (Uri does not support # and @ in query)
+                    : ""))); // no need to parse the Query (eg. % === %25) (the Uri class do this for me)
+
+            string Query = constructedQuery.Query;
+            return Query;
+        }
+
         public string replaceDashUpper(string str)
         {
             string finalString = "";
@@ -190,6 +255,7 @@ namespace AirlyAPI
 
         public string[][] ParseQuery(dynamic query)
         {
+            if (query == null) return new string[0][];
             List<NormalizedProperty> properties = GetClassProperties(query);
 
             string[][] convertedQuery = { };
@@ -207,12 +273,6 @@ namespace AirlyAPI
             return convertedQuery;
         }
 
-        // Validating the 
-        public bool validateKey(string key)
-        {
-
-            return false;
-        }
 
         public T getFirstEnumarable<T>(IEnumerable<T> enumarable) => enumarable.First((e) => true);
 

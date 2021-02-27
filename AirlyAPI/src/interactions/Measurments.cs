@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace AirlyAPI.Interactions
 {
@@ -19,19 +20,15 @@ namespace AirlyAPI.Interactions
             indexType = resolveIndexType(type)
         });
 
-        public async Task<Measurement> Point(double lat, double lng, IndexQueryType type = IndexQueryType.AirlyCAQI) => await api<Measurement>("measurements/point", new { lat, lng, indexType = resolveIndexType(type) });
+        public async Task<Measurement> Point(double lat, double lng, IndexQueryType type = IndexQueryType.AirlyCAQI) => await api<Measurement>("measurements/point", new {
+            lat,
+            lng,
+            indexType = resolveIndexType(type)
+        });
 
-        // Se what is the redirect in the Installations.cs file
-        public async Task<Measurement> Installation(int installationId, IndexQueryType type = IndexQueryType.AirlyCAQI, bool redirect = false) => await api<Measurement>("measurements/installation", new { installationId = installationId, indexType = resolveIndexType(type) });
-
-        //public async Task<Measurement> Area(LocationArea area)
-        //{
-        //    var ne = area.ne;
-        //    var sw = area.sw;
-
-
-
-        //    throw new NotImplementedException();
-        //}
+        public async Task<Measurement> Installation(int installationId, bool redirect = false, IndexQueryType type = IndexQueryType.AirlyCAQI) => await api<Measurement>("measurements/installation", new {
+            installationId,
+            indexType = resolveIndexType(type)
+        });
     }
 }

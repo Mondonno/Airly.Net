@@ -21,20 +21,20 @@ namespace AirlyAPI.handling
     // The queuer make the same what do waiter but waiter is a core for queuer
     public class RequestQueuer
     {
-        public Waiter waiter { get; set; }
-        public RESTManager manager { get; set; }
+        public Waiter Waiter { get; set; }
+        public RESTManager Manager { get; set; }
 
         public RequestQueuer(RESTManager manager)
         {
-            this.manager = manager;
+            this.Manager = manager;
         }
         public async Task<string> Push(RequestModule request)
         {
-            await waiter.WaitAsync();
+            await Waiter.WaitAsync();
 
             // Simple thread locks handlings
             try { return await this.Make(request); }
-            finally { waiter.Release(); }
+            finally { Waiter.Release(); }
         }
 
         private async Task<string> Make(RequestModule request)

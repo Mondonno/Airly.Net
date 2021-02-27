@@ -11,6 +11,17 @@ namespace AirlyAPI.test
 {
     public class unitTests
     {
+        public void test()
+        {
+            //setLanguage(language == "en" ? AirlyLanguage.en : (language == "pl" ? AirlyLanguage.pl : AirlyLanguage.en));
+            //string virtualHost = $"https://{API_DOMAIN}"; // Declaring the virtual host to get the query from URI
+            //
+            //Uri param = new Uri(virtualHost);
+            //Uri constructedQuery = new Uri(string.Format("{0}{1}{2}", virtualHost, this.endPoint,
+            //        (queryString != "" ? string.Format("?{0}",
+            //        queryString.Replace("#", "%23").Replace("@", "%40")) // Replacing # and @ to the own URL code (Uri does not support # and @ in query)
+            //        : ""))); // no need to parse the Query (eg. % === %25) (the Uri class do this for me)
+        }
         //[TestMethod]
         public async void RunTests()
         {
@@ -50,19 +61,19 @@ namespace AirlyAPI.test
             List<DateTime> datetimes = new List<DateTime>();
             foreach (var item in measurements)
             {
-                string rawdate = item.current.fromDateTime;
+                string rawdate = item.current.fromDateTime.ToString();
                 DateTime date = DateTime.Parse(rawdate);
                 datetimes.Add(date);
             }
         }
-        public async void RunInstallTests()
+        public void RunInstallTests()
         {
-            string apiKey = "123213125sdfggsaete3123";
-            Airly airly = new Airly(apiKey);
-            double lat = 12.035;
-            double lng = 13.01;
-            double maxDistance = 12.334;
-            var Measurements = await airly.Measurments.Point(lat, lng, IndexQueryType.AirlyCAQI);
+            //string apiKey = "123213125sdfggsaete3123";
+            //Airly airly = new Airly(apiKey);
+            //double lat = 12.035;
+            //double lng = 13.01;
+            ////double maxDistance = 12.334;
+            //var Measurements = await airly.Measurments.Point(lat, lng, IndexQueryType.AirlyCAQI);
 
         }
 
@@ -70,7 +81,7 @@ namespace AirlyAPI.test
         public static void RunRequest()
         {
 
-            string apiKey = "o0utpKmGeTbxbwnVcER8KFpJi9EBilvu";
+            //string apiKey = "12233333";
 
             //var properties = new AirlyProps(new Types());
             //properties.API_KEY = string.Format("{0}", apiKey);

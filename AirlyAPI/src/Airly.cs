@@ -18,9 +18,9 @@ namespace AirlyAPI
         public string apiKey { get; }
         private RESTManager rest { get; set; }
 
-        public Installations Installations { get; set; }
-        public Measurments Measurments { get; set; }
-        public Meta Meta { get; set; }
+        public Installations Installations { get; private set; }
+        public Measurments Measurments { get; private set; }
+        public Meta Meta { get; private set; }
 
         public AirlyConfiguration Configuration { get; set; }
         public AirlyLanguage language {
@@ -28,12 +28,11 @@ namespace AirlyAPI
                 return rest.lang;
             }
             set {
-                setLanguage(value);
+                rest.lang = value;
             }
         }
 
-        private void setLanguage(AirlyLanguage lang) => rest.lang = lang;
-
+        // Initializing all required classes and properties
         private void Init(bool lang)
         {
             rest = new RESTManager(this);
@@ -42,7 +41,7 @@ namespace AirlyAPI
             Meta = new Meta(this);
             Measurments = new Measurments(this);
 
-            _ = lang ? language = AirlyLanguage.en : AirlyLanguage.en; 
+            _ = lang ? language = AirlyLanguage.en : language; 
         }
 
         public Airly(string apiKey)

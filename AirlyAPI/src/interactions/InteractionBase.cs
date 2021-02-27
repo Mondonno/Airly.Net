@@ -29,6 +29,7 @@ namespace AirlyAPI.Interactions
 
         public InteractionBase(Airly airly)
         {
+            this.airly = airly;
             rest = new RESTManager(airly);
         }
     }

@@ -114,6 +114,25 @@ namespace AirlyAPI
         PJP
     }
 
+    public class LocationArea
+    {
+        public LocationArea() { } // cs-non-required-constructor-params
+        public LocationArea(Location sw, Location ne)
+        {
+            this.sw = sw;
+            this.ne = ne;
+        }
+
+        public Location sw { get; set; }
+        public Location ne { get; set; }
+
+        public bool Contains(Location location) => GeoUtil.Contains(location.lat, sw.lat, ne.lat) && GeoUtil.Contains(location.lng, sw.lng, ne.lng);
+        public Location GetBarycenter() => new Location(
+            GeoUtil.GetMidpoint(sw.lat, ne.lat),
+            GeoUtil.GetMidpoint(sw.lng, ne.lng)
+        );
+    }
+
     /* <<=============================>>
     *   Models for airly api responses
     *  <<=============================>>
@@ -124,6 +143,7 @@ namespace AirlyAPI
     * * Single Measurment
     * * Installation
     */
+
     public class Level
     {
         public string values { get; set; }
@@ -168,14 +188,14 @@ namespace AirlyAPI
 
     public class Location
     {
-        public int lat { get; set; }
-        public int lng { get; set; }
-    }
+        public Location(double lat, double lng)
+        {
+            this.lat = lat;
+            this.lng = lng;
+        }
 
-    public class LocationArea
-    {
-        public Location sw { get; set; }
-        public Location ne { get; set; }
+        public double lat { get; set; }
+        public double lng { get; set; }
     }
 
     public class Sponsor
@@ -227,8 +247,8 @@ namespace AirlyAPI
 
     public class SingleMeasurement
     {
-        public string fromDateTime { get; set; }
-        public string tillDateTime { get; set; }
+        public DateTime fromDateTime { get; set; }
+        public DateTime tillDateTime { get; set; }
 
         public List<Value> values { get; set; }
         public List<Index> indexes { get; set; }
