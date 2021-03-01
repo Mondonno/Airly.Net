@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Linq;
 
 namespace AirlyAPI.Interactions
 {
     public class Measurments : InteractionBase
     {
-        public Measurments(Airly airly) : base(airly) { }
+        public Measurments(Airly airly, RESTManager rest) : base(airly, rest) { }
 
         // Added support for the Index Type parameter
         private string resolveIndexType(IndexQueryType type) => type == IndexQueryType.AirlyCAQI ? "AIRLY_CAQI" : (type == IndexQueryType.CAQI ? "CAQI" : (type == IndexQueryType.PJP ? "PJP" : "AIRLY_CAQI"));

@@ -2,11 +2,6 @@
 
 namespace AirlyAPI
 {
-    public class AirlyRawConfiguration
-    {
-        // ...
-    }
-
     public class EndPoints
     {
         public string meta { get; } = "meta";
@@ -17,18 +12,18 @@ namespace AirlyAPI
         public string cdn { get; } = "cdn";
     }
 
-    public class AirlyConfiguration : AirlyRawConfiguration
+    public class AirlyConfiguration
     {
-        public string agent { get; } = "Airly-C#-Wrapper";
+        public string agent { get; set; } = "Airly-C#-Wrapper";
         public string protocol { get; set; } = "https://";
 
-        public string domain { get; set; } = "airly.eu";
-        public AirlyLanguage language { get; set; } = AirlyLanguage.en;
+        public double requestTimeout { get; set; } = 60000.00;
+
+        public int version { get; set; } = 2;
+        public string domain { get; } = "airly.eu";
 
         public string apiDomain { get; private set; }
         public string cdn { get; private set; }
-
-        public int version { get; } = 2;
 
         public EndPoints endPoints { get; private set; }
 

@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Newtonsoft.Json.Linq;
+
+using System.Collections.Generic;
 
 namespace AirlyAPI
 {
@@ -82,6 +83,7 @@ namespace AirlyAPI.handling
                 handleMalformed(rawJSON);
                 return;
             }
+            if (code == 404) return; // Passing null on the 404
 
             int limit = utils.calculateRateLimit(response);
             if (limit == 0) throw new AirlyError($"Get ratelimited by airly api\n{utils.calculateRateLimit(response)}");

@@ -12,6 +12,15 @@ namespace AirlyAPI.Interactions
         public RESTManager rest { get; set; }
         public Airly airly { get; set; }
 
+        public InteractionBase(Airly airly, RESTManager rest)
+        {
+            this.airly = airly;
+            this.rest = rest;
+            //throw new Exception(rest.Lang.ToString());
+
+            //rest.Lang = airly.Language;
+        }
+
         public string domain
         {
             get => Utils.domain;
@@ -26,11 +35,5 @@ namespace AirlyAPI.Interactions
             installations = "installations",
             measurements = "measurements"
         };
-
-        public InteractionBase(Airly airly)
-        {
-            this.airly = airly;
-            rest = new RESTManager(airly);
-        }
     }
 }

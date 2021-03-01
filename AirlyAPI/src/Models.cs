@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Collections.Generic;
+
 using System.Linq;
 using System.Net;
 using System.Web;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
-using System.Collections.Generic;
 
 namespace AirlyAPI
 {
@@ -103,8 +104,8 @@ namespace AirlyAPI
 
     public enum AirlyLanguage
     {
-        pl = 0,
-        en = 1
+        pl,
+        en
     }
 
     public enum IndexQueryType
@@ -114,9 +115,9 @@ namespace AirlyAPI
         PJP
     }
 
+    // Area model class
     public class LocationArea
     {
-        public LocationArea() { } // cs-non-required-constructor-params
         public LocationArea(Location sw, Location ne)
         {
             this.sw = sw;
@@ -202,8 +203,8 @@ namespace AirlyAPI
     {
         public string name { get; set; }
         public string description { get; set; }
-        public string logo { get; set; }
-        public string link { get; set; }
+        public Uri logo { get; set; }
+        public Uri link { get; set; }
     }
 
     public class Adress
@@ -241,7 +242,7 @@ namespace AirlyAPI
     public class MeasurementType
     {
         public string name { get; set; }
-        public string value { get; set; }
+        public string label { get; set; }
         public string unit { get; set; }
     }
 

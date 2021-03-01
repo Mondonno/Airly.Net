@@ -6,11 +6,13 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Reflection;
+using System.Globalization;
 
 using System.Text.RegularExpressions;
 using System.Net.Http;
 using System.Dynamic;
 using System.Threading.Tasks;
+
 
 namespace AirlyAPI
 {
@@ -18,7 +20,7 @@ namespace AirlyAPI
     // Made by github.com/Mondonno
     public static class GeoUtil
     {
-        private static double ToRadians(double angel) => (angel / 360) * (2 * Math.PI);
+        private static double ToRadians(double degrees) => (degrees / 360) * (2 * Math.PI);
         private static double ToDegrees(double radians) => (radians / (2 * Math.PI)) * 360;
 
         public static double GetMidpoint(double pointOne, double pointTwo) => (Math.Min(pointOne, pointTwo)) + (Math.Abs(pointOne - pointTwo) / 2);
@@ -48,7 +50,7 @@ namespace AirlyAPI
             double finalDist = dist * 60.0 * 1.1515 * 1.609344;
             return finalDist;
         }
-
+        
         public static double GetKmInArea(LocationArea area)
         {
             Location sw = area.sw;
@@ -207,6 +209,7 @@ namespace AirlyAPI
         {
             string finalString = "";
             string[] strs = str.Split('-');
+
             foreach (string nm in strs)
             {
                 finalString += string.Format("{0}{1}", nm[0].ToString().ToUpper(), nm.Remove(0, 1));
@@ -253,8 +256,28 @@ namespace AirlyAPI
             return normalizedProperties;
         }
 
+        public bool IsDouble(object obj)
+        {
+            double? result;
+            try
+            {
+                result = (double)obj;
+            }
+            catch (InvalidCastException)
+            {
+                return false;
+            }
+            if (result != null) return true;
+            else return false;
+        }
+
         public string[][] ParseQuery(dynamic query)
         {
+            NumberFormatInfo numberInfo = new NumberFormatInfo()
+            {
+                NumberDecimalSeparator = "."
+            };
+
             if (query == null) return new string[0][];
             List<NormalizedProperty> properties = GetClassProperties(query);
 
@@ -262,7 +285,10 @@ namespace AirlyAPI
             foreach (var p in properties)
             {
                 string name = p.name;
-                string value = string.Format("{0}", p.value); // Converting the object value to string (without the explict type)
+
+                string value = ""; // Converting the object value to string (without the explict type)
+                if (IsDouble(p.value)) value = ((double)p.value).ToString(numberInfo);
+                else value = p.value.ToString();
 
                 _ = value == null ? value = "" : null;
 
@@ -283,6 +309,7 @@ namespace AirlyAPI
                 target.Add(pair.Key, pair.Value);
         }
 
+        // Simple converting JTokens to the JObjects by exclicting the C# types
         public JObject[] convertTokens(JToken[] tokens)
         {
             JObject[] jObjects = new JObject[0];
@@ -298,14 +325,36 @@ namespace AirlyAPI
             return type.GetType();
         }
 
-        // Simple parsing wrapper
-        public static JObject ParseJson(string json)
+        public static bool checkJsonArray(string json)
         {
-            JObject convertedJSON = JObject.Parse(json);
-                //JsonConvert.DeserializeObject(json);
-            return convertedJSON;
+            string jsonValidation = json.Trim().ToString();
+            bool arrayCheck = jsonValidation.StartsWith("[") && jsonValidation.EndsWith("]");
+            return arrayCheck;
         }
-        public static T ParseToClassJSON<T>(JObject json)
+        public static bool checkJsonObject(string json)
+        {
+            string jsonValidation = json.Trim().ToString();
+            bool objectCheck = jsonValidation.StartsWith("{") && jsonValidation.EndsWith("}");
+            return objectCheck;
+        }
+
+        // Simple parsing wrapper
+        public static JToken ParseJson(string json)
+        {
+            var utils = new Utils();
+            JObject[] finalArrayResult = new JObject[0];
+            if (checkJsonArray(json))
+            {
+                var arr = JArray.Parse(json);
+                foreach (JObject obj in arr) utils.ArrayPush(ref finalArrayResult, obj);
+                if (finalArrayResult.Length == 0) return new JArray();
+
+                return arr;
+            }
+            else if (checkJsonObject(json)) return JObject.Parse(json);
+            else return new JObject();
+        }
+        public static T ParseToClassJSON<T>(JToken json)
         {
             // Some date handlings
             JsonSerializerSettings settings = new JsonSerializerSettings() {
@@ -313,7 +362,7 @@ namespace AirlyAPI
                 DateTimeZoneHandling = DateTimeZoneHandling.Utc
             };
 
-            var rawjson = JsonConvert.SerializeObject(json);
+            var rawjson = json.ToString();
             T classment = JsonConvert.DeserializeObject<T>(rawjson, settings);
             return classment;
         }
@@ -372,14 +421,14 @@ namespace AirlyAPI
             return newTabel;
         }
 
-        public string joinArray<T> (ref T[] table, string character)
+        public string joinArray<T> (T[] table, string character)
         {
             string compiledString = "";
             foreach (var item in table)
             {
                 compiledString += string.Format("{0}{1}", item, character);
             }
-            return compiledString;
+            return compiledString.Remove(compiledString.Length -1, 1);
         }
 
         public T[] assignArray<T>(T[] source, T[] target) {

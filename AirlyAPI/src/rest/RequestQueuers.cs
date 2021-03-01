@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Net;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace AirlyAPI.handling
 {
@@ -42,26 +42,15 @@ namespace AirlyAPI.handling
             Handler handler = new Handler();
             AirlyResponse res;
 
-            try
-            {
-                res = await request.MakeRequest();
-            }
-            catch (Exception ex)
-            {
-                throw new AirlyError(new HttpError(ex));
-            }
+            try { res = await request.MakeRequest(); }
+            catch (Exception ex) { throw new AirlyError(new HttpError(ex)); }
 
             if (res == null || res.rawJSON == String.Empty) throw new HttpError("Can not resolve the Airly api response");
-
-            ErrorModel convertedError = handler.getErrorFromJSON(res.JSON);
-
-            int? succesor = convertedError.succesor;
-            var convertCheck = !(succesor == 0 || succesor == null);
-            //if (convertCheck) return succesor.ToString();
-
-            //if(res.me)
+            ErrorModel parsedError = handler.getErrorFromJSON(res.JSON);
 
             int statusCode = 111;
+            if (statusCode == 404) return null;
+
             handler.handleError(statusCode, res);
 
             return null;

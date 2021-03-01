@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Linq;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace AirlyAPI
 {
@@ -13,7 +15,7 @@ namespace AirlyAPI
     {
         private Airly airly { get; set; }
         private string apiKey { get; set; }
-        public AirlyLanguage lang { get; set; } = AirlyLanguage.en;
+        public AirlyLanguage Lang { get; set; }
 
         public RESTManager(Airly airly, string apiKey)
         {
@@ -24,12 +26,17 @@ namespace AirlyAPI
         public RESTManager(Airly airly)
         {
             this.airly = airly;
-            this.apiKey = airly.apiKey;
+            this.apiKey = airly.ApiKey;
         }
 
-        public string Auth {
-            get {
-                if (string.IsNullOrEmpty(apiKey)) throw new AirlyError("Provided api key is empty");
+        public string Auth
+        {
+            get
+            {
+                AirlyError err = new AirlyError("Provided api key is empty");
+                err.Data.Add("Token", false);
+
+                if (string.IsNullOrEmpty(apiKey)) throw err;
                 return this.apiKey;
             }
         }
@@ -37,10 +44,16 @@ namespace AirlyAPI
         public string Endpoint { get; set; }
         public string Cdn { get => $"cdn.{Utils.domain}"; }
 
+        private void SetAirlyPreferedLang(Airly air) => this.Lang = air.Language;
+
         private object ValidateLang(object lang)
         {
-            string air = nameof(AirlyLanguage);
-            if (lang.GetType().ToString() == air) return lang;
+            if (lang == null) return AirlyLanguage.en;
+
+            string air = string.Format("{0}.{1}", nameof(AirlyAPI), nameof(AirlyLanguage));
+            string matchType = lang.GetType().ToString();
+
+            if (matchType == air) return lang;
             else return AirlyLanguage.en;
         }
 
@@ -48,14 +61,19 @@ namespace AirlyAPI
         // Something like "core" wrapper
         public async Task<AirlyResponse> Request(string end, string method, RequestOptions options = null)
         {
+            //this.Lang = this.airly.Language;
+
             var util = new Utils();
             if (options == null) options = new RequestOptions(new string[0][]);
 
-            var requestManager = new RequestModule(end, method, options);
+            var requestManager = new RequestModule(end, method.ToUpper(), options);
 
-            object lang = this.lang;
+            object lang = this.Lang;
+            //AirlyLanguage validatedLang = (AirlyLanguage)ValidateLang(lang);
+
+            Debug.WriteLine(this.Lang);
             requestManager.setKey(apiKey);
-            requestManager.setLanguage((AirlyLanguage)ValidateLang(lang));
+            requestManager.setLanguage(this.Lang);
 
             var response = await requestManager.MakeRequest();
             string dateHeader = util.getHeader(response.headers, "Date");

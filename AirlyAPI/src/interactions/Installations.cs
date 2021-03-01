@@ -6,7 +6,7 @@ namespace AirlyAPI.Interactions
 {
     public class Installations : InteractionBase
     {
-        public Installations(Airly airly) : base(airly) { }
+        public Installations(Airly airly, RESTManager rest) : base(airly, rest) { }
 
         public async Task<List<Installation>> Nearest(double lat, double lng, double maxDistance = 3, int maxResults = 1) => await api<List<Installation>>("installations/nearest", new
         {
@@ -15,6 +15,8 @@ namespace AirlyAPI.Interactions
             maxDistanceKM = maxDistance,
             maxResults
         });
+
+        public async Task<List<Installation>> Nearest(Location location, double maxDistance = 3, int maxResults = 1) => await Nearest(location.lat, location.lng, maxDistance, maxResults);
 
         // What does do redirect?
         // Redirect do the request to the api with the new id (`INSTALLATION_REPLACED` error) and returns them not error
@@ -30,17 +32,8 @@ namespace AirlyAPI.Interactions
             List<Installation> installations = await Nearest(barycenter.lat, barycenter.lng, km, 100);
             List<Installation> installationsFiltred = installations.FindAll((installation) => area.Contains(installation.location));
 
-            Installation installationResult = (installationsFiltred.GetRange(0, 1))[0];
+            Installation installationResult = installationsFiltred.GetRange(0, 1)[0];
             return installationResult;
-        }
-
-        // Getting first occurence of the Nearest (so the most in the radius)
-        public async Task<Installation> Point(double lat, double lng, double maxDistance = 3)
-        {
-            List<Installation> nearest = await this.Nearest(lat, lng, 3, 100);
-            Installation installation = (nearest.GetRange(0, 1))[0];
-
-            return installation;
         }
     }
 }

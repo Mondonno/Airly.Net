@@ -101,3 +101,17 @@ namespace AirlyAPI.test
         }
     }
 }
+
+//// Checking if the custom headers contains the api key and then setting them to the apiKey header
+//            if (deafultHttpHeaders.Contains(API_KEY_HEADER_NAME)) {
+//                string firstValue = moduleUtil.getHeader(deafultHttpHeaders, API_KEY_HEADER_NAME);
+
+//_ = apiKey[0] == API_KEY_HEADER_NAME? apiKey[1] = firstValue : apiKey[1] = "";
+//            }
+//            else
+
+//if (moduleUtil.Exists(customHeaders, API_KEY_HEADER_NAME) > -1)
+//            {
+//                string key = customHeaders[(moduleUtil.Exists(customHeaders, API_KEY_HEADER_NAME))][1];
+//apiKey[1] = key;
+//            }

@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
 using System.Linq;
+using System.Diagnostics;
 using System.Collections.Generic;
 
 namespace AirlyAPI
 {
-
     [DnsPermission(System.Security.Permissions.SecurityAction.Assert)]
     [WebPermission(System.Security.Permissions.SecurityAction.Assert)]
     /// <summary>Raw request module for Airly API Wrapper *(Do not use this in yours project, just check API manager)</summary>
@@ -32,7 +32,7 @@ namespace AirlyAPI
         public string method = "get", Agent, endPoint = "";
         public string path { get; set; }
 
-        /// <summary>Raw request module for Airly API Wrapper *(Do not use this in yours project, just check API manager)</summary>
+        /// <summary>Raw request module for Airly API Wrapper <i>(Do not use this in yours project, just check API manager)</i></summary>
         public RequestModule(string endPoint, string method, RequestOptions options)
         {
             this.options = options;
@@ -79,14 +79,12 @@ namespace AirlyAPI
             this.path = $"{endPoint}{(!string.IsNullOrEmpty(Query) ? Query : "")}";
         }
 
-        /// <summary>Makeing a request to the Airly API.
-        /// Settings:                        
-        /// 
-        ///    - endpoint(optional) -- Custom Endpoint(Change if required custom request on the same options)
-        ///    - body(optional) -- Body of the request(Used on post). Throw please to your type(eg.FormData)</summary>
-        ///<param name="endpoint">Endpoint (optional param)</param>
-        ///<param name="body">Obosolete (actually the requester supports al lot of methods but only streaming the text (json))</param>
-        ///
+        /// <summary>
+        /// Making a request to the Airly API.
+        /// </summary>
+        /// <param name="customHeaders">The custom headers for the request</param>
+        /// <param name="body">Obosolete (actually the requester supports al lot of methods but only streaming the text (json))</param>
+        /// <returns></returns>
         public async Task<AirlyResponse> MakeRequest(string[][] customHeaders = null, string body = null)
         {
             if (string.IsNullOrEmpty(API_KEY) || string.IsNullOrEmpty(API_KEY.Replace(" ", ""))) throw new AirlyError(new HttpError("The provided airly api key is empty"));
@@ -124,13 +122,13 @@ namespace AirlyAPI
             string RequestWebUrl = string.Format("{0}{1}", API_URL, path);
             
             Uri RequestUri = new Uri(RequestWebUrl);
-            AuthenticationHeaderValue airlyAuthentication = new AuthenticationHeaderValue(apiKey[0], apiKey[1]);
+            AuthenticationHeaderValue airlyAuthentication = new AuthenticationHeaderValue(apiKey[0], apiKey[1]); // todo wywalic to poniewaz autoryzacja jest w headerach :)
 
             HttpRequestMessage RequestParams = new HttpRequestMessage();
             HttpClient RequestClient = new HttpClient();
 
+            SetHeaders(ref RequestClient, requestHeaders);
             RequestClient.CancelPendingRequests(); // Prevenitng infinity thread loop (if user does not await and one request must kill another)
-            RequestClient = SetHeaders(requestHeaders, RequestClient);
             RequestParams.Method = GetMethod(this.method);
 
             RequestClient.BaseAddress = RequestUri;
@@ -139,17 +137,24 @@ namespace AirlyAPI
             RequestClient.Timeout = TimeSpan.FromMilliseconds(timeout);
 
             HttpResponseMessage response;
-            try
+            try 
             {
                  response = await RequestClient.GetAsync(RequestUri);
             }
             catch (Exception ex)
-            { throw new HttpError(string.Format("{0}\n{1}", RequestWebUrl, ex.Message.ToString())); }
+            {
+                HttpError httpError = new HttpError(string.Format("{0}\n{1}", RequestWebUrl, ex.Message.ToString()));
+                httpError.Data.Add("Connected", false);
+
+                throw httpError;
+            }
 
             string responseBody = await response.Content.ReadAsStringAsync();
+
+            Debug.WriteLine(responseBody);
             RequestClient.Dispose();
 
-            JObject convertedJSON = Utils.ParseJson(responseBody);
+            JToken convertedJSON = Utils.ParseJson(responseBody);
 
             AirlyResponse airlyResponse = new AirlyResponse(
                 convertedJSON,
@@ -181,14 +186,14 @@ namespace AirlyAPI
         {
             API_KEY = key;
 
-            string[][] copiedHeaders = (string[][])((string[][])deafultHeaders).Clone();
+            string[][] copiedHeaders = (string[][]) ((string[][]) deafultHeaders).Clone();
             string[] apiKey = { API_KEY_HEADER_NAME, key };
 
             moduleUtil.ArrayPush(ref copiedHeaders, apiKey);
             deafultHeaders = copiedHeaders;
         }
         
-        public void setLanguage(AirlyLanguage language = AirlyLanguage.en)
+        public void setLanguage(AirlyLanguage language)
         { 
             string actualCode = Enum.GetName(language.GetType(), language);
 
@@ -217,7 +222,7 @@ namespace AirlyAPI
             this.LANGUAGE_CODE = correctLanguage;
         }
 
-        private HttpClient SetHeaders(string[][] headers, HttpClient client = null)
+        private void SetHeaders(ref HttpClient client, string[][] headers)
         {
             if (headers.Length == 0) throw new Exception("The headers length is 0");
 
@@ -237,8 +242,11 @@ namespace AirlyAPI
                 if (client != null) client.DefaultRequestHeaders.TryAddWithoutValidation(name, value);
             }
 
-            return client;
+            // todo Only for the debug tests (to delete)
+            foreach (var item in client.DefaultRequestHeaders)
+            {
+                Debug.WriteLine($"{item.Key}     {moduleUtil.getFirstEnumarable(item.Value)}");
+            }
         }
-
     }
 }
