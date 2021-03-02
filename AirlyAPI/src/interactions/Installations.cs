@@ -30,7 +30,10 @@ namespace AirlyAPI.Interactions
             Location barycenter = area.GetBarycenter();
 
             List<Installation> installations = await Nearest(barycenter.lat, barycenter.lng, km, 100);
+            if (installations.Count == 0) return null;
+
             List<Installation> installationsFiltred = installations.FindAll((installation) => area.Contains(installation.location));
+            if (installationsFiltred.Count == 0) return null;
 
             Installation installationResult = installationsFiltred.GetRange(0, 1)[0];
             return installationResult;

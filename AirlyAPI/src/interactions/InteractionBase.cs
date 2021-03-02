@@ -9,16 +9,13 @@ namespace AirlyAPI.Interactions
     }
     public class InteractionBase : BaseInterface
     {
-        public RESTManager rest { get; set; }
-        public Airly airly { get; set; }
+        private RESTManager Rest { get; set; }
+        public Airly Airly { get; set; }
 
         public InteractionBase(Airly airly, RESTManager rest)
         {
-            this.airly = airly;
-            this.rest = rest;
-            //throw new Exception(rest.Lang.ToString());
-
-            //rest.Lang = airly.Language;
+            this.Airly = airly;
+            this.Rest = rest;
         }
 
         public string domain
@@ -27,7 +24,7 @@ namespace AirlyAPI.Interactions
         }
 
         // api shortcut
-        public async Task<T> api<T>(string end, dynamic query) => await rest.api<T>(end, query);
+        public async Task<T> api<T>(string end, dynamic query) => await Rest.api<T>(end, query);
 
         dynamic endPoints = new
         {

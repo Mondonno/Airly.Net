@@ -41,7 +41,7 @@ namespace AirlyAPI
             }
         }
 
-        public string Endpoint { get; set; }
+        public string Endpoint { get => $"{this.airly.Configuration.ApiDomain}"; }
         public string Cdn { get => $"cdn.{Utils.domain}"; }
 
         private void SetAirlyPreferedLang(Airly air) => this.Lang = air.Language;
@@ -50,6 +50,7 @@ namespace AirlyAPI
         {
             if (lang == null) return AirlyLanguage.en;
 
+            // Declaring the namespace and the type of the checking object
             string air = string.Format("{0}.{1}", nameof(AirlyAPI), nameof(AirlyLanguage));
             string matchType = lang.GetType().ToString();
 
@@ -61,19 +62,13 @@ namespace AirlyAPI
         // Something like "core" wrapper
         public async Task<AirlyResponse> Request(string end, string method, RequestOptions options = null)
         {
-            //this.Lang = this.airly.Language;
-
             var util = new Utils();
             if (options == null) options = new RequestOptions(new string[0][]);
 
-            var requestManager = new RequestModule(end, method.ToUpper(), options);
+            RequestModule requestManager = new RequestModule(end, method.ToUpper(), options);
 
-            object lang = this.Lang;
-            //AirlyLanguage validatedLang = (AirlyLanguage)ValidateLang(lang);
-
-            Debug.WriteLine(this.Lang);
             requestManager.setKey(apiKey);
-            requestManager.setLanguage(this.Lang);
+            requestManager.SetLanguage(this.Lang);
 
             var response = await requestManager.MakeRequest();
             string dateHeader = util.getHeader(response.headers, "Date");
@@ -83,7 +78,14 @@ namespace AirlyAPI
         }
 
         // Simple get wrapper (because only GET requests Airly API accepts)
-        public async Task<T> api<T>(string end, dynamic query) => Utils.ParseToClassJSON<T>((await Request(end, "get", new RequestOptions(new Utils().ParseQuery(query)))).JSON);
+        public async Task<T> api<T>(string end, dynamic query) {
+            // Utils.ParseToClassJSON<T>((await Request(end, "get", new RequestOptions(new Utils().ParseQuery(query)))).JSON);
+
+            var requestJsonResult = (await Request(end, "get", new RequestOptions(new Utils().ParseQuery(query)))).JSON;
+            var resultValue = JsonParser.ParseToClassJSON<T>(requestJsonResult);
+
+            return resultValue;
+        }
     }
 
     public class BasicRoutes : IBaseRouter

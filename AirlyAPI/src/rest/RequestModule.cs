@@ -23,13 +23,13 @@ namespace AirlyAPI
        
         public string API_URL { get; set; } = string.Format("https://{0}/v{1}/", API_DOMAIN, VERSION);
         public string API_KEY_HEADER_NAME { get; set; } = "apikey";
+
         private Utils moduleUtil { get; set; } = new Utils();
 
         public object options { get; set; }
-        public string apiToken { get; set; }
         public object deafultHeaders { get; set; }
 
-        public string method = "get", Agent, endPoint = "";
+        public string method, Agent, endPoint;
         public string path { get; set; }
 
         /// <summary>Raw request module for Airly API Wrapper <i>(Do not use this in yours project, just check API manager)</i></summary>
@@ -45,16 +45,14 @@ namespace AirlyAPI
             string[] cacheControl = { "Cache-Control", "no-cache" };
             string[] encoding = { "Accept-Encoding", "gzip" }; // Added encoding
             string[] accept = { "Accept", "application/json" };
-            
-            string[][] headers = new string[][] {
+
+            deafultHeaders = new string[][] {
                 agent,
                 connection,
                 cacheControl,
                 encoding,
                 accept
             };
-
-            deafultHeaders = headers;
 
             string queryString = "";
             string finalQuery = "";
@@ -128,6 +126,7 @@ namespace AirlyAPI
             HttpClient RequestClient = new HttpClient();
 
             SetHeaders(ref RequestClient, requestHeaders);
+
             RequestClient.CancelPendingRequests(); // Prevenitng infinity thread loop (if user does not await and one request must kill another)
             RequestParams.Method = GetMethod(this.method);
 
@@ -150,11 +149,9 @@ namespace AirlyAPI
             }
 
             string responseBody = await response.Content.ReadAsStringAsync();
-
-            Debug.WriteLine(responseBody);
             RequestClient.Dispose();
 
-            JToken convertedJSON = Utils.ParseJson(responseBody);
+            JToken convertedJSON = JsonParser.ParseJson(responseBody);
 
             AirlyResponse airlyResponse = new AirlyResponse(
                 convertedJSON,
@@ -165,21 +162,6 @@ namespace AirlyAPI
             response.Dispose();
 
             return airlyResponse;
-        }
-
-        // ===========================================
-
-        private HttpMethod GetMethod(string Method)
-        {
-            HttpMethod httpMethod;
-            try
-            {
-                httpMethod = new HttpMethod(Method.Replace(" ", "").ToUpper());
-            }
-            catch (Exception)
-            { httpMethod = HttpMethod.Get; } // Using GET if the method in string is invalid
-
-            return httpMethod;
         }
 
         public void setKey(string key)
@@ -193,7 +175,7 @@ namespace AirlyAPI
             deafultHeaders = copiedHeaders;
         }
         
-        public void setLanguage(AirlyLanguage language)
+        public void SetLanguage(AirlyLanguage language)
         { 
             string actualCode = Enum.GetName(language.GetType(), language);
 
@@ -204,7 +186,7 @@ namespace AirlyAPI
             this.LANGUAGE_CODE = actualCode;
         }
 
-        public void setLanguage(string language) {
+        public void SetLanguage(string language) {
             AirlyLanguage instance = AirlyLanguage.en;
             string[] langNames = Enum.GetNames(instance.GetType());
 
@@ -221,6 +203,21 @@ namespace AirlyAPI
 
             this.LANGUAGE_CODE = correctLanguage;
         }
+        // Initializing the deafult language 
+        public void SetLanguage() => SetLanguage(AirlyLanguage.en);
+
+        private HttpMethod GetMethod(string Method)
+        {
+            HttpMethod httpMethod;
+            try
+            {
+                httpMethod = new HttpMethod(Method.Replace(" ", "").ToUpper());
+            }
+            catch (Exception)
+            { httpMethod = HttpMethod.Get; } // Using GET if the method in string is invalid
+
+            return httpMethod;
+        }
 
         private void SetHeaders(ref HttpClient client, string[][] headers)
         {
@@ -233,7 +230,7 @@ namespace AirlyAPI
 
                 if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(value)) continue;
 
-                name = moduleUtil.replaceDashUpper(name); // Replacing "Content-Type" to "ContentType"
+                name = moduleUtil.ReplaceDashUpper(name); // Replacing "Content-Type" to "ContentType"
 
                 bool clientCheck = client.DefaultRequestHeaders.Contains(name);
                 if (clientCheck) client.DefaultRequestHeaders.Remove(name);
@@ -241,11 +238,9 @@ namespace AirlyAPI
                 // Adding the headers to provided client
                 if (client != null) client.DefaultRequestHeaders.TryAddWithoutValidation(name, value);
             }
-
-            // todo Only for the debug tests (to delete)
             foreach (var item in client.DefaultRequestHeaders)
             {
-                Debug.WriteLine($"{item.Key}     {moduleUtil.getFirstEnumarable(item.Value)}");
+                Debug.WriteLine($"{item.Key}     {moduleUtil.GetFirstEnumarable(item.Value)}");
             }
         }
     }

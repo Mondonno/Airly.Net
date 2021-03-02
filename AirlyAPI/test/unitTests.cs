@@ -11,8 +11,77 @@ namespace AirlyAPI.test
 {
     public class unitTests
     {
+        /*
+         * 
+        public static Type GetTokenType(JTokenType type)
+        {
+            return type.GetType();
+        }
+
+        public static bool checkJsonArray(string json)
+        {
+            string jsonValidation = json.Trim().ToString();
+            bool arrayCheck = jsonValidation.StartsWith("[") && jsonValidation.EndsWith("]");
+            return arrayCheck;
+        }
+        public static bool checkJsonObject(string json)
+        {
+            string jsonValidation = json.Trim().ToString();
+            bool objectCheck = jsonValidation.StartsWith("{") && jsonValidation.EndsWith("}");
+            return objectCheck;
+        }
+        public static bool checkJsonValidation(string json)
+        {
+            bool isJsonObject = checkJsonObject(json);
+            bool isJsonArray = checkJsonArray(json);
+
+            bool isValidJson = isJsonObject && isJsonArray;
+            return isValidJson;
+        }
+
+        // Simple parsing wrapper
+        public static JToken ParseJson(string json)
+        {
+            Utils utils = new Utils();
+            JObject[] finalArrayResult = new JObject[0];
+            if (checkJsonArray(json))
+            {
+                var arr = JArray.Parse(json);
+                foreach (JObject obj in arr) utils.ArrayPush(ref finalArrayResult, obj);
+                if (finalArrayResult.Length == 0) return new JArray();
+
+                return arr;
+            }
+            else if (checkJsonObject(json)) return JObject.Parse(json);
+            else return new JObject();
+        }
+
+        public static T ParseToClassJSON<T>(string json)
+        {
+            // Some date handlings
+            JsonSerializerSettings settings = new JsonSerializerSettings() {
+                DateFormatString = "yyyy-MM-ddTH:mm:ss.fffK",
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+            };
+
+            string rawjson = json.ToString();
+            T classment = JsonConvert.DeserializeObject<T>(rawjson, settings);
+            return classment;
+        }
+        public static T ParseToClassJSON<T>(JToken jsonToken) => ParseToClassJSON<T>(jsonToken.ToString());
+         */
         public void test()
         {
+            //object lang = this.Lang;
+            //AirlyLanguage validatedLang = (AirlyLanguage)ValidateLang(lang);
+
+            //// toddo Only for the debug tests (to delete)
+            //foreach (var item in client.DefaultRequestHeaders)
+            //{
+            //    Debug.WriteLine($"{item.Key}     {moduleUtil.getFirstEnumarable(item.Value)}");
+            //}
+
+
             //setLanguage(language == "en" ? AirlyLanguage.en : (language == "pl" ? AirlyLanguage.pl : AirlyLanguage.en));
             //string virtualHost = $"https://{API_DOMAIN}"; // Declaring the virtual host to get the query from URI
             //

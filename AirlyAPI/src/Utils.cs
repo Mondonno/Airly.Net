@@ -13,7 +13,6 @@ using System.Net.Http;
 using System.Dynamic;
 using System.Threading.Tasks;
 
-
 namespace AirlyAPI
 {
     // Simple Geo Util for the wrapper comaptiblity
@@ -66,6 +65,68 @@ namespace AirlyAPI
         }
     }
 
+    // Simple JSON Parsing class utitlity for the AirlyAPI C# wrapper
+    public static class JsonParser
+    {
+        private static readonly JsonSerializerSettings SerializerSettings = new JsonSerializerSettings()
+        {
+            DateFormatString = "yyyy-MM-ddTH:mm:ss.fffK",
+            DateTimeZoneHandling = DateTimeZoneHandling.Utc
+        };
+
+        public static Type GetTokenType(JTokenType type) => type.GetType();
+        public static string GetJTokenJson(JToken token) => token.ToString();
+
+        public static bool CheckJsonArray(string json)
+        {
+            string jsonValidation = json.Trim().ToString();
+            bool arrayCheck = jsonValidation.StartsWith("[") && jsonValidation.EndsWith("]");
+            return arrayCheck;
+        }
+        public static bool CheckJsonObject(string json)
+        {
+            string jsonValidation = json.Trim().ToString();
+            bool objectCheck = jsonValidation.StartsWith("{") && jsonValidation.EndsWith("}");
+            return objectCheck;
+        }
+        public static bool CheckJsonValidation(string json)
+        {
+            bool isJsonObject = CheckJsonObject(json);
+            bool isJsonArray = CheckJsonArray(json);
+
+            bool isValidJson = isJsonObject || isJsonArray;
+            return isValidJson;
+        }
+
+        public static JToken ParseJson(string json)
+        {
+            Utils utils = new Utils();
+            JObject[] finalArrayResult = new JObject[0];
+            if (CheckJsonArray(json))
+            {
+                var arr = JArray.Parse(json);
+
+                foreach (JObject obj in arr) utils.ArrayPush(ref finalArrayResult, obj);
+                if (finalArrayResult.Length == 0) return new JArray();
+
+                return arr;
+            }
+            else if (CheckJsonObject(json)) return JObject.Parse(json);
+            else return new JObject();
+        }
+
+        public static T ParseToClassJSON<T>(string json)
+        {
+            string rawjson = json.ToString();
+            T classment = JsonConvert.DeserializeObject<T>(rawjson, SerializerSettings);
+            return classment;
+        }
+        public static T ParseToClassJSON<T>(JToken jsonToken) => ParseToClassJSON<T>(GetJTokenJson(jsonToken));
+
+        public static string SerializeJSON<T>(T obj) => JsonConvert.SerializeObject((T)obj, SerializerSettings);
+        public static string SerializeJSON(JToken json) => GetJTokenJson(json);
+    }
+
     public interface IUtils
     { }
     public class Utils : IUtils
@@ -73,8 +134,8 @@ namespace AirlyAPI
         public static string domain = "airly.eu";
 
         // The ratelimits headers names
-        private string XRemainingName = "X-RateLimit-Remaining-day";
-        private string XLimitName = "X-RateLimit-Limit-day";
+        public string XRemainingName = "X-RateLimit-Remaining-day";
+        public string XLimitName = "X-RateLimit-Limit-day";
 
         // Checking if the ratelimit is reached
         private bool getRateLimitBase(string XRemaining, string XLimit)
@@ -128,9 +189,9 @@ namespace AirlyAPI
         }
 
         // Calculating the ratelimits diffrents
-        public int calculateRateLimit(AirlyResponse response)
+        public int calculateRateLimit(HttpResponseHeaders responseHeaders)
         {
-            var headers = response.headers;
+            var headers = responseHeaders;
 
             string XRemaining = getHeader(headers, this.XRemainingName);
             string XLimit = getHeader(headers, this.XLimitName);
@@ -143,8 +204,9 @@ namespace AirlyAPI
             int calculated = cnv2 - (cnv2 - cnv1);
             return calculated;
         }
+        public int calculateRateLimit(AirlyResponse res) => calculateRateLimit(res.headers);
 
-        private string getHeaderBase(IEnumerable<string> values) => this.getFirstEnumarable(values);
+        private string getHeaderBase(IEnumerable<string> values) => this.GetFirstEnumarable(values);
 
         // For response headers
         // Getting the header first value because the headers can have multiple values (Airly API always return one value headers)
@@ -190,6 +252,16 @@ namespace AirlyAPI
             return Convert.ToInt32(checkedValue);
         }
 
+        public static string GetRoute(string url)
+        {
+            if (url == null) return null;
+            string[] routes = url.Split('/');
+
+            if (routes.Length == 0 || (routes.Length == 1 && routes[0] == url)) return url;
+
+            return routes[0].ToString(); 
+        }
+
         // Formmatting web query
         public string formatQuery(string query)
         {
@@ -205,10 +277,11 @@ namespace AirlyAPI
             return Query;
         }
 
-        public string replaceDashUpper(string str)
+        public string ReplaceDashUpper(string str)
         {
             string finalString = "";
             string[] strs = str.Split('-');
+            if (strs.Length == 0 || (strs.Length == 1 && (strs[0] == str))) return str;
 
             foreach (string nm in strs)
             {
@@ -299,8 +372,7 @@ namespace AirlyAPI
             return convertedQuery;
         }
 
-
-        public T getFirstEnumarable<T>(IEnumerable<T> enumarable) => enumarable.First((e) => true);
+        public T GetFirstEnumarable<T>(IEnumerable<T> enumarable) => enumarable.First((e) => true);
 
         // Simple coping the one dictonary to another without the overwriting
         public void CopyDictonaryValues(ref IDictionary<object, object> target, IDictionary<object, object> toCopyInto)
@@ -320,53 +392,6 @@ namespace AirlyAPI
             return jObjects;
         }
 
-        public static Type GetTokenType(JTokenType type)
-        {
-            return type.GetType();
-        }
-
-        public static bool checkJsonArray(string json)
-        {
-            string jsonValidation = json.Trim().ToString();
-            bool arrayCheck = jsonValidation.StartsWith("[") && jsonValidation.EndsWith("]");
-            return arrayCheck;
-        }
-        public static bool checkJsonObject(string json)
-        {
-            string jsonValidation = json.Trim().ToString();
-            bool objectCheck = jsonValidation.StartsWith("{") && jsonValidation.EndsWith("}");
-            return objectCheck;
-        }
-
-        // Simple parsing wrapper
-        public static JToken ParseJson(string json)
-        {
-            var utils = new Utils();
-            JObject[] finalArrayResult = new JObject[0];
-            if (checkJsonArray(json))
-            {
-                var arr = JArray.Parse(json);
-                foreach (JObject obj in arr) utils.ArrayPush(ref finalArrayResult, obj);
-                if (finalArrayResult.Length == 0) return new JArray();
-
-                return arr;
-            }
-            else if (checkJsonObject(json)) return JObject.Parse(json);
-            else return new JObject();
-        }
-        public static T ParseToClassJSON<T>(JToken json)
-        {
-            // Some date handlings
-            JsonSerializerSettings settings = new JsonSerializerSettings() {
-                DateFormatString = "yyyy-MM-ddTH:mm:ss.fffK",
-                DateTimeZoneHandling = DateTimeZoneHandling.Utc
-            };
-
-            var rawjson = json.ToString();
-            T classment = JsonConvert.DeserializeObject<T>(rawjson, settings);
-            return classment;
-        }
-
         // <===========>
         //  Array utils
         // <===========>
@@ -377,6 +402,7 @@ namespace AirlyAPI
         }
 
         // Checking if the element exists in [][] Array in Array array
+        [Obsolete]
         public int Exists(string[][] table, string value)
         {
             int index = -1;
@@ -391,20 +417,22 @@ namespace AirlyAPI
             return index;
         }
 
-        public T[] removeArrayValue<T> (T[] table, int index)
+        public void RemoveArrayValue<T> (ref T[] table, int index)
         {
             // Clone from start index of the element and then pause
             // Then clone from the index + 1 and add this to the final array
 
-            T[] newArray = (T[]) table.Clone();
+            //T[] newArray = (T[]) table.Clone();
 
             int lastIndex = index + 1;
             int calced = (table.Length - 1) - lastIndex;
 
-            Array.ConstrainedCopy(table, 0, newArray, 0, index);
-            Array.ConstrainedCopy(table, lastIndex, newArray, index, calced);
+            //                              .
+            Array.ConstrainedCopy(table, 0, table, 0, index);
+            //                                      .
+            Array.ConstrainedCopy(table, lastIndex, table, index, calced);
 
-            return newArray;
+            //return newArray;
         }
 
         public string[] removeStringEmtpyValues(string[] table)
@@ -415,7 +443,7 @@ namespace AirlyAPI
                 var ii = item;
                 int index = Array.IndexOf(newTabel, ii);
                 if (!string.IsNullOrEmpty(ii)) {
-                    newTabel = removeArrayValue(newTabel, index);
+                    RemoveArrayValue(ref newTabel, index);
                 }
             }
             return newTabel;

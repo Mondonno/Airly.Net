@@ -2,6 +2,8 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 using System.Linq;
 using System.Net;
@@ -10,44 +12,22 @@ using System.Text.RegularExpressions;
 
 namespace AirlyAPI
 {
-    // Types for Airly API (eg. enums of pollusions)
-    public static class Types
+    public enum AirlyLanguage
     {
-        public enum PollusionsUnits
-        {
-            Celcjusza,
-            Precent,
-            HpA,
-            µgm,
-            kilometerForHour, 
-            Stopien,
-        }
-
-        public enum RegistredPollusions
-        {
-            PM10
-        }
-
-        public enum RequestMethod
-        {
-            GET,
-            POST,
-            DELETE,
-        }
+        pl,
+        en
     }
 
-    public class AirlyProps
+    public enum IndexQueryType
     {
-        public string API_KEY { get; set; }
-        public string LANG { get; set; }
-        public string RateLimit { get; set; }
-        public string RateLimitMax { get; set; }
-        //public Types airlyTypes { get; set; }
-        //public AirlyProps(Types atypes) { this.airlyTypes = atypes; }
+        AirlyCAQI,
+        CAQI,
+        PJP
     }
 
     public class RequestOptions
     {
+        public RequestOptions() { } // bypassing the required constructor
         public RequestOptions(string[][] query)
         {
             this.query = query;
@@ -73,7 +53,7 @@ namespace AirlyAPI
             this.timestamp = timestamp;
         }
 
-        public dynamic JSON { get; }
+        public JToken JSON { get; } // Added JToken no raw json conversion
         public string rawJSON { get; }
 
         public DateTime timestamp { get; }
@@ -82,10 +62,20 @@ namespace AirlyAPI
         public HttpResponseMessage response { get; }
     }
 
+    // Simple internal used RateLimitInformation object
+    public class RateLimitInformation
+    {
+        public bool IsRateLimited { get; set; } 
+
+        public int RateLimitDiffrent { get; set; }
+        public int PerDays { get; set; }
+        public int PerGlobal { get; set; }
+    }
+
     // Handler raw response (with converted JSON)
     public class RawHandlerResponse
     {
-        public dynamic convertedJSON { get; set; }
+        public JToken convertedJSON { get; set; }
         public HttpResponseMessage response { get; set; }
     }
 
@@ -100,19 +90,6 @@ namespace AirlyAPI
 
         public HttpResponseMessage response { get; set; }
         public string rawJSON { get; set; }
-    }
-
-    public enum AirlyLanguage
-    {
-        pl,
-        en
-    }
-
-    public enum IndexQueryType
-    {
-        AirlyCAQI,
-        CAQI,
-        PJP
     }
 
     // Area model class
@@ -195,7 +172,10 @@ namespace AirlyAPI
             this.lng = lng;
         }
 
+        [JsonProperty("latitude")]
         public double lat { get; set; }
+
+        [JsonProperty("longitude")]
         public double lng { get; set; }
     }
 
@@ -209,7 +189,7 @@ namespace AirlyAPI
 
     public class Adress
     {
-        public string country { get; set; }
+        public string country { get; set; } 
         public string city { get; set; }
         public string street { get; set; }
         public int number { get; set; }
@@ -255,5 +235,4 @@ namespace AirlyAPI
         public List<Index> indexes { get; set; }
         public List<Standard> standards { get; set; }
     }
-
 }

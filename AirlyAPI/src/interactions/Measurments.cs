@@ -25,8 +25,8 @@ namespace AirlyAPI.Interactions
             indexType = resolveIndexType(type)
         });
 
-        public async Task<Measurement> Installation(int installationId, bool redirect = false, IndexQueryType type = IndexQueryType.AirlyCAQI) => await api<Measurement>("measurements/installation", new {
-            installationId,
+        public async Task<Measurement> Installation(int id, IndexQueryType type = IndexQueryType.AirlyCAQI, bool redirect = false) => await api<Measurement>("measurements/installation", new {
+            installationId = id,
             indexType = resolveIndexType(type)
         });
     }

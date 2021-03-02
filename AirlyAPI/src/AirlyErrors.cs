@@ -3,6 +3,7 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json.Linq;
 
 using System.Collections.Generic;
+using System.Net.Http;
 
 namespace AirlyAPI
 {
@@ -32,7 +33,7 @@ namespace AirlyAPI
     }
 }
 
-namespace AirlyAPI.handling
+namespace AirlyAPI.Handling
 {
     public class ErrorModel
     {
@@ -50,63 +51,102 @@ namespace AirlyAPI.handling
 
     public class Handler
     {
-        public void makeRateLimitError(string limits, string all, string customMessage) {
+        public void MakeRateLimitError(string limits, string all, string customMessage) {
             string errorMessage = $"Your api key get ratelimited for this day/minut/secound by Airly API\n{customMessage ?? ""}\n{all}/{limits}";
             AirlyError error = new AirlyError(errorMessage);
+            error.Data.Add("Ratelimited", true);
 
             throw error;
         }
+        public void MakeRateLimitError(AirlyResponse res, Utils utils, string customMessage = null)
+        {
+            string limits = utils.getHeader(res.headers, "X-RateLimit-Limit-day");
+            string all = utils.calculateRateLimit(res).ToString();
 
-        // Handling the malformed request and throwing a new error
-        private void handleMalformed(string rawJSON)
+            MakeRateLimitError(limits, all, customMessage);
+        }
+
+        public bool IsMalformedResponse(string JsonString)
         {
             try
-            {
-                Utils.ParseJson(rawJSON);
-            }
+            { HandleMalformed(JsonString.ToString()); }
+            catch (Exception)
+            { return true; } // Malformed
+
+            return false; // Normal response, non malformed
+        }
+
+        // Handling the malformed request and throwing a new error
+        private void HandleMalformed(string rawJSON)
+        {
+            try
+            { JsonParser.ParseJson(rawJSON); }
             catch (Exception ex)
-            {
-                throw new HttpError($"[AIRLY] POSSIBLE MALFORMED RESPONSE\n{ex.Message}");
-            }
+            { throw new HttpError($"[AIRLY] POSSIBLE MALFORMED RESPONSE\n{ex.Message}"); }
         }
 
         public void handleError(int code, AirlyResponse response)
         {
             var utils = new Utils();
             string rawJSON = response.rawJSON;
-            if (code > 0 && code <= 200) return;
+            if (code > 0 && code <= 200) return; // all ok, returning
 
-            // MOVED_PERMANETLY response code
-            // Obosolete for now
-            if(code == 301)
-            {
-                handleMalformed(rawJSON);
+            // MOVED_PERMANETLY response code 301
+            if(code == 301) {
+                HandleMalformed(rawJSON);
                 return;
             }
-            if (code == 404) return; // Passing null on the 404
+            if (code == 404) {
+                HandleMalformed(rawJSON);
+                return;
+            }; // Passing null on the 404
 
             int limit = utils.calculateRateLimit(response);
             if (limit == 0) throw new AirlyError($"Get ratelimited by airly api\n{utils.calculateRateLimit(response)}");
             if (code > 200 && code <= 300)
             {
                 if (code == 301) throw new HttpError("[REQUEST] REQUEST IS FORBIDDEN");
-                throw new AirlyError("Unknown invalid request");
+                throw new AirlyError("Unknown invalid request/response");
             }
             if (code >= 400 && code < 500)
             {
                 if (code == 401) throw new AirlyError("The provided API Key is not valid");
                 if (code == 429)
                 {
-                    makeRateLimitError(utils.getHeader(response.headers, "X-RateLimit-Limit-day"), $"{utils.calculateRateLimit(response)}", "");
+                    MakeRateLimitError(utils.getHeader(response.headers, "X-RateLimit-Limit-day"), $"{utils.calculateRateLimit(response)}", "");
                     return;
                 }
-                handleMalformed(rawJSON);
-                throw new AirlyError($"[AIRLY_INVALID] [{response.timestamp.ToString()}] {rawJSON}");
+                HandleMalformed(rawJSON);
+                throw new AirlyError($"[AIRLY_INVALID] [{response.timestamp}] {rawJSON}");
             }
             if (code >= 500 && code < 600) throw new HttpError("[AIRLY] INTERNAL PROBLEM WITH AIRLY API");
         }
 
-        public ErrorModel getErrorFromJSON(JObject json)
+        
+        public RateLimitInformation GetRateLimitDetails(HttpResponseMessage res)
+        {
+            var utils = new Utils();
+            var headers = res.Headers;
+
+            int rateLimitDiffrent = utils.calculateRateLimit(headers);
+
+            int perDay =  string.IsNullOrEmpty(utils.getHeader(headers, utils.XLimitName)) ? Convert.ToInt32(utils.getHeader(headers, utils.XLimitName)) : 0;
+            int perDayUsed = string.IsNullOrEmpty(utils.getHeader(headers, utils.XRemainingName)) ? Convert.ToInt32(utils.getHeader(headers, utils.XRemainingName)) : 0;
+
+            bool isLimited = utils.getRatelimit(headers);
+
+            RateLimitInformation rateLimitInfo = new RateLimitInformation()
+            {
+                IsRateLimited = isLimited,
+                RateLimitDiffrent = rateLimitDiffrent,
+                PerDays = perDayUsed,
+                PerGlobal = perDay
+            };
+
+            return rateLimitInfo;
+        }
+
+        public ErrorModel GetErrorFromJSON(JToken json)
         {
             bool errorCheck = json["errorCode"] == null;
             if (errorCheck) return null;
