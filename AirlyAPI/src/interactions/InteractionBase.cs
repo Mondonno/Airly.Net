@@ -1,36 +1,26 @@
 ﻿using System;
 using System.Threading.Tasks;
 
+using AirlyAPI.Rest;
+
 namespace AirlyAPI.Interactions
 {
-    public interface BaseInterface
-    {
-        string domain { get; }
-    }
-    public class InteractionBase : BaseInterface
+    public interface IBaseInterface { }
+
+    public class InteractionBase : IBaseInterface
     {
         private RESTManager Rest { get; set; }
-        public Airly Airly { get; set; }
 
-        public InteractionBase(Airly airly, RESTManager rest)
+        protected Airly Airly { get; set; }
+        protected string Domain { get => this.Airly.Configuration.Domain; }
+
+        public InteractionBase(Airly airly)
         {
             this.Airly = airly;
-            this.Rest = rest;
-        }
-
-        public string domain
-        {
-            get => Utils.domain;
+            this.Rest = airly.Rest;
         }
 
         // api shortcut
-        public async Task<T> api<T>(string end, dynamic query) => await Rest.api<T>(end, query);
-
-        dynamic endPoints = new
-        {
-            meta = "meta",
-            installations = "installations",
-            measurements = "measurements"
-        };
+        protected async Task<T> Api<T>(string end, dynamic query) => await Rest.Api<T>(end, query);
     }
 }

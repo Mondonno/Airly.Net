@@ -1,8 +1,7 @@
-﻿using System;
-
+﻿
 namespace AirlyAPI
 {
-    public class EndPoints
+    public sealed class AirlyEndPoints
     {
         public string Meta { get; } = "meta";
         public string Installations { get; } = "installations";
@@ -12,10 +11,11 @@ namespace AirlyAPI
         public string Cdn { get; } = "cdn";
     }
 
-    public class AirlyConfiguration
+    public sealed class AirlyConfiguration
     {
-        public string Agent { get; set; } = "Airly-C#-Wrapper";
-        public string Protocol { get; set; } = "https://";
+        // "Airly-C#-Wrapper"
+        public string Agent { get; set; } = "AirlyAPI C# Wrapper";
+        public string Protocol { get; set; } = "https";
 
         public double RestRequestTimeout { get; set; } = 60000;
 
@@ -25,13 +25,12 @@ namespace AirlyAPI
         public string ApiDomain { get; private set; }
         public string Cdn { get; private set; }
 
-        public EndPoints EndPoints { get; private set; }
+        public AirlyEndPoints EndPoints { get; } = new AirlyEndPoints();
 
         public AirlyConfiguration()
         {
-            EndPoints = new EndPoints();
-            ApiDomain = $"{Protocol}{EndPoints.Api}.{Domain}";
-            Cdn = $"{Protocol}{EndPoints.Cdn}.{Domain}";
+            ApiDomain = $"{EndPoints.Api}.{Domain}";
+            Cdn = $"{EndPoints.Cdn}.{Domain}";
         }
     }
 }

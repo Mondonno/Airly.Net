@@ -42,7 +42,6 @@
     <Compile Include="src\AirlyErrors.cs" />
     <Compile Include="src\Models.cs" />
     <Compile Include="test\unitTests.cs" />
-    <Compile Include="src\Utils.cs" />
     <Compile Include="src\rest\RequestModule.cs" />
     <Compile Include="src\rest\Managers.cs" />
     <Compile Include="src\interactions\Measurments.cs" />
@@ -51,12 +50,17 @@
     <Compile Include="src\interactions\InteractionBase.cs" />
     <Compile Include="src\rest\RequestQueuers.cs" />
     <Compile Include="src\AirlyConfiguration.cs" />
+    <Compile Include="src\utils\Utils.cs" />
+    <Compile Include="src\utils\JsonParser.cs" />
+    <Compile Include="src\utils\GeoUtil.cs" />
+    <Compile Include="src\utils\ArrayUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
     <Folder Include="test\" />
     <Folder Include="src\rest\" />
     <Folder Include="src\interactions\" />
+    <Folder Include="src\utils\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

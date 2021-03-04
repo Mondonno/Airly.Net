@@ -5,10 +5,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-using System.Linq;
-using System.Net;
-using System.Web;
-using System.Text.RegularExpressions;
+using AirlyAPI.Utilities;
 
 namespace AirlyAPI
 {
@@ -34,6 +31,7 @@ namespace AirlyAPI
         }
 
         public string[][] query { get; set; }
+        public bool auth { get; set; } = true;
     }
 
     public class AirlyResponse
@@ -59,7 +57,7 @@ namespace AirlyAPI
         public DateTime timestamp { get; }
         public HttpResponseHeaders headers { get; }
 
-        public HttpResponseMessage response { get; }
+        public HttpResponseMessage response { get; set; }
     }
 
     // Simple internal used RateLimitInformation object
@@ -67,7 +65,7 @@ namespace AirlyAPI
     {
         public bool IsRateLimited { get; set; } 
 
-        public int RateLimitDiffrent { get; set; }
+        public int? RateLimitDiffrent { get; set; }
         public int PerDays { get; set; }
         public int PerGlobal { get; set; }
     }
@@ -124,8 +122,12 @@ namespace AirlyAPI
 
     public class Level
     {
+        public int? maxValue { get; set; }
+        public int? minValue { get; set; }
+
         public string values { get; set; }
         public string level { get; set; }
+
         public string description { get; set; }
         public string color { get; set; }
     }
@@ -181,8 +183,13 @@ namespace AirlyAPI
 
     public class Sponsor
     {
+        public int id { get; set; }
+
         public string name { get; set; }
+        public string displayName { get; set; }
+
         public string description { get; set; }
+
         public Uri logo { get; set; }
         public Uri link { get; set; }
     }
@@ -192,7 +199,7 @@ namespace AirlyAPI
         public string country { get; set; } 
         public string city { get; set; }
         public string street { get; set; }
-        public int number { get; set; }
+        public int? number { get; set; }
 
         public string displayAddress1 { get; set; }
         public string displayAddress2 { get; set; }
@@ -203,7 +210,7 @@ namespace AirlyAPI
         public int id { get; set; }
         public int locationId { get; set; }
 
-        public Adress adress { get; set; }
+        public Adress address { get; set; }
         public Location location { get; set; }
         public Sponsor sponsor { get; set; }
 

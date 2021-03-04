@@ -7,10 +7,84 @@ using System.Collections.Generic;
 using AirlyAPI;
 
 // The namespace for AirlyAPI unit tests
-namespace AirlyAPI.test
+namespace AirlyAPI
 {
+    /*
+     * var json = "[ \"admin\", \"editor\", \"contributor\" ]";
+var result = JsonConvert.DeserializeObject<Whatever<string>>(json);
+foreach (var item in result)
+{
+Console.WriteLine($"{item}");
+}
+class Whatever<T> : List<T> {}
+     */
+    /*
+     using System.Text.RegularExpressions;
+using System.Net.Http;
+using System.Dynamic;
+using System.Threading.Tasks;
+     */
+    /*
+     [Obsolete("The characters escaper is not longer in use (no-need-escape)")]
+        public string charactersEscaper(string[] characters, string text)
+        {
+            string textReturn = text;
+            string escaper = "\\";
+            for (int i = 0; i < characters.Length; i++)
+            {
+                string character = characters[i];
+                textReturn.Replace(character, string.Format("{0}{1}", escaper, character));
+            }
+            return textReturn;
+        }
+
+        // Simple resolving from enum the code of the request
+        [Obsolete("unused for the request Module")]
+        public int resolveStatusCode(HttpStatusCode code)
+        {
+            Type enumType = code.GetType();
+
+            string[] codesNames = Enum.GetNames(enumType);
+            int[] codes = (int[])Enum.GetValues(enumType);
+
+            string codeName = code.ToString();
+            string validCodeName = null;
+
+            foreach (var cd in codesNames)
+            {
+                if (cd == codeName) validCodeName = cd;
+                else continue;
+            }
+
+            int validIndex = Array.IndexOf(codesNames, validCodeName);
+            var checkedValue = $"{codes[validIndex]}";
+
+            return Convert.ToInt32(checkedValue);
+        }
+     */
+    /*
+            var util = new Utils();
+            if (options == null) options = new RequestOptions(new string[0][]);
+
+            RequestModule requestManager = new RequestModule(this, end, method.ToUpper(), options);
+
+            requestManager.setKey(apiKey);
+            requestManager.SetLanguage(this.Lang);
+
+            var response = await requestManager.MakeRequest();
+            string dateHeader = util.getHeader(response.headers, "Date");
+
+            DateTime date = DateTime.Parse(dateHeader ?? DateTime.Now.ToString()); // If the date header is null setting the date for actual date
+            return new AirlyResponse(response, date);
+    */
+
     public class unitTests
     {
+        //if (i >= (options.query.Length - 1)) queryString = queryString.Substring(0, queryString.Length - 1);
+        //             if (string.IsNullOrEmpty(API_KEY) || string.IsNullOrEmpty(API_KEY.Replace(" ", ""))) throw new AirlyError(new HttpError("The provided airly api key is empty"));
+
+        //            if (string.IsNullOrEmpty(apiKey[1])) apiKey[1] = API_KEY.ToString();
+
         /*
          * 
         public static Type GetTokenType(JTokenType type)
@@ -119,21 +193,21 @@ namespace AirlyAPI.test
         }
         public async void RunBasicAirlyTest()
         {
-            string apiKey = "123213125sdfggsaete3123";
-            Airly airly = new Airly(apiKey);
+            //string apiKey = "123213125sdfggsaete3123";
+            //Airly airly = new Airly(apiKey);
 
-            double lat = 12.035;
-            double lng = 13.01;
-            double maxDistance = 12.334;
+            //double lat = 12.035;
+            //double lng = 13.01;
+            //double maxDistance = 12.334;
 
-            var measurements = await airly.Measurments.Nearest(lat, lng, maxDistance, IndexQueryType.CAQI);
-            List<DateTime> datetimes = new List<DateTime>();
-            foreach (var item in measurements)
-            {
-                string rawdate = item.current.fromDateTime.ToString();
-                DateTime date = DateTime.Parse(rawdate);
-                datetimes.Add(date);
-            }
+            //var measurements = await airly.Measurements.Nearest(lat, lng, maxDistance, IndexQueryType.CAQI);
+            //List<DateTime> datetimes = new List<DateTime>();
+            //foreach (var item in measurements)
+            //{
+            //    string rawdate = item.current.fromDateTime.ToString();
+            //    DateTime date = DateTime.Parse(rawdate);
+            //    datetimes.Add(date);
+            //}
         }
         public void RunInstallTests()
         {

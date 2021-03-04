@@ -5,6 +5,8 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Net.Http;
 
+using AirlyAPI.Utilities;
+
 namespace AirlyAPI
 {
     // Making simple error basement
@@ -101,7 +103,7 @@ namespace AirlyAPI.Handling
                 return;
             }; // Passing null on the 404
 
-            int limit = utils.calculateRateLimit(response);
+            int? limit = utils.calculateRateLimit(response);
             if (limit == 0) throw new AirlyError($"Get ratelimited by airly api\n{utils.calculateRateLimit(response)}");
             if (code > 200 && code <= 300)
             {
@@ -128,7 +130,7 @@ namespace AirlyAPI.Handling
             var utils = new Utils();
             var headers = res.Headers;
 
-            int rateLimitDiffrent = utils.calculateRateLimit(headers);
+            int? rateLimitDiffrent = utils.calculateRateLimit(headers);
 
             int perDay =  string.IsNullOrEmpty(utils.getHeader(headers, utils.XLimitName)) ? Convert.ToInt32(utils.getHeader(headers, utils.XLimitName)) : 0;
             int perDayUsed = string.IsNullOrEmpty(utils.getHeader(headers, utils.XRemainingName)) ? Convert.ToInt32(utils.getHeader(headers, utils.XRemainingName)) : 0;
@@ -156,7 +158,7 @@ namespace AirlyAPI.Handling
                 json["message"],
                 json["details"]
             };
-            JObject[] errors = new Utils().convertTokens(tokens);
+            JObject[] errors = new Utils().ConvertTokens(tokens);
 
             string code = errors[0].ToString();
             string message = errors[1].ToString();

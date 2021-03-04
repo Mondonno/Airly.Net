@@ -2,13 +2,15 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
+using AirlyAPI.Utilities;
+
 namespace AirlyAPI.Interactions
 {
     public class Installations : InteractionBase
     {
-        public Installations(Airly airly, RESTManager rest) : base(airly, rest) { }
-
-        public async Task<List<Installation>> Nearest(double lat, double lng, double maxDistance = 3, int maxResults = 1) => await api<List<Installation>>("installations/nearest", new
+        public Installations(Airly airly) : base(airly) { }
+    
+        public async Task<List<Installation>> Nearest(double lat, double lng, double maxDistance = 3, int maxResults = 1) => await Api<List<Installation>>("installations/nearest", new
         {
             lat,
             lng,
@@ -22,7 +24,7 @@ namespace AirlyAPI.Interactions
         // Redirect do the request to the api with the new id (`INSTALLATION_REPLACED` error) and returns them not error
         // If you do not provide them our module give you error with succesor, message and code
         // If the another installation is moved module give error (this prevents the infinity request loops)
-        public async Task<Installation> Info(int id, bool redirect = false) => await api<Installation>($"installations/{id}", new { });
+        public async Task<Installation> Info(int id, bool redirect = false) => await Api<Installation>($"installations/{id}", new { });
 
         public async Task<Installation> Area(LocationArea area)
         {

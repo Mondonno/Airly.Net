@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Linq;
-using System.Collections.Generic;
-using System.Diagnostics;
+using Newtonsoft.Json.Linq;
 
-namespace AirlyAPI
+using AirlyAPI.Handling;
+using AirlyAPI.Utilities;
+
+namespace AirlyAPI.Rest
 {
     public interface IBaseRouter { }
 
@@ -13,20 +14,22 @@ namespace AirlyAPI
     // :)
     public class RESTManager : BasicRoutes
     {
-        private Airly airly { get; set; }
-        private string apiKey { get; set; }
+        private string ApiKey { get; set; }
+        private RequestQueueHandler Handlers { get; set; } = new RequestQueueHandler();
+
+        public Airly Airly { get; set; }
         public AirlyLanguage Lang { get; set; }
 
         public RESTManager(Airly airly, string apiKey)
         {
-            this.apiKey = apiKey;
-            this.airly = airly;
+            this.ApiKey = apiKey;
+            this.Airly = airly;
         }
 
         public RESTManager(Airly airly)
         {
-            this.airly = airly;
-            this.apiKey = airly.ApiKey;
+            this.Airly = airly;
+            this.ApiKey = airly.ApiKey;
         }
 
         public string Auth
@@ -36,13 +39,13 @@ namespace AirlyAPI
                 AirlyError err = new AirlyError("Provided api key is empty");
                 err.Data.Add("Token", false);
 
-                if (string.IsNullOrEmpty(apiKey)) throw err;
-                return this.apiKey;
+                if (string.IsNullOrEmpty(ApiKey)) throw err;
+                return this.ApiKey;
             }
         }
 
-        public string Endpoint { get => $"{this.airly.Configuration.ApiDomain}"; }
-        public string Cdn { get => $"cdn.{Utils.domain}"; }
+        public string Endpoint { get => this.Airly.Configuration.ApiDomain; }
+        public string Cdn { get => this.Airly.Configuration.Cdn; }
 
         private void SetAirlyPreferedLang(Airly air) => this.Lang = air.Language;
 
@@ -60,28 +63,39 @@ namespace AirlyAPI
 
         // Making the request to the API
         // Something like "core" wrapper
-        public async Task<AirlyResponse> Request(string end, string method, RequestOptions options = null)
+        public Task<AirlyResponse> Request(string end, string method, RequestOptions options = null)
         {
-            var util = new Utils();
-            if (options == null) options = new RequestOptions(new string[0][]);
+            if (options == null) options = new RequestOptions();
 
-            RequestModule requestManager = new RequestModule(end, method.ToUpper(), options);
+            options.auth = true;
 
-            requestManager.setKey(apiKey);
-            requestManager.SetLanguage(this.Lang);
+            string route = Utils.GetRoute(end);
+            var Request = new RequestModule(this, end, method, options);
 
-            var response = await requestManager.MakeRequest();
-            string dateHeader = util.getHeader(response.headers, "Date");
+            Request.SetKey(this.ApiKey);
+            Request.SetLanguage(this.Lang);
 
-            DateTime date = DateTime.Parse(dateHeader ?? DateTime.Now.ToString()); // If the date header is null setting the date for actual date
-            return new AirlyResponse(response, date);
+            RequestQueuer handler = Handlers.Get(route);
+
+            if(handler == null)
+            {
+                handler = new RequestQueuer(this);
+                this.Handlers.Set(route, handler);
+            }
+
+            return handler.Push(Request);
         }
 
         // Simple get wrapper (because only GET requests Airly API accepts)
-        public async Task<T> api<T>(string end, dynamic query) {
+        public async Task<T> Api<T>(string end, dynamic query) {
             // Utils.ParseToClassJSON<T>((await Request(end, "get", new RequestOptions(new Utils().ParseQuery(query)))).JSON);
 
-            var requestJsonResult = (await Request(end, "get", new RequestOptions(new Utils().ParseQuery(query)))).JSON;
+            var requestResponse = (await Request(end, "get", new RequestOptions(new Utils().ParseQuery(query))));
+            JToken requestJsonResult ;
+
+            if (requestResponse == null) return default;
+            else requestJsonResult = requestResponse.JSON;
+
             var resultValue = JsonParser.ParseToClassJSON<T>(requestJsonResult);
 
             return resultValue;

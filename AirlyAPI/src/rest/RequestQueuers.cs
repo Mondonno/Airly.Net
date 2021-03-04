@@ -4,20 +4,21 @@ using System.Threading;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
-using System.Net;
-using System.Collections.Concurrent;
-using System.Linq;
+using AirlyAPI.Utilities;
+using AirlyAPI.Rest;
 
 namespace AirlyAPI.Handling
 {
     // == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
     //   TODO: Przekształcić zwracaną wartość z RequestModule na RawResponse i parsowanie zrobić z poziomu queuera (parse method)
     // == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
+    // Parsowanie z queuera done
+    // Przekształcenie na raw response w trakcie
 
     // Simple wrapper for semaphore slim to handle threads in requests
     public class Waiter : SemaphoreSlim
     {
-        public Waiter() : base(1){} // Limiting to one action per push and one thread (so user can make a lot of threads and the thread does not have childs)
+        public Waiter() : base(1, 1){} // Limiting to one action per push and one thread (so user can make a lot of threads and the thread does not have childs)
 
         public int RemainingTasks() => this.CurrentCount; // Shortcut
         public void Destroy() => this.Dispose();
@@ -38,7 +39,7 @@ namespace AirlyAPI.Handling
             this.Waiter = new Waiter();
         }
 
-        public async Task<JToken> Push(RequestModule request)
+        public async Task<AirlyResponse> Push(RequestModule request)
         {
             await Waiter.WaitAsync();
 
@@ -61,13 +62,13 @@ namespace AirlyAPI.Handling
         }
         private JToken ConvertJsonString(AirlyResponse res) => ConvertJsonString(res.rawJSON);
 
-        private async Task<JToken> Make(RequestModule request)
+        private async Task<AirlyResponse> Make(RequestModule request)
         {
             Handler handler = new Handler();
             AirlyResponse res;
 
             try { res = await request.MakeRequest(); }
-            catch (Exception ex) { throw new AirlyError(new HttpError(ex)); }
+            catch (Exception ex) { throw ex; }
 
             if (res == null || string.IsNullOrEmpty(res.rawJSON)) throw new HttpError("Can not resolve the Airly api response");
             if (this.RateLimited)
@@ -80,15 +81,17 @@ namespace AirlyAPI.Handling
                 }
             }
 
-            ErrorModel parsedError = handler.GetErrorFromJSON((JObject)res.JSON);
-
             int statusCode = (int) res.response.StatusCode;
 
-            if (statusCode == 200) return ConvertJsonString(res); // Nothing wrong with request & response
+            string rawDate = new Utils().getHeader(res.headers, "Date");
+            AirlyResponse constructedResponse = new AirlyResponse(ConvertJsonString(res), res.headers, res.rawJSON, !string.IsNullOrEmpty(rawDate) ? DateTime.Parse(rawDate) : DateTime.Now);
+
+            if (statusCode == 200) return constructedResponse; // Nothing wrong with request & response
             if (statusCode == 404) return null; // returning the null value from the 404 (user known)
             if (statusCode == 301)
             {
-                // Working on the special information on the {id}_REPLACED error
+                ErrorModel parsedError = handler.GetErrorFromJSON(res.JSON);
+                // Working on the special information on the {id}_REPLACED (INSTALLATION_REPLACED) errors
             }
 
             handler.handleError(statusCode, res); // Handling all other response status codes
@@ -101,7 +104,8 @@ namespace AirlyAPI.Handling
             var convertedJson = ConvertJsonString(rawJson);
             bool jsonValidCheck = !string.IsNullOrEmpty(convertedJson.ToString());
 
-            if (jsonValidCheck) return convertedJson;
+            
+            if (jsonValidCheck) return constructedResponse;
             else if(!jsonValidCheck) throw new HttpError("The Airly API returned json is null or empty");
 
             return null; // Fallback value (when all other statments do not react with the response)
@@ -114,8 +118,11 @@ namespace AirlyAPI.Handling
     {
         public int Handlers() => this.Count; // Getting all the active queuers
         public bool Inactive() => this.Count == 0; // Indicates if the QueuerHandler is inactive
+
         public bool RateLimited()
         {
+            if (this.Count == 0) return false;
+
             List<bool> limits = new List<bool>();
             foreach (var queuer in this) limits.Add(queuer.Value.RateLimited);
 
@@ -145,13 +152,13 @@ namespace AirlyAPI.Handling
         // Reseting the queuer handler and destroying all key queuers
         public void Reset()
         {
-            foreach (var val in this)
+            foreach (var avaibleQueuer in this)
             {
-                var queuer = val.Value ?? null;
-                if (queuer == null || string.IsNullOrEmpty(val.Key)) continue;
+                var queuer = avaibleQueuer.Value ?? null;
+                if (queuer == null || string.IsNullOrEmpty(avaibleQueuer.Key)) continue;
 
                 queuer.Zero(); // Detroying
-                this.Remove(val); // Removing
+                this.Remove(avaibleQueuer); // Removing
             }
         }
     }

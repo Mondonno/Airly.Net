@@ -6,9 +6,9 @@ namespace AirlyAPI.Interactions
 {
     public class Meta : InteractionBase
     {
-        public Meta(Airly airly, RESTManager rest) : base(airly, rest) { }
+        public Meta(Airly airly) : base(airly) { }
 
-        public async Task<List<IndexType>> Indexes() => await api<List<IndexType>>("meta/indexes", new { });
-        public async Task<List<MeasurementType>> Measurements() => await api<List<MeasurementType>>("meta/measurements", new { });
+        public async Task<List<IndexType>> Indexes() => await Api<List<IndexType>>("meta/indexes", new { });
+        public async Task<List<MeasurementType>> Measurements() => await Api<List<MeasurementType>>("meta/measurements", new { });
     }
 }

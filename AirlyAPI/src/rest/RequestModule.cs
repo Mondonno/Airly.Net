@@ -6,52 +6,55 @@ using System.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 using System.Diagnostics;
-using System.Collections.Generic;
 
-namespace AirlyAPI
+using AirlyAPI.Utilities;
+
+namespace AirlyAPI.Rest
 {
     [DnsPermission(System.Security.Permissions.SecurityAction.Assert)]
     [WebPermission(System.Security.Permissions.SecurityAction.Assert)]
     /// <summary>Raw request module for Airly API Wrapper *(Do not use this in yours project, just check API manager)</summary>
     public class RequestModule
     {
-        private static int VERSION { get; set; } = 2;
-        private static string API_DOMAIN { get; set; } = $"airapi.{Utils.domain}";
+        private int Version { get; set; } = 2;
+        private string ApiDomain { get; set; }
 
-        private string LANGUAGE_CODE { get; set; } = "en"; // Deafult language code is the english
-        private protected string API_KEY { get; set; } = null;
-       
-        public string API_URL { get; set; } = string.Format("https://{0}/v{1}/", API_DOMAIN, VERSION);
-        public string API_KEY_HEADER_NAME { get; set; } = "apikey";
+        private string LanguageCode { get; set; } = "en"; // Deafult language code is the english
 
-        private Utils moduleUtil { get; set; } = new Utils();
+        private Utils ModuleUtil { get; set; } = new Utils();
+        private AirlyConfiguration Configuration { get; set; } // The airly http configuration
 
-        public object options { get; set; }
-        public object deafultHeaders { get; set; }
+        private RequestOptions Options { get; set; }
 
-        public string method, Agent, endPoint;
-        public string path { get; set; }
+        private string ApiUrl { get; set; }
+        private string AuthorizationHeaderName { get; set; } = "apikey";
+
+        public object DeafultHeaders { get; set; }
+        public string method, endPoint, path;
 
         /// <summary>Raw request module for Airly API Wrapper <i>(Do not use this in yours project, just check API manager)</i></summary>
-        public RequestModule(string endPoint, string method, RequestOptions options)
+        public RequestModule(RESTManager rest, string endPoint, string method, RequestOptions options)
         {
-            this.options = options;
+            AirlyConfiguration rawConfig = rest.Airly.Configuration; PatchConfiguration(ref rawConfig);
+
+            this.Configuration = rawConfig;
+            this.Options = options;
             this.method = method;
             this.endPoint = endPoint;
 
-            // Decalaring all deafult headers
-            string[] agent = { "User-Agent", "Airly-C#-Wrapper" };
+            string[] agent = { "User-Agent", this.Configuration.Agent };
             string[] connection = { "Connection", "keep-alive" };
             string[] cacheControl = { "Cache-Control", "no-cache" };
-            string[] encoding = { "Accept-Encoding", "gzip" }; // Added encoding
-            string[] accept = { "Accept", "application/json" };
+            string[] encoding = { "Accept-Encoding", "gzip" };
 
-            deafultHeaders = new string[][] {
-                agent,
-                connection,
-                cacheControl,
-                encoding,
-                accept
+            string jsonResponses = "application/json";
+            string[] accept = { "Accept", jsonResponses };
+            string[] contentType = { "Content-Type", jsonResponses };
+
+            DeafultHeaders = new string[][] {
+                agent, connection,
+                cacheControl, encoding,
+                accept, contentType
             };
 
             string queryString = "";
@@ -65,10 +68,10 @@ namespace AirlyAPI
                     string value = options.query[i][1];
 
                     queryString += string.Format("{0}={1}&", key, value);
-                    if (i >= (options.query.Length - 1)) queryString = queryString.Substring(0, queryString.Length - 1);
                 }
 
-                finalQuery = moduleUtil.formatQuery(queryString);
+                queryString = queryString.EndsWith("&") ? queryString.Remove(queryString.Length - 1, 1) : queryString;
+                finalQuery = ModuleUtil.FormatQuery(queryString);
             }
 
             string Query = finalQuery;
@@ -85,39 +88,37 @@ namespace AirlyAPI
         /// <returns></returns>
         public async Task<AirlyResponse> MakeRequest(string[][] customHeaders = null, string body = null)
         {
-            if (string.IsNullOrEmpty(API_KEY) || string.IsNullOrEmpty(API_KEY.Replace(" ", ""))) throw new AirlyError(new HttpError("The provided airly api key is empty"));
             if(customHeaders == null) customHeaders = new string[0][];
 
             // Initializing the request headers used in initializing the HttpClient
             string[][] requestHeaders;
 
             // The request response timeout
-            double timeout = 60000;
+            double restTimeout = this.Configuration.RestRequestTimeout;
+            double timeout = restTimeout == 0 ? 60000 : restTimeout;
 
-            string[] apiKey = { API_KEY_HEADER_NAME, "key" };
+            string[] apiKey = { AuthorizationHeaderName, "key" };
             string[] contentType = { "Content-Type", "application/json" };
-            string[] language = { "Accept-Language", LANGUAGE_CODE ?? "en" };
+            string[] language = { "Accept-Language", LanguageCode ?? "en" };
             // Accept Languages:
             // * pl
             // * en
 
-            moduleUtil.ArrayPush(ref customHeaders, language);
-
-            if (!string.IsNullOrEmpty(body)) moduleUtil.ArrayPush(ref customHeaders, contentType);
-            if (string.IsNullOrEmpty(apiKey[1])) apiKey[1] = API_KEY.ToString();
+            ArrayUtil.ArrayPush(ref customHeaders, language);
+            if (!string.IsNullOrEmpty(body)) ArrayUtil.ArrayPush(ref customHeaders, contentType);
 
             // when the custom headers exists we assigning the on array to another
-            string[][] copiedDeafultHeaders = (string[][]) ((string[][]) deafultHeaders).Clone();
-            string[] customKey = Array.Find(customHeaders, (key) => key[0] == API_KEY_HEADER_NAME);
+            string[][] copiedDeafultHeaders = (string[][]) ((string[][]) DeafultHeaders).Clone();
+            string[] customKey = Array.Find(customHeaders, (key) => key[0] == AuthorizationHeaderName);
 
-            if (customKey != null) apiKey[1] = string.Format("{0}", customKey);
+            if (customKey != null && !string.IsNullOrEmpty(customKey[1])) apiKey[1] = string.Format("{0}", customKey[1]);
             if ((customHeaders.Length - 1) >= 0) {
-                customHeaders = moduleUtil.assignArray(copiedDeafultHeaders, customHeaders);
+                customHeaders = ArrayUtil.AssignArray(copiedDeafultHeaders, customHeaders);
             }
             else customHeaders = copiedDeafultHeaders;
             requestHeaders = customHeaders;
 
-            string RequestWebUrl = string.Format("{0}{1}", API_URL, path);
+            string RequestWebUrl = ApiUrl + path;
             
             Uri RequestUri = new Uri(RequestWebUrl);
             AuthenticationHeaderValue airlyAuthentication = new AuthenticationHeaderValue(apiKey[0], apiKey[1]); // todo wywalic to poniewaz autoryzacja jest w headerach :)
@@ -149,6 +150,8 @@ namespace AirlyAPI
             }
 
             string responseBody = await response.Content.ReadAsStringAsync();
+            Debug.WriteLine(responseBody.ToString());
+
             RequestClient.Dispose();
 
             JToken convertedJSON = JsonParser.ParseJson(responseBody);
@@ -158,22 +161,24 @@ namespace AirlyAPI
                 response.Headers,
                 responseBody,
                 DateTime.Now // Only for the raw requests without handlers
-            );
+            )
+            { response = response };
             response.Dispose();
 
             return airlyResponse;
         }
 
-        public void setKey(string key)
+        public void SetKey(string key)
         {
-            API_KEY = key;
+            if (!this.Options.auth) return;
 
-            string[][] copiedHeaders = (string[][]) ((string[][]) deafultHeaders).Clone();
-            string[] apiKey = { API_KEY_HEADER_NAME, key };
+            string[][] copiedHeaders = (string[][]) ((string[][]) DeafultHeaders).Clone();
+            string[] apiKey = { AuthorizationHeaderName, key };
 
-            moduleUtil.ArrayPush(ref copiedHeaders, apiKey);
-            deafultHeaders = copiedHeaders;
+            ArrayUtil.ArrayPush(ref copiedHeaders, apiKey);
+            DeafultHeaders = copiedHeaders;
         }
+        public void SetKey(RESTManager rest) { if (this.Options.auth != false) SetKey(rest.Auth); }
         
         public void SetLanguage(AirlyLanguage language)
         { 
@@ -183,7 +188,7 @@ namespace AirlyAPI
                 return;
 
             actualCode = actualCode.ToLower();
-            this.LANGUAGE_CODE = actualCode;
+            this.LanguageCode = actualCode;
         }
 
         public void SetLanguage(string language) {
@@ -194,15 +199,16 @@ namespace AirlyAPI
             foreach (var lang in langNames)
             {
                 string correctedLang = lang.TrimEnd(' ').TrimStart(' ').ToLower();
-                moduleUtil.ArrayPush(ref correctLangs, correctedLang);
+                ArrayUtil.ArrayPush(ref correctLangs, correctedLang);
             }
 
             string correctLanguage = language.TrimStart(' ').TrimEnd(' ').Replace(" ", "").ToLower();
             bool langCheck = correctLangs.Contains(correctLanguage);
             if (!langCheck) throw new AirlyError(string.Format("Provided language \"{0}\" is invalid", language));
 
-            this.LANGUAGE_CODE = correctLanguage;
+            this.LanguageCode = correctLanguage;
         }
+
         // Initializing the deafult language 
         public void SetLanguage() => SetLanguage(AirlyLanguage.en);
 
@@ -219,6 +225,29 @@ namespace AirlyAPI
             return httpMethod;
         }
 
+        private void PatchConfiguration(ref AirlyConfiguration config)
+        {
+            // string.Format("https://{0}/v{1}/", ApiDomain, Version)
+            AirlyConfiguration configuration = config;
+
+            this.Version = configuration.Version;
+            this.ApiDomain = configuration.ApiDomain;
+            this.ApiUrl = string.Format("{0}://{1}/v{2}/", configuration.Protocol, ApiDomain, Version);
+
+            config = configuration;
+        }
+
+        public void SetHeader(ref HttpClient client, string[] header)
+        {
+            string name = ModuleUtil.ReplaceDashUpper(header[0]);
+            string value = header[1];
+
+            bool check = client.DefaultRequestHeaders.Contains(name);
+            if (check) client.DefaultRequestHeaders.Remove(name);
+
+            client.DefaultRequestHeaders.Add(name, value);
+        }
+
         private void SetHeaders(ref HttpClient client, string[][] headers)
         {
             if (headers.Length == 0) throw new Exception("The headers length is 0");
@@ -230,7 +259,7 @@ namespace AirlyAPI
 
                 if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(value)) continue;
 
-                name = moduleUtil.ReplaceDashUpper(name); // Replacing "Content-Type" to "ContentType"
+                name = ModuleUtil.ReplaceDashUpper(name); // Replacing "Content-Type" to "ContentType"
 
                 bool clientCheck = client.DefaultRequestHeaders.Contains(name);
                 if (clientCheck) client.DefaultRequestHeaders.Remove(name);
@@ -240,7 +269,7 @@ namespace AirlyAPI
             }
             foreach (var item in client.DefaultRequestHeaders)
             {
-                Debug.WriteLine($"{item.Key}     {moduleUtil.GetFirstEnumarable(item.Value)}");
+                Debug.WriteLine($"{item.Key}     {ModuleUtil.GetFirstEnumarable(item.Value)}");
             }
         }
     }
