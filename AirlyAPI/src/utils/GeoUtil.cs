@@ -2,8 +2,6 @@
 
 namespace AirlyAPI.Utilities
 {
-    // Simple Geo Util for the wrapper comaptiblity
-    // Made by github.com/Mondonno
     public static class GeoUtil
     {
         private static double ToRadians(double degrees) => (degrees / 360) * (2 * Math.PI);
@@ -13,16 +11,16 @@ namespace AirlyAPI.Utilities
         public static bool Contains(double point, double begin, double end) => (point >= Math.Min(begin, end)) && (point <= Math.Max(begin, end));
         public static double GreatCircleDistanceInKm(Location pointOne, Location pointTwo)
         {
-            bool simmilarCheck = (pointOne.lat == pointTwo.lat) && (pointOne.lng == pointTwo.lng);
+            bool simmilarCheck = (pointOne.Lat == pointTwo.Lat) && (pointOne.Lng == pointTwo.Lng);
             if (simmilarCheck) return 0.0;
 
-            double oneLat = pointOne.lat;
-            double twoLat = pointTwo.lat;
+            double oneLat = pointOne.Lat;
+            double twoLat = pointTwo.Lat;
 
             double oneRadian = ToRadians(oneLat);
             double twoRadian = ToRadians(twoLat);
 
-            double theta = pointOne.lng - pointTwo.lng;
+            double theta = pointOne.Lng - pointTwo.Lng;
             double dist = Math.Sin(oneRadian) *
                 Math.Sin(twoRadian) +
                 Math.Cos(oneRadian) *

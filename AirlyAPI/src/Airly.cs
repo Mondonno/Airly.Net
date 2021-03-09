@@ -1,28 +1,23 @@
-﻿//
-// AIRLY CLIENT 
-//
-// Dependecies of Airly API
-// -- Newtonsoft.Json
-// -- Lastest C# (preffered 8.0+) & LINQ
+﻿using System;
 
 using AirlyAPI.Interactions;
 using AirlyAPI.Rest;
+using AirlyAPI.Utilities;
 
-// Todo dodac do Airly metode api publiczna wrapowana z Rest (po to zeby interfejsy API mialy od razu api connect bez przekazywania RESTManager)
-// Todo please look to Managers.cs for todo :) (IMPORTANT !!!)
+// todo przekodowac na ConfigureAwait(false) poniewaz jak zrobie synchroniczne to rzuca agregatem i robi sie deadlock (3x exception)
 
 namespace AirlyAPI
 {
-    public class Airly
+    public class Airly : IDisposable
     {
-        public string ApiKey { get; }
-        internal RESTManager Rest { get; set; }
+        public string ApiKey { get; private set;  }
+        protected internal RESTManager Rest { get; set; }
 
         public Installations Installations { get; private set; }
         public Measurements Measurements { get; private set; }
         public Meta Meta { get; private set; }
 
-        public AirlyConfiguration Configuration { get; set; }
+        public AirlyConfiguration Configuration { get; set; } = new AirlyConfiguration();
         public AirlyLanguage Language {
             get  {
                 return this.Rest.Lang;
@@ -31,22 +26,31 @@ namespace AirlyAPI
                 this.Rest.Lang = value;
             }
         }
+        protected bool _isDisposed;
+
+        // Indicates if the last request got ratelimited
+        public bool IsRateLimited
+        {
+            get {
+                return this.Rest.RateLimited;
+            }
+        }
 
         // Simply creating a new airly with the same configuration but with new rest
         public Airly(Airly airly)
         {
             this.ApiKey = airly.ApiKey;
-            this.Configuration = airly.Configuration;
             this.Language = airly.Language;
+            this.Configuration = airly.Configuration;
 
             Initialize();
         }
 
         public Airly(Airly airly, AirlyConfiguration configuration)
         {
-            this.Configuration = configuration;
             this.ApiKey = airly.ApiKey;
             this.Language = airly.Language;
+            this.Configuration = configuration;
 
             Initialize();
         }
@@ -54,8 +58,7 @@ namespace AirlyAPI
         public Airly(string apiKey)
         {
            this.ApiKey = apiKey;
-           this.Configuration = new AirlyConfiguration();
-            
+           
            Initialize();
         }
 
@@ -75,21 +78,19 @@ namespace AirlyAPI
             Meta = new Meta(this);
             Measurements = new Measurements(this);
 
-            KeyCheck();
+            Utils.ValidateKey(this.ApiKey);
         }
 
-        private void KeyCheck()
+        public override string ToString() => ApiKey;
+
+        public void Dispose()
         {
-            // Simple airly key validation (eg. key of whitespaces)
-            string toValidate = this.ApiKey;
-
-            AirlyError invalidToken = new AirlyError("Provided airly api key is invalid");
-            invalidToken.Data.Add("Token", false);
-
-            string validatedKey = toValidate.Replace(" ", "").Trim().Normalize();
-
-            if (string.IsNullOrEmpty(toValidate) || string.IsNullOrEmpty(validatedKey) || validatedKey != toValidate) throw invalidToken;
-            else return;
+            if (!_isDisposed)
+            {
+                this.Rest.Dispose();
+                this.ApiKey = null;
+                this._isDisposed = true;
+            }
         }
     }
 }

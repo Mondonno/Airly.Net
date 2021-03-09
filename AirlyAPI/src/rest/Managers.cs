@@ -7,15 +7,13 @@ using AirlyAPI.Utilities;
 
 namespace AirlyAPI.Rest
 {
-    public interface IBaseRouter { }
-
     // The routes is the wrapper for the Request Module with the prered useful methods
     // The reuqest manager is the manager of all API operations
     // :)
-    public class RESTManager : BasicRoutes
+    public class RESTManager : BasicRoutes, IDisposable
     {
         private string ApiKey { get; set; }
-        private RequestQueueHandler Handlers { get; set; } = new RequestQueueHandler();
+        private RequestQueueHandler Handlers { get; set; }
 
         public Airly Airly { get; set; }
         public AirlyLanguage Lang { get; set; }
@@ -24,13 +22,10 @@ namespace AirlyAPI.Rest
         {
             this.ApiKey = apiKey;
             this.Airly = airly;
+            this.Handlers = new RequestQueueHandler(this);
         }
 
-        public RESTManager(Airly airly)
-        {
-            this.Airly = airly;
-            this.ApiKey = airly.ApiKey;
-        }
+        public RESTManager(Airly airly) : this(airly, airly.ApiKey) { }
 
         public string Auth
         {
@@ -44,10 +39,19 @@ namespace AirlyAPI.Rest
             }
         }
 
+        public bool RateLimited
+        {
+            get
+            {
+                if (this.Handlers.Queuers() >= 1) return this.Handlers.RateLimited();
+                else return false;
+            }
+        }
+
         public string Endpoint { get => this.Airly.Configuration.ApiDomain; }
         public string Cdn { get => this.Airly.Configuration.Cdn; }
 
-        private void SetAirlyPreferedLang(Airly air) => this.Lang = air.Language;
+        private void SetAirlyPreferedLanguage(Airly air) => this.Lang = air.Language;
 
         private object ValidateLang(object lang)
         {
@@ -61,46 +65,40 @@ namespace AirlyAPI.Rest
             else return AirlyLanguage.en;
         }
 
-        // Making the request to the API
-        // Something like "core" wrapper
         public Task<AirlyResponse> Request(string end, string method, RequestOptions options = null)
         {
             if (options == null) options = new RequestOptions();
 
-            options.auth = true;
+            if(this.ApiKey != null) options.Auth = true;
 
             string route = Utils.GetRoute(end);
-            var Request = new RequestModule(this, end, method, options);
+            DeafultRestRequest Request = new DeafultRestRequest(this, end, method, options);
 
             Request.SetKey(this.ApiKey);
             Request.SetLanguage(this.Lang);
 
-            RequestQueuer handler = Handlers.Get(route);
-
-            if(handler == null)
+            return Handlers.Queue(route, Request);
+        }
+        public async Task<T> RequestAndParseType<T>(string end, string method, dynamic query, bool versioned)
+        {
+            Utils util = new Utils();
+            RequestOptions options = new RequestOptions()
             {
-                handler = new RequestQueuer(this);
-                this.Handlers.Set(route, handler);
-            }
-
-            return handler.Push(Request);
+                Query = util.ParseQuery(query),
+                Versioned = versioned
+            };
+            var httpResponse = await Request(end, method ?? "GET", options);
+            return new RestResponseParser<T>(httpResponse.rawJSON).Deserializated;
         }
 
         // Simple get wrapper (because only GET requests Airly API accepts)
-        public async Task<T> Api<T>(string end, dynamic query) {
-            // Utils.ParseToClassJSON<T>((await Request(end, "get", new RequestOptions(new Utils().ParseQuery(query)))).JSON);
+        public async Task<T> Api<T>(string end, dynamic query) where T : class => await RequestAndParseType<T>(end, "GET", query, true);
+        public async Task<T> Api<T>(string end, dynamic query, bool versioned) where T : class => await RequestAndParseType<T>(end, "GET", query, versioned);
 
-            var requestResponse = (await Request(end, "get", new RequestOptions(new Utils().ParseQuery(query))));
-            JToken requestJsonResult ;
-
-            if (requestResponse == null) return default;
-            else requestJsonResult = requestResponse.JSON;
-
-            var resultValue = JsonParser.ParseToClassJSON<T>(requestJsonResult);
-
-            return resultValue;
-        }
+        public void Dispose() => this.Handlers.Reset();
     }
+
+    public interface IBaseRouter { }
 
     public class BasicRoutes : IBaseRouter
     {

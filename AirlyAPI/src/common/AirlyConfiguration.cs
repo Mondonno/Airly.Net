@@ -18,6 +18,7 @@ namespace AirlyAPI
         public string Protocol { get; set; } = "https";
 
         public double RestRequestTimeout { get; set; } = 60000;
+        public AirlyNotFoundHandling NotFoundHandling { get; set; } = AirlyNotFoundHandling.Null;
 
         public int Version { get; set; } = 2;
         public string Domain { get; } = "airly.eu";

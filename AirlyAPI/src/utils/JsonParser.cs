@@ -1,11 +1,33 @@
 ﻿using System;
+using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace AirlyAPI.Utilities
 {
-    // Simple JSON Parsing class utitlity for the AirlyAPI C# wrapper
-    // Made by github.com/Mondonno
+    public class RestResponseParser<T>
+    {
+        public string Json { get; set; }
+        public T Deserializated { get; set; }
+
+        public RestResponseParser(string json)
+        {
+            this.Json = json ?? throw new ArgumentNullException("json");
+            Refresh();
+        }
+
+        public void Refresh() => Deserializated = Parse();
+        private T Parse()
+        {
+            if (Json == null) return default;
+
+            var parsedJson = JsonParser.DeserializeJson<T>(Json);
+            if (parsedJson == null) return default;
+            else return parsedJson;
+        }
+    }
+
     public static class JsonParser
     {
         private static readonly JsonSerializerSettings SerializerSettings = new JsonSerializerSettings()
@@ -13,7 +35,7 @@ namespace AirlyAPI.Utilities
             DateFormatString = "yyyy-MM-ddTH:mm:ss.fffK",
             DateTimeZoneHandling = DateTimeZoneHandling.Utc,
             DateParseHandling = DateParseHandling.DateTime,
-            NullValueHandling = NullValueHandling.Ignore
+            NullValueHandling = NullValueHandling.Ignore,
         };
 
         public static Type GetTokenType(JTokenType type) => type.GetType();
@@ -58,7 +80,7 @@ namespace AirlyAPI.Utilities
             else return new JObject();
         }
 
-        public static T ParseToClassJSON<T>(string json)
+        public static T DeserializeJson<T>(string json)
         {
             if (string.IsNullOrEmpty(json)) return default;
 
@@ -66,7 +88,16 @@ namespace AirlyAPI.Utilities
             T classment = JsonConvert.DeserializeObject<T>(rawjson, SerializerSettings);
             return classment;
         }
-        public static T ParseToClassJSON<T>(JToken jsonToken) => ParseToClassJSON<T>(GetJTokenJson(jsonToken));
+        public static T DeserializeJson<T>(JToken jsonToken) => DeserializeJson<T>(GetJTokenJson(jsonToken));
+        public static T DeserializeJson<T> (Stream jsonStream)
+        {
+            using (TextReader text = new StreamReader(jsonStream))
+            using (JsonReader reader = new JsonTextReader(text))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                return serializer.Deserialize<T>(reader);
+            }
+        }
 
         public static string SerializeJSON<T>(T obj)
         {
@@ -75,6 +106,6 @@ namespace AirlyAPI.Utilities
 
             return JsonConvert.SerializeObject((T)obj, settings);
         }
-        public static string SerializeJSON(JToken json) => GetJTokenJson(json);
+        public static string SerializeJSON(JToken jsonToken) => GetJTokenJson(jsonToken);
     }
 }

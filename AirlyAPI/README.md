@@ -1,0 +1,39 @@
+# Airly.Net
+
+Unoffical powerfull and fast .NET API wrapper for [**Airly**](https://developer.airly.org/docs)
+
+- Async based
+- 100% converage with the Airly API
+- Fully safe and easy to use
+- No more than one request per invoked method*
+
+# Documentation
+
+You can acces the documentation [**here**](https://mondonno.github.io/airly.net)
+Or visit project Wiki
+
+# Installation
+
+Airly.Net stable builds are avaible on NugGet.org through the Airly.Net meta package
+    - [**Airly.Net*]()
+
+# Compiling
+You can compile our library with the following dependencies
+    - Visual Studio
+    - .NET Core SDK
+Or via .NET Command line CLI
+    - .NET Core SDK
+
+# Example of usage
+```csharp
+string myApiKey = "myFullyGoodAirlyApiKey"; // Define your apikey
+Airly client = new Airly(myApiKey); // Create new instance of the Api Client
+
+Location location = new Location(0, 0) // Provide coordinates (lat, lng)
+Measurment measurment = await client.Measurments.Nearest(location) // Pass it
+
+DateTime fromMeasurmentDateTime = measurment.Current.FromDateTime; // Destruct actual measurments from date time
+Console.WriteLine(fromMeasurmentDateTime.ToString()); // Show it over the world
+```
+
+#### [Polish Version]()

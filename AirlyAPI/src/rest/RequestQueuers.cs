@@ -1,30 +1,26 @@
 ﻿using System;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Threading;
-using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json.Linq;
 
 using AirlyAPI.Utilities;
 using AirlyAPI.Rest;
 
 namespace AirlyAPI.Handling
 {
-    // == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
-    //   TODO: Przekształcić zwracaną wartość z RequestModule na RawResponse i parsowanie zrobić z poziomu queuera (parse method)
-    // == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
-    // Parsowanie z queuera done
-    // Przekształcenie na raw response w trakcie
-
     // Simple wrapper for semaphore slim to handle threads in requests
     public class Waiter : SemaphoreSlim
     {
         public Waiter() : base(1, 1){} // Limiting to one action per push and one thread (so user can make a lot of threads and the thread does not have childs)
 
-        public int RemainingTasks() => this.CurrentCount; // Shortcut
-        public void Destroy() => this.Dispose();
+        // Shortcuts
+        public int RemainingTasks() => this.CurrentCount;
+        public void Destroy() => this.Dispose(true);
     }
 
-    // The queuer make the same what do waiter but waiter is a core for queuer
     public class RequestQueuer
     {
         public Waiter Waiter { get; private set; }
@@ -33,47 +29,47 @@ namespace AirlyAPI.Handling
         public bool RateLimited { get; private set; } = false; // The ratelimit error can be handled by user so thats why this variable exists
         public bool Inactive { get => Waiter.RemainingTasks() == 0 && !this.RateLimited; }
 
+        private CancellationToken _cancellationToken { get; set; } = CancellationToken.None; // cs-unused
+
         public RequestQueuer(RESTManager manager)
         {
             this.Manager = manager;
             this.Waiter = new Waiter();
         }
 
-        public async Task<AirlyResponse> Push(RequestModule request)
+        public async Task<AirlyResponse> Push(DeafultRestRequest request)
         {
             await Waiter.WaitAsync();
 
-            // Simple thread locks handlings
             try { return await this.Make(request); }
             finally { Waiter.Release(); }
         }
 
         public void Zero()
         {
-            this.Waiter.Destroy(); // Deleting all the pending requests
+            this.Waiter.Destroy();
             this.RateLimited = false;
         }
 
-        // simple converter wrap
+        private JToken ConvertJsonString(RawResponse res) => ConvertJsonString(res.rawJSON);
         private JToken ConvertJsonString(string json)
         {
             JToken token = JsonParser.ParseJson(json);
             return token;
         }
-        private JToken ConvertJsonString(AirlyResponse res) => ConvertJsonString(res.rawJSON);
 
-        private async Task<AirlyResponse> Make(RequestModule request)
+        private async Task<AirlyResponse> Make(DeafultRestRequest request)
         {
             Handler handler = new Handler();
-            AirlyResponse res;
+            RawResponse res;
 
-            try { res = await request.MakeRequest(); }
-            catch (Exception ex) { throw ex; }
+            try { res = await request.SendAndHandle(); }
+            catch(Exception ex) { throw ex; };
 
             if (res == null || string.IsNullOrEmpty(res.rawJSON)) throw new HttpError("Can not resolve the Airly api response");
             if (this.RateLimited)
             {
-                var details = handler.GetRateLimitDetails(res.response);
+                var details = new RateLimitInfo(res.response);
                 if (details.IsRateLimited) handler.MakeRateLimitError(res, new Utils(), null);
                 else {
                     this.RateLimited = false;
@@ -81,85 +77,129 @@ namespace AirlyAPI.Handling
                 }
             }
 
+            HttpResponseHeaders headers = res.response.Headers;
             int statusCode = (int) res.response.StatusCode;
+            string rawDate = new Utils().GetHeader(headers, "Date");
 
-            string rawDate = new Utils().getHeader(res.headers, "Date");
-            AirlyResponse constructedResponse = new AirlyResponse(ConvertJsonString(res), res.headers, res.rawJSON, !string.IsNullOrEmpty(rawDate) ? DateTime.Parse(rawDate) : DateTime.Now);
+            AirlyResponse constructedResponse = new AirlyResponse(ConvertJsonString(res), headers, res.rawJSON, !string.IsNullOrEmpty(rawDate) ? DateTime.Parse(rawDate) : DateTime.Now);
 
-            if (statusCode == 200) return constructedResponse; // Nothing wrong with request & response
-            if (statusCode == 404) return null; // returning the null value from the 404 (user known)
+            if (statusCode == 200 || res.response.IsSuccessStatusCode) return constructedResponse; // Nothing wrong with request & response, returning
+            if (statusCode == 404)
+            {
+                var notFoundEnum = this.Manager.Airly.Configuration.NotFoundHandling;
+                if (notFoundEnum.Equals(AirlyNotFoundHandling.Null)) return null; // returning the null value from the 404 (user known)
+                else if (notFoundEnum.Equals(AirlyNotFoundHandling.Error)) throw new HttpError($"The content for {request.RequestUri} was not found"); // or throwing the error on the AirlyNotFound handling setting
+            }
             if (statusCode == 301)
             {
-                ErrorModel parsedError = handler.GetErrorFromJSON(res.JSON);
+                ErrorModel parsedError = handler.GetErrorFromJson(ConvertJsonString(res.rawJSON));
+                int? succesor = parsedError.succesor;
+
+                if (succesor == null) throw new HttpError("[301] [INSTALLATION_REPLACED] Installation get replaced and new succesor was not found");
+                else if (succesor != null)
+                {
+
+
+                } else throw new HttpError("[301] [UNHANDLED]");
+
                 // Working on the special information on the {id}_REPLACED (INSTALLATION_REPLACED) errors
             }
 
-            handler.handleError(statusCode, res); // Handling all other response status codes
+            handler.HandleError(statusCode, res);
 
             string rawJson = res.rawJSON;
             bool malformedCheck = handler.IsMalformedResponse(rawJson);
 
-            if (malformedCheck) throw new HttpError("The Airly API response get malformed or it is not fully normally");
+            if (malformedCheck)
+                throw new HttpError("The Airly API response get malformed or it is not fully normally");
 
             var convertedJson = ConvertJsonString(rawJson);
             bool jsonValidCheck = !string.IsNullOrEmpty(convertedJson.ToString());
-
             
             if (jsonValidCheck) return constructedResponse;
-            else if(!jsonValidCheck) throw new HttpError("The Airly API returned json is null or empty");
+            else if(!jsonValidCheck)
+                throw new HttpError("The Airly API returned json is null or empty");
 
             return null; // Fallback value (when all other statments do not react with the response)
         }
     }
 
-    // Handling all the RequestQueuers with the specified interaction first endpoints
-    // The small List wrapper with the additional methods
-    public class RequestQueueHandler : List<KeyValuePair<string, RequestQueuer>>
+    public class RequestQueueManager : Dictionary<string, RequestQueuer>, IDisposable // Handler for all avaible routes on the API Manager
     {
-        public int Handlers() => this.Count; // Getting all the active queuers
-        public bool Inactive() => this.Count == 0; // Indicates if the QueuerHandler is inactive
+        public RequestQueueManager() { }
 
+        public int Handlers() => Count;
+        public bool Inactive() => Count == 0;
         public bool RateLimited()
         {
             if (this.Count == 0) return false;
 
-            List<bool> limits = new List<bool>();
-            foreach (var queuer in this) limits.Add(queuer.Value.RateLimited);
+            List<bool> limits = new List<bool>(this.Values.Select((e, b) => e.RateLimited));
+            int limited = limits.FindAll((e) => e == true).Count;
 
-            List<bool> limited = limits.FindAll((e) => e == true);
-            return limits.Count == limited.Count;
+            return limits.Count == limited;
         }
 
         public RequestQueuer Get(string route)
         {
-            var value = this.Find((e) => e.Key == route).Value;
-            return value ?? null;
+            TryGetValue(route, out RequestQueuer queuer);
+            return queuer ?? null;
         }
-
-        public void Set(string route, RequestQueuer queue)
+        public void Set(string route, RequestQueuer queuer)
         {
-            KeyValuePair<string, RequestQueuer> element = new KeyValuePair<string, RequestQueuer>(route, queue);
-            var checkedValue = Find((obj) => obj.Key == route);
-            bool checkContains = checkedValue.Value != null;
-
-            if (checkContains) {
-                this.Remove(checkedValue);
-                this.Add(element);
-            }
-            else this.Add(element);
+            bool contains = base.ContainsKey(route);
+            if (contains) Remove(route);
+            Add(route, queuer);
         }
-
-        // Reseting the queuer handler and destroying all key queuers
-        public void Reset()
+        public void Dispose()
         {
-            foreach (var avaibleQueuer in this)
+            foreach (var avaibleQueuer in this)    
             {
                 var queuer = avaibleQueuer.Value ?? null;
                 if (queuer == null || string.IsNullOrEmpty(avaibleQueuer.Key)) continue;
 
-                queuer.Zero(); // Detroying
-                this.Remove(avaibleQueuer); // Removing
+                queuer.Zero();
             }
+            Clear();
         }
+    }
+
+    public class RequestQueueHandler
+    {
+        private RequestQueueManager QueueManager = new RequestQueueManager();
+        private RESTManager RestManager { get; set; }
+
+        // shortcuts
+        public bool Inactive() => QueueManager.Inactive();
+        public bool RateLimited() => QueueManager.RateLimited();
+        public int Queuers() => QueueManager.Handlers();
+
+        public RequestQueueHandler(RESTManager rest)
+        {
+            this.RestManager = rest;
+        }
+
+        public Task<AirlyResponse> Queue(string route, DeafultRestRequest request)
+        {
+            RequestQueuer handler = QueueManager.Get(route);
+
+            if (handler == null)
+            {
+                handler = new RequestQueuer(RestManager);
+                QueueManager.Set(route, handler);
+            }
+
+            return handler.Push(request);
+        }
+        public void UnQueue(string route)
+        {
+            QueueManager.TryGetValue(route, out RequestQueuer queuer);
+            if (queuer == null) return;
+
+            queuer.Zero();
+            QueueManager.Remove(route);
+        }
+
+        public void Reset() => QueueManager.Dispose();
     }
 }

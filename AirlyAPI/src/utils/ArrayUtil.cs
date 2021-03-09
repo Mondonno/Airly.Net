@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AirlyAPI.Utilities
@@ -32,6 +33,7 @@ namespace AirlyAPI.Utilities
             table = removedArray;
         }
 
+        public static string JoinList<T>(List<T> list, string character) => JoinArray(list.ToArray(), character);
         public static string JoinArray<T>(T[] table, string character)
         {
             string compiledString = string.Empty;
@@ -39,6 +41,15 @@ namespace AirlyAPI.Utilities
 
             return compiledString.Remove(compiledString.Length - 1, 1);
         }
+
+        // Splitting the blank characters in a string (CS1011)
+        public static string[] SplitEvery(string str)
+        {
+            string[] array = new string[0];
+            foreach (var s in str) ArrayPush(ref array, s);
+            return array;
+        }
+        public static List<string> SplitEveryToList(string str) => new List<string>(SplitEvery(str));
 
         public static T[] AssignArray<T>(T[] source, T[] target)
         {

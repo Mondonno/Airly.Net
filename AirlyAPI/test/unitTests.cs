@@ -5,10 +5,206 @@
 using System;
 using System.Collections.Generic;
 using AirlyAPI;
+using AirlyAPI.Handling;
+using AirlyAPI.Rest;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Threading;
+using System.IO;
+using AirlyAPI.Utilities;
+using System.Collections;
 
 // The namespace for AirlyAPI unit tests
 namespace AirlyAPI
 {
+    /*
+     Utils util = new Utils();
+            RequestOptions options = new RequestOptions()
+            {
+                Query = util.ParseQuery(query),
+                Versioned = versioned
+            };
+            var httpResponse = await Request(end, method ?? "GET", options);
+            string json;
+
+            if (httpResponse == null) return default;
+            else json = httpResponse.rawJSON;
+
+            var jsonParsedResult = JsonParser.DeserializeJson<T>(json);
+            if (jsonParsedResult == null) return default;
+
+            return jsonParsedResult;
+     */
+    /*
+     foreach (var mm in measurement.Current.Values)
+            {
+                Debug.WriteLine($"{mm.Name.ToString()}    {mm.Value.ToString()}");
+                // Entered
+            }
+            Debug.WriteLine("-----------");
+            foreach (var index in measurement.Current.Indexes)
+            {
+                Debug.WriteLine($"{index.Name}    {index.Value}");
+            }
+            Debug.WriteLine("-----------");
+            foreach (var standard in measurement.Current.Standards)
+            {
+                Debug.WriteLine($"{standard.Name}    {standard.Pollutant}    {standard.Limit}");
+            }
+
+            throw new Exception(measurement.Current.TillDateTime.ToString());
+     */
+    /*
+     //// Handling all the RequestQueuers with the specified interaction first endpoints
+    //// The small List wrapper with the additional methods
+    //public class RequestQueueHandler : List<KeyValuePair<string, RequestQueuer>>
+    //{
+    //    public int Handlers() => this.Count;
+    //    public bool Inactive() => this.Count == 0;
+
+    //    public bool RateLimited()
+    //    {
+    //        if (this.Count == 0) return false;
+
+    //        List<bool> limits = new List<bool>();
+    //        foreach (var queuer in this) limits.Add(queuer.Value.RateLimited);
+
+    //        List<bool> limited = limits.FindAll((e) => e == true);
+    //        return limits.Count == limited.Count;
+    //    }
+
+    //    public RequestQueuer Get(string route)
+    //    {
+    //        var value = this.Find((e) => e.Key == route).Value;
+    //        return value ?? null;
+    //    }
+
+    //    public void Set(string route, RequestQueuer queue)
+    //    {
+    //        KeyValuePair<string, RequestQueuer> element = new KeyValuePair<string, RequestQueuer>(route, queue);
+    //        var checkedValue = Find((obj) => obj.Key == route);
+    //        bool checkContains = checkedValue.Value != null;
+
+    //        if (checkContains) {
+    //            this.Remove(checkedValue);
+    //            this.Add(element);
+    //        }
+    //        else this.Add(element);
+    //    }
+
+    //    // Reseting the queuer handler and destroying all key queuers
+    //    public void Reset()
+    //    {
+    //        foreach (var avaibleQueuer in this)
+    //        {
+    //            var queuer = avaibleQueuer.Value ?? null;
+    //            if (queuer == null || string.IsNullOrEmpty(avaibleQueuer.Key)) continue;
+
+    //            queuer.Zero(); // Detroying
+    //            this.Remove(avaibleQueuer); // Removing
+    //        }
+    //    }
+    //}
+     */
+
+
+
+
+    /*// tods przepisac request module na HttpRequestMessage (na handlery)
+
+    [Obsolete]
+    public class RestRequestInvoker
+    {
+        public RESTManager Rest { get; set; }
+        public RequestOptions RestOptions { get; set; }
+        public RestRequest Request { get; set; }
+
+        public string RequestUri { get; set; }
+
+        public RestRequestInvoker(RESTManager rest, string url, RequestOptions options)
+        {
+            this.Rest = rest;
+            this.RestOptions = options;
+            this.RequestUri = url;
+
+            this.Request = new RestRequest(rest, url, null, options);
+        }
+
+        public void GetAsync()
+        {
+            Request.RawMethod = "GET";
+            Request.Send();
+        }
+    }
+
+     */
+
+    /*
+     * //Installation installation = (await airly.Installations.Nearest(rybnik))[0];
+            //airly.Measurements.Location(installation.locationId, true).Result.current.fromDateTime.ToString();
+
+            //string json = JsonParser.SerializeJSON<Installation>(installation);
+
+            //Debug.WriteLine(json.ToString());
+            //throw new Exception(json.ToString());
+
+            //List<Installation> installations = await airly.Installations.Nearest(rybnik, 100, 10);
+            //List<Measurement> measurements = new List<Measurement>();
+
+            //foreach (var installation in installations)
+            //{
+            //    Measurement measurement = await airly.Measurements.Installation(installation.id);
+            //    Debug.WriteLine(installation.id);
+            //    measurements.Add(measurement);
+            //}
+
+            //List<double> caqis = new List<double>();
+            //foreach (var measurement in measurements)
+            //{
+            //    double caqi = GetMeasurmentAirlyCAQI(measurement);
+            //    Debug.WriteLine(caqi);
+            //    caqis.Add(caqi);
+            //}
+            //double avarge = caqis.Average();
+            //throw new Exception(avarge.ToString());
+
+            //Measurement value = await airly.Measurements.Nearest(rybnik);
+            //Installation installation = (await airly.Installations.Nearest(rybnik))[0];
+            //Measurement measurement = await airly.Measurements.Installation(installation.id);
+
+            //Measurement measurement = await airly.Measurements.Nearest(rybnik);
+
+            //foreach (var item in measurement.current.indexes)
+            //{
+            //    Debug.WriteLine($"{item.name}     {item.value}");
+            //}
+            //foreach (var item in measurement.current.values)
+            //{
+            //    Debug.WriteLine($"{item.name}     {item.value}");
+            //}
+
+            //double caqi = GetMeasurmentAirlyCAQI(measurement);
+            //throw new Exception(
+                //installation.location.lat + "   " + installation.location.lng +
+                //"  CAQI  " + caqi);
+            //Installation installation = await airly.Installations.Info()
+
+            //double caqi = GetMeasurmentAirlyCAQI(value);
+            //throw new Exception(value.sponsor.logo.ToString());
+            //throw new Exception(caqi.ToString());
+    */
+
+
+
+    // //AirlyResponse airlyResponse = new AirlyResponse(
+    //    convertedJSON,
+    //    response.Headers,
+    //    responseBody,
+    //    DateTime.Now // Only for the raw requests without handlers
+    //)
+    //{ response = response };
+
     /*
      * var json = "[ \"admin\", \"editor\", \"contributor\" ]";
 var result = JsonConvert.DeserializeObject<Whatever<string>>(json);

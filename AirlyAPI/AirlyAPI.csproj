@@ -18,6 +18,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -25,6 +26,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -39,8 +41,6 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\Airly.cs" />
-    <Compile Include="src\AirlyErrors.cs" />
-    <Compile Include="src\Models.cs" />
     <Compile Include="test\unitTests.cs" />
     <Compile Include="src\rest\RequestModule.cs" />
     <Compile Include="src\rest\Managers.cs" />
@@ -49,11 +49,17 @@
     <Compile Include="src\interactions\Meta.cs" />
     <Compile Include="src\interactions\InteractionBase.cs" />
     <Compile Include="src\rest\RequestQueuers.cs" />
-    <Compile Include="src\AirlyConfiguration.cs" />
     <Compile Include="src\utils\Utils.cs" />
     <Compile Include="src\utils\JsonParser.cs" />
     <Compile Include="src\utils\GeoUtil.cs" />
     <Compile Include="src\utils\ArrayUtil.cs" />
+    <Compile Include="test\RewritesTrash.cs" />
+    <Compile Include="src\common\AirlyConfiguration.cs" />
+    <Compile Include="src\common\Models.cs" />
+    <Compile Include="src\rest\RequestProviders.cs" />
+    <Compile Include="src\common\handling\Handlings.cs" />
+    <Compile Include="src\common\handling\Errors.cs" />
+    <Compile Include="src\common\handling\RateLimitInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
@@ -61,9 +67,15 @@
     <Folder Include="src\rest\" />
     <Folder Include="src\interactions\" />
     <Folder Include="src\utils\" />
+    <Folder Include="src\common\" />
+    <Folder Include=".github\workflows\" />
+    <Folder Include="src\common\handling\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="README.md" />
+    <None Include=".github\CONTRIBUTING.md" />
+    <None Include=".github\workflows\Travis.yml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

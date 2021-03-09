@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Globalization;
 
 using Newtonsoft.Json.Linq;
+using AirlyAPI.Handling;
 
 namespace AirlyAPI.Utilities
 {
@@ -16,7 +17,7 @@ namespace AirlyAPI.Utilities
         public string XLimitName = "X-RateLimit-Limit-day";
 
         // Checking if the ratelimit is reached
-        private bool getRateLimitBase(string XRemaining, string XLimit)
+        private bool GetRateLimitBase(string XRemaining, string XLimit)
         {
             int rateLimitRemaining;
             int rateLimitAll;
@@ -45,73 +46,110 @@ namespace AirlyAPI.Utilities
         }
 
         // Getting and calculating the ratelimits for the headers
-        public bool getRatelimit(HttpResponseHeaders headers)
+        public bool GetRatelimit(HttpResponseHeaders headers)
         {
-            string XRemaining = getHeader(headers, this.XRemainingName);
-            string XLimit = getHeader(headers, this.XLimitName);
+            string XRemaining = GetHeader(headers, this.XRemainingName);
+            string XLimit = GetHeader(headers, this.XLimitName);
 
-            object rateLimit = getRateLimitBase(XRemaining, XLimit);
+            object rateLimit = GetRateLimitBase(XRemaining, XLimit);
             return (bool)rateLimit;
         }
 
         // The method to get the ratlimits from the response message
-        public bool getRatelimit(AirlyResponse response)
+        public bool GetRatelimit(AirlyResponse response)
         {
             HttpResponseHeaders headers = response.headers;
 
-            string XRemaining = getHeader(headers, this.XRemainingName);
-            string XLimit = getHeader(headers, this.XLimitName);
+            string XRemaining = GetHeader(headers, this.XRemainingName);
+            string XLimit = GetHeader(headers, this.XLimitName);
 
-            object rateLimit = getRateLimitBase(XRemaining, XLimit);
+            object rateLimit = GetRateLimitBase(XRemaining, XLimit);
             return (bool)rateLimit;
         }
 
+        public int? CalculateRateLimit(int? XRemaining, int? XLimit)
+        {
+            if (XRemaining == null || XLimit == null) return null;
+
+            int? calculated = XLimit - (XLimit - XRemaining);
+            return calculated;
+        }
+
         // Calculating the ratelimits diffrents
-        public int? calculateRateLimit(HttpResponseHeaders responseHeaders)
+        public int? CalculateRateLimit(HttpResponseHeaders responseHeaders)
         {
             var headers = responseHeaders;
 
-            string XRemaining = getHeader(headers, this.XRemainingName);
-            string XLimit = getHeader(headers, this.XLimitName);
+            string XRemaining = GetHeader(headers, this.XRemainingName);
+            string XLimit = GetHeader(headers, this.XLimitName);
 
             if (XRemaining == null || XLimit == null) return null;
 
             int cnv1 = Convert.ToInt32(XRemaining);
             int cnv2 = Convert.ToInt32(XLimit);
 
-            int calculated = cnv2 - (cnv2 - cnv1);
-            return calculated;
+            return CalculateRateLimit(cnv1, cnv2);
         }
-        public int? calculateRateLimit(AirlyResponse res) => calculateRateLimit(res.headers);
+        public int? CalculateRateLimit(AirlyResponse res) => CalculateRateLimit(res.headers);
 
-        private string getHeaderBase(IEnumerable<string> values) => this.GetFirstEnumarable(values);
+        private string GetHeaderBase(IEnumerable<string> values) => this.GetFirstEnumarable(values);
 
         // For response headers
         // Getting the header first value because the headers can have multiple values (Airly API always return one value headers)
-        public string getHeader(HttpResponseHeaders headers, string key)
+        public string GetHeader(HttpHeaders headers, string key)
         {
             string values = null;
             try
             {
-                values = getHeaderBase(headers.GetValues(key));
+                values = GetHeaderBase(headers.GetValues(key));
             }
             catch (Exception)
             { }
             return values;
         }
 
-        // For request headers
-        // 
-        public string getHeader(HttpRequestHeaders headers, string key)
+        public static bool IsAggregated(Exception ex)
         {
-            string values = null;
             try
             {
-               values = getHeaderBase(headers.GetValues(key));
+                _ = (AggregateException)ex;
             }
-            catch(Exception)
-            { }
-            return values;
+            catch (InvalidCastException)
+            {
+                return false;
+            }
+            return true;
+        }
+        public static string GetVersion(int version, bool slash) => $"{(slash ? "/" : string.Empty)}v{version}{(slash ? "/" : string.Empty)}";
+        public static string GetInners(AggregateException ag)
+        {
+            List<string> Messages = new List<string>();
+            foreach (var exception in ag.InnerExceptions) Messages.Add(exception.Message);
+
+            return ArrayUtil.JoinList(Messages,"\n");
+        }
+        public static void ValidateKey(string key)
+        {
+            // Simple airly key validation (eg. key of whitespaces)
+            string toValidate = key;
+
+            AirlyError invalidToken = new AirlyError("Provided airly api key is invalid");
+            invalidToken.Data.Add("Token", false);
+
+            string validatedKey = toValidate.Replace(" ", "").Trim().Normalize();
+
+            if (string.IsNullOrEmpty(toValidate) || string.IsNullOrEmpty(validatedKey) || validatedKey != toValidate) throw invalidToken;
+            else return;
+        }
+
+        public static string GetRoute(string url)
+        {
+            if (url == null) return null;
+            string[] routes = url.Split('/');
+
+            if (routes.Length == 0 || (routes.Length == 1 && routes[0] == url)) return url;
+
+            return routes[0].ToString();
         }
 
         // Simple coping the one dictonary to another without the overwriting
@@ -130,16 +168,6 @@ namespace AirlyAPI.Utilities
                 ArrayUtil.ArrayPush(ref jObjects, (JObject)token);
             }
             return jObjects;
-        }
-
-        public static string GetRoute(string url)
-        {
-            if (url == null) return null;
-            string[] routes = url.Split('/');
-
-            if (routes.Length == 0 || (routes.Length == 1 && routes[0] == url)) return url;
-
-            return routes[0].ToString(); 
         }
 
         // Formmatting web query

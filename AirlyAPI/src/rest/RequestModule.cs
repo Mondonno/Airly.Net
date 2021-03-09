@@ -2,274 +2,230 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Net.Http.Headers;
-using Newtonsoft.Json.Linq;
-using System.Linq;
-using System.Diagnostics;
+using System.Collections.Generic;
+using System.Threading;
+using System.Security.Permissions;
+using System.Text;
 
+using AirlyAPI.Handling;
 using AirlyAPI.Utilities;
+using System.Runtime.ExceptionServices;
+using System.Diagnostics;
 
 namespace AirlyAPI.Rest
 {
-    [DnsPermission(System.Security.Permissions.SecurityAction.Assert)]
-    [WebPermission(System.Security.Permissions.SecurityAction.Assert)]
-    /// <summary>Raw request module for Airly API Wrapper *(Do not use this in yours project, just check API manager)</summary>
-    public class RequestModule
+    // todo przepisac RestRequest na reuseable (mozna wyslac kilka tych samych requestów przez jedna klase RestRequest) czyli inaczej zrobic HttpClient constantem a HttpRequest Message zdjąć z constanta
+    // todo zfixowac SendAndHandle() poniewaz robi buga jesli wywola sie asynchronicznie i rzuci w srodku exceptionem
+    // todo zmienic usage z DeafultRestRequest na RestRequest który implementuje RestRequestProvider'a który wrapuje klase deafult rest request
+    
+    // The pack of all required methods to interact with API
+    public class RestRequest : RestRequestProvider
     {
-        private int Version { get; set; } = 2;
-        private string ApiDomain { get; set; }
-
-        private string LanguageCode { get; set; } = "en"; // Deafult language code is the english
-
-        private Utils ModuleUtil { get; set; } = new Utils();
-        private AirlyConfiguration Configuration { get; set; } // The airly http configuration
-
-        private RequestOptions Options { get; set; }
-
-        private string ApiUrl { get; set; }
-        private string AuthorizationHeaderName { get; set; } = "apikey";
-
-        public object DeafultHeaders { get; set; }
-        public string method, endPoint, path;
-
-        /// <summary>Raw request module for Airly API Wrapper <i>(Do not use this in yours project, just check API manager)</i></summary>
-        public RequestModule(RESTManager rest, string endPoint, string method, RequestOptions options)
+        public RestRequest(RESTManager rest, string end, string[][] query) : base(rest, end, query) { }
+        public RestRequest(RESTManager rest, string end, string[][] query, bool versioned) : this(rest, end, query)
         {
-            AirlyConfiguration rawConfig = rest.Airly.Configuration; PatchConfiguration(ref rawConfig);
-
-            this.Configuration = rawConfig;
-            this.Options = options;
-            this.method = method;
-            this.endPoint = endPoint;
-
-            string[] agent = { "User-Agent", this.Configuration.Agent };
-            string[] connection = { "Connection", "keep-alive" };
-            string[] cacheControl = { "Cache-Control", "no-cache" };
-            string[] encoding = { "Accept-Encoding", "gzip" };
-
-            string jsonResponses = "application/json";
-            string[] accept = { "Accept", jsonResponses };
-            string[] contentType = { "Content-Type", jsonResponses };
-
-            DeafultHeaders = new string[][] {
-                agent, connection,
-                cacheControl, encoding,
-                accept, contentType
-            };
-
-            string queryString = "";
-            string finalQuery = "";
-
-            if (options.query != null && options.query.Length > 0)
-            {
-                for (int i = 0; i < options.query.Length; i++)
-                {
-                    string key = options.query[i][0];
-                    string value = options.query[i][1];
-
-                    queryString += string.Format("{0}={1}&", key, value);
-                }
-
-                queryString = queryString.EndsWith("&") ? queryString.Remove(queryString.Length - 1, 1) : queryString;
-                finalQuery = ModuleUtil.FormatQuery(queryString);
-            }
-
-            string Query = finalQuery;
-
-            // Eg. Retruns from https://example.com/?test=Absurdal_test --> /?test=Absurdal_test
-            this.path = $"{endPoint}{(!string.IsNullOrEmpty(Query) ? Query : "")}";
+            base.Request.RestOptions.Versioned = versioned;
+        }
+        public RestRequest(RESTManager rest, string end, RequestOptions options) : base(rest, end)
+        {
+            base.Request.RestOptions = options;
         }
 
-        /// <summary>
-        /// Making a request to the Airly API.
-        /// </summary>
-        /// <param name="customHeaders">The custom headers for the request</param>
-        /// <param name="body">Obosolete (actually the requester supports al lot of methods but only streaming the text (json))</param>
-        /// <returns></returns>
-        public async Task<AirlyResponse> MakeRequest(string[][] customHeaders = null, string body = null)
+        public async Task<RawResponse> InvokeRequest(bool handle = true)
         {
-            if(customHeaders == null) customHeaders = new string[0][];
+            return await base.SendAsync(handle);
+        }
+        public async Task<T> InvokeRequest<T>(bool handle = true)
+        {
+            return await base.SendAsync<T>(handle);
+        }
+    }
 
-            // Initializing the request headers used in initializing the HttpClient
-            string[][] requestHeaders;
+    public class RestHttpHandler : HttpClientHandler
+    {
+        public RestHttpHandler() : base()
+        {
+            AutomaticDecompression = DecompressionMethods.GZip;
+            AllowAutoRedirect = true;
+            UseCookies = false;
+            UseProxy = false;
+        }
+    }
 
-            // The request response timeout
-            double restTimeout = this.Configuration.RestRequestTimeout;
-            double timeout = restTimeout == 0 ? 60000 : restTimeout;
+    interface IRequest
+    {
+        void SetKey(string key);
+        void SetLanguage(AirlyLanguage language);
 
-            string[] apiKey = { AuthorizationHeaderName, "key" };
-            string[] contentType = { "Content-Type", "application/json" };
-            string[] language = { "Accept-Language", LanguageCode ?? "en" };
-            // Accept Languages:
-            // * pl
-            // * en
+        Task<RawResponse> Send();
 
-            ArrayUtil.ArrayPush(ref customHeaders, language);
-            if (!string.IsNullOrEmpty(body)) ArrayUtil.ArrayPush(ref customHeaders, contentType);
+        RESTManager Rest { get; set; }
+    }
 
-            // when the custom headers exists we assigning the on array to another
-            string[][] copiedDeafultHeaders = (string[][]) ((string[][]) DeafultHeaders).Clone();
-            string[] customKey = Array.Find(customHeaders, (key) => key[0] == AuthorizationHeaderName);
+    [DnsPermission(SecurityAction.Assert)]
+    [WebPermission(SecurityAction.Assert)]
+    public class DeafultRestRequest : IRequest, IDisposable
+    {
+        public RESTManager Rest { get; set; }
+        public HttpMethod Method { get; set; }
+        public RequestOptions RestOptions { get; set; }
+        public AirlyConfiguration RestConfiguration { get; set; }
+        public HttpRequestMessage RequestMessage { get; set; }
+        public Utils Util { get; set; } = new Utils();
 
-            if (customKey != null && !string.IsNullOrEmpty(customKey[1])) apiKey[1] = string.Format("{0}", customKey[1]);
-            if ((customHeaders.Length - 1) >= 0) {
-                customHeaders = ArrayUtil.AssignArray(copiedDeafultHeaders, customHeaders);
-            }
-            else customHeaders = copiedDeafultHeaders;
-            requestHeaders = customHeaders;
+        public Dictionary<string, string> DeafultHeaders = new Dictionary<string, string>()
+        {
+            { "Accept", "*/*" },
+            { "Connection", "keep-alive" },
+            { "Cache-Control", "no-cache" },
+            { "Accept-Encoding", "gzip" }
+        };
 
-            string RequestWebUrl = ApiUrl + path;
-            
-            Uri RequestUri = new Uri(RequestWebUrl);
-            AuthenticationHeaderValue airlyAuthentication = new AuthenticationHeaderValue(apiKey[0], apiKey[1]); // todo wywalic to poniewaz autoryzacja jest w headerach :)
-
-            HttpRequestMessage RequestParams = new HttpRequestMessage();
-            HttpClient RequestClient = new HttpClient();
-
-            SetHeaders(ref RequestClient, requestHeaders);
-
-            RequestClient.CancelPendingRequests(); // Prevenitng infinity thread loop (if user does not await and one request must kill another)
-            RequestParams.Method = GetMethod(this.method);
-
-            RequestClient.BaseAddress = RequestUri;
-            RequestClient.DefaultRequestHeaders.Authorization = airlyAuthentication;
-
-            RequestClient.Timeout = TimeSpan.FromMilliseconds(timeout);
-
-            HttpResponseMessage response;
-            try 
+        public Uri RequestUri { get => RequestMessage.RequestUri; }
+        public string RawMethod
+        {
+            set
             {
-                 response = await RequestClient.GetAsync(RequestUri);
+                Method = GetMethod(value);
+            }
+            get
+            {
+                return Method.Method;
+            }
+        }
+
+        protected bool _isDisposed;
+        public string EndPoint { get; set; }
+
+        public DeafultRestRequest(RESTManager rest, string end, string method, RequestOptions options)
+        {
+            this.Rest = rest;
+            this.RestConfiguration = rest.Airly.Configuration;
+            this.EndPoint = end;
+            this.RestOptions = options;
+            this.Method = !string.IsNullOrEmpty(method) ? GetMethod(method) : GetMethod("GET");
+
+            DeafultHeaders.Add("User-Agent", this.RestConfiguration.Agent ?? "Airly API C#");
+
+            string url =
+                this.RestConfiguration.Protocol + "://" +
+                this.RestConfiguration.ApiDomain + Utils.GetVersion(this.RestConfiguration.Version, true) +
+                this.EndPoint;
+
+            bool queryExists = options.Query != null && options.Query.Length != 0;
+            string query = string.Empty;
+
+            if (queryExists)
+            {
+                foreach (var segment in options.Query)
+                    query += string.Format("{0}={1}&", segment[0], segment[1]);
+
+                query = query.EndsWith("&") ? query.Remove(query.Length - 1, 1) : query;
+                query = Util.FormatQuery(query);
+            }
+
+            url = !string.IsNullOrEmpty(query) ? url + query : url;
+
+            RequestMessage = new HttpRequestMessage(Method, new Uri(url));
+
+            MergeHeaders(DeafultHeaders);
+        }
+
+        public async Task<RawResponse> Send()
+        {
+            double restTimeout = this.RestConfiguration.RestRequestTimeout;
+            double requestTimeout = restTimeout == 0 ? 60000 : restTimeout;
+
+            RestHttpHandler handler = new RestHttpHandler();
+            HttpClient httpClient = new HttpClient(handler, true) { Timeout = TimeSpan.FromMilliseconds(requestTimeout) };
+
+            if(this.RestOptions.Body != null)
+            {
+                StringContent content = new StringContent(this.RestOptions.Body.ToString(), Encoding.UTF8, "application/json");
+                RequestMessage.Content = content;
+            }
+
+            HttpResponseMessage httpResponse = await httpClient.SendAsync(RequestMessage, HttpCompletionOption.ResponseContentRead, CancellationToken.None); // Error (capture)
+            string httpContent = await httpResponse.Content.ReadAsStringAsync();
+            
+            httpClient.Dispose();
+            httpResponse.Dispose();
+
+            RequestMessage.Dispose();
+            Refresh();
+
+            _ = this.RestOptions.Body != null ? RequestMessage.Content = null : null;
+
+            RawResponse restResponse = new RawResponse(httpResponse, httpContent);
+
+            return restResponse;
+        }
+        public async Task<RawResponse> SendAndHandle()
+        {
+            try
+            {
+                return await Send();
+            }
+            catch (AggregateException ag)
+            {
+                throw new Exception($"New agregated error (potential thread lock)\n{Utils.GetInners(ag)}");
             }
             catch (Exception ex)
             {
-                HttpError httpError = new HttpError(string.Format("{0}\n{1}", RequestWebUrl, ex.Message.ToString()));
-                httpError.Data.Add("Connected", false);
-
-                throw httpError;
+                throw new HttpError($"{this.RequestMessage.RequestUri}\n{ex.Message}");
             }
-
-            string responseBody = await response.Content.ReadAsStringAsync();
-            Debug.WriteLine(responseBody.ToString());
-
-            RequestClient.Dispose();
-
-            JToken convertedJSON = JsonParser.ParseJson(responseBody);
-
-            AirlyResponse airlyResponse = new AirlyResponse(
-                convertedJSON,
-                response.Headers,
-                responseBody,
-                DateTime.Now // Only for the raw requests without handlers
-            )
-            { response = response };
-            response.Dispose();
-
-            return airlyResponse;
         }
 
-        public void SetKey(string key)
+        public void Refresh() {
+            RequestMessage = new HttpRequestMessage(RequestMessage.Method, RequestMessage.RequestUri);
+            MergeHeaders(DeafultHeaders);
+        }
+        public void AddHeader(string key, string value) => RequestMessage.Headers.Add(key, value);
+        public void RemoveHeader(string key) => RequestMessage.Headers.Remove(key);
+        public void MergeHeaders(Dictionary<string, string> headers)
         {
-            if (!this.Options.auth) return;
-
-            string[][] copiedHeaders = (string[][]) ((string[][]) DeafultHeaders).Clone();
-            string[] apiKey = { AuthorizationHeaderName, key };
-
-            ArrayUtil.ArrayPush(ref copiedHeaders, apiKey);
-            DeafultHeaders = copiedHeaders;
-        }
-        public void SetKey(RESTManager rest) { if (this.Options.auth != false) SetKey(rest.Auth); }
-        
-        public void SetLanguage(AirlyLanguage language)
-        { 
-            string actualCode = Enum.GetName(language.GetType(), language);
-
-            if(string.IsNullOrEmpty(actualCode))
-                return;
-
-            actualCode = actualCode.ToLower();
-            this.LanguageCode = actualCode;
-        }
-
-        public void SetLanguage(string language) {
-            AirlyLanguage instance = AirlyLanguage.en;
-            string[] langNames = Enum.GetNames(instance.GetType());
-
-            string[] correctLangs = new string[0];
-            foreach (var lang in langNames)
+            foreach (var header in headers)
             {
-                string correctedLang = lang.TrimEnd(' ').TrimStart(' ').ToLower();
-                ArrayUtil.ArrayPush(ref correctLangs, correctedLang);
+                RemoveHeader(header.Key);
+                AddHeader(header.Key, header.Value);
             }
-
-            string correctLanguage = language.TrimStart(' ').TrimEnd(' ').Replace(" ", "").ToLower();
-            bool langCheck = correctLangs.Contains(correctLanguage);
-            if (!langCheck) throw new AirlyError(string.Format("Provided language \"{0}\" is invalid", language));
-
-            this.LanguageCode = correctLanguage;
         }
 
-        // Initializing the deafult language 
-        public void SetLanguage() => SetLanguage(AirlyLanguage.en);
-
-        private HttpMethod GetMethod(string Method)
+        public HttpMethod GetMethod(string method)
         {
-            HttpMethod httpMethod;
+            HttpMethod httpMethod = HttpMethod.Get;
+            string validatedMethod = method.Trim().Normalize().Replace(" ", "").ToUpper();
+
             try
             {
-                httpMethod = new HttpMethod(Method.Replace(" ", "").ToUpper());
+                httpMethod = new HttpMethod(validatedMethod);
             }
-            catch (Exception)
-            { httpMethod = HttpMethod.Get; } // Using GET if the method in string is invalid
+            catch (Exception) { }
 
             return httpMethod;
         }
 
-        private void PatchConfiguration(ref AirlyConfiguration config)
+        public void SetKey(string key)
         {
-            // string.Format("https://{0}/v{1}/", ApiDomain, Version)
-            AirlyConfiguration configuration = config;
+            if (!RestOptions.Auth) return;
 
-            this.Version = configuration.Version;
-            this.ApiDomain = configuration.ApiDomain;
-            this.ApiUrl = string.Format("{0}://{1}/v{2}/", configuration.Protocol, ApiDomain, Version);
-
-            config = configuration;
+            RemoveHeader("apikey");
+            AddHeader("apikey", key);
         }
 
-        public void SetHeader(ref HttpClient client, string[] header)
+        public void SetLanguage(AirlyLanguage language) => SetLanguage(language.ToString().ToLower());
+        public void SetLanguage(string language)
         {
-            string name = ModuleUtil.ReplaceDashUpper(header[0]);
-            string value = header[1];
-
-            bool check = client.DefaultRequestHeaders.Contains(name);
-            if (check) client.DefaultRequestHeaders.Remove(name);
-
-            client.DefaultRequestHeaders.Add(name, value);
+            RemoveHeader("Accept-Language");
+            AddHeader("Accept-Language", language);
         }
 
-        private void SetHeaders(ref HttpClient client, string[][] headers)
+        public void Dispose()
         {
-            if (headers.Length == 0) throw new Exception("The headers length is 0");
-
-            foreach (var header in headers)
+            if (!_isDisposed)
             {
-                string name = header[0];
-                string value = header[1];
-
-                if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(value)) continue;
-
-                name = ModuleUtil.ReplaceDashUpper(name); // Replacing "Content-Type" to "ContentType"
-
-                bool clientCheck = client.DefaultRequestHeaders.Contains(name);
-                if (clientCheck) client.DefaultRequestHeaders.Remove(name);
-
-                // Adding the headers to provided client
-                if (client != null) client.DefaultRequestHeaders.TryAddWithoutValidation(name, value);
-            }
-            foreach (var item in client.DefaultRequestHeaders)
-            {
-                Debug.WriteLine($"{item.Key}     {ModuleUtil.GetFirstEnumarable(item.Value)}");
+                RequestMessage.Dispose();
+                this._isDisposed = true;
             }
         }
     }
