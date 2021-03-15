@@ -2,32 +2,9 @@
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 
 namespace AirlyAPI.Utilities
 {
-    public class RestResponseParser<T>
-    {
-        public string Json { get; set; }
-        public T Deserializated { get; set; }
-
-        public RestResponseParser(string json)
-        {
-            this.Json = json ?? throw new ArgumentNullException("json");
-            Refresh();
-        }
-
-        public void Refresh() => Deserializated = Parse();
-        private T Parse()
-        {
-            if (Json == null) return default;
-
-            var parsedJson = JsonParser.DeserializeJson<T>(Json);
-            if (parsedJson == null) return default;
-            else return parsedJson;
-        }
-    }
-
     public static class JsonParser
     {
         private static readonly JsonSerializerSettings SerializerSettings = new JsonSerializerSettings()
@@ -99,13 +76,35 @@ namespace AirlyAPI.Utilities
             }
         }
 
+        public static string SerializeJSON(JToken jsonToken) => GetJTokenJson(jsonToken);
         public static string SerializeJSON<T>(T obj)
         {
             JsonSerializerSettings settings = SerializerSettings;
             settings.NullValueHandling = NullValueHandling.Include;
 
-            return JsonConvert.SerializeObject((T)obj, settings);
+            return JsonConvert.SerializeObject(obj, settings);
         }
-        public static string SerializeJSON(JToken jsonToken) => GetJTokenJson(jsonToken);
+    }
+
+    public class RestResponseParser<T>
+    {
+        public string Json { get; set; }
+        public T Deserializated { get; protected set; }
+
+        public RestResponseParser(string json)
+        {
+            Json = json;
+            Refresh();
+        }
+
+        public void Refresh() => Deserializated = Parse();
+        private T Parse()
+        {
+            if (Json == null) return default;
+
+            var parsedJson = JsonParser.DeserializeJson<T>(Json);
+            if (parsedJson == null) return default;
+            else return parsedJson;
+        }
     }
 }

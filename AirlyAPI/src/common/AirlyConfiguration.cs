@@ -13,8 +13,7 @@ namespace AirlyAPI
 
     public sealed class AirlyConfiguration
     {
-        // "Airly-C#-Wrapper"
-        public string Agent { get; set; } = "AirlyAPI C# Wrapper";
+        public string Agent { get; set; } = "Airly.Net";
         public string Protocol { get; set; } = "https";
 
         public double RestRequestTimeout { get; set; } = 60000;

@@ -9,68 +9,31 @@ using System.Text;
 
 using AirlyAPI.Handling;
 using AirlyAPI.Utilities;
-using System.Runtime.ExceptionServices;
-using System.Diagnostics;
+using AirlyAPI.Rest.Typings;
+using AirlyAPI.Handling.Errors;
 
 namespace AirlyAPI.Rest
 {
-    // todo przepisac RestRequest na reuseable (mozna wyslac kilka tych samych requestów przez jedna klase RestRequest) czyli inaczej zrobic HttpClient constantem a HttpRequest Message zdjąć z constanta
-    // todo zfixowac SendAndHandle() poniewaz robi buga jesli wywola sie asynchronicznie i rzuci w srodku exceptionem
-    // todo zmienic usage z DeafultRestRequest na RestRequest który implementuje RestRequestProvider'a który wrapuje klase deafult rest request
-    
-    // The pack of all required methods to interact with API
-    public class RestRequest : RestRequestProvider
-    {
-        public RestRequest(RESTManager rest, string end, string[][] query) : base(rest, end, query) { }
-        public RestRequest(RESTManager rest, string end, string[][] query, bool versioned) : this(rest, end, query)
-        {
-            base.Request.RestOptions.Versioned = versioned;
-        }
-        public RestRequest(RESTManager rest, string end, RequestOptions options) : base(rest, end)
-        {
-            base.Request.RestOptions = options;
-        }
-
-        public async Task<RawResponse> InvokeRequest(bool handle = true)
-        {
-            return await base.SendAsync(handle);
-        }
-        public async Task<T> InvokeRequest<T>(bool handle = true)
-        {
-            return await base.SendAsync<T>(handle);
-        }
-    }
-
     public class RestHttpHandler : HttpClientHandler
     {
-        public RestHttpHandler() : base()
-        {
+        public RestHttpHandler(bool proxy = false, bool cookies = false) : base()
+        { 
             AutomaticDecompression = DecompressionMethods.GZip;
             AllowAutoRedirect = true;
-            UseCookies = false;
-            UseProxy = false;
+            UseCookies = cookies;
+            UseProxy = proxy;
         }
-    }
-
-    interface IRequest
-    {
-        void SetKey(string key);
-        void SetLanguage(AirlyLanguage language);
-
-        Task<RawResponse> Send();
-
-        RESTManager Rest { get; set; }
     }
 
     [DnsPermission(SecurityAction.Assert)]
     [WebPermission(SecurityAction.Assert)]
-    public class DeafultRestRequest : IRequest, IDisposable
+    public class DeafultRestRequest : IRequest, IDisposable, IAirlyAuth
     {
         public RESTManager Rest { get; set; }
         public HttpMethod Method { get; set; }
         public RequestOptions RestOptions { get; set; }
         public AirlyConfiguration RestConfiguration { get; set; }
-        public HttpRequestMessage RequestMessage { get; set; }
+        public HttpClient HttpClient { get; set; }
         public Utils Util { get; set; } = new Utils();
 
         public Dictionary<string, string> DeafultHeaders = new Dictionary<string, string>()
@@ -81,18 +44,16 @@ namespace AirlyAPI.Rest
             { "Accept-Encoding", "gzip" }
         };
 
-        public Uri RequestUri { get => RequestMessage.RequestUri; }
-        public string RawMethod
-        {
-            set
-            {
-                Method = GetMethod(value);
-            }
-            get
-            {
-                return Method.Method;
-            }
+        public Uri RequestUri { get; set; }
+        private string RawUrl {
+            get => RawUrl;
+            set => RequestUri = new Uri(value);
         }
+        public string RawMethod {
+            set => Method = GetMethod(value);
+            get => Method.Method;
+        }
+        public IEnumerable<KeyValuePair<string, IEnumerable<string>>> Headers { get => HttpClient.DefaultRequestHeaders; }
 
         protected bool _isDisposed;
         public string EndPoint { get; set; }
@@ -125,42 +86,39 @@ namespace AirlyAPI.Rest
             }
 
             url = !string.IsNullOrEmpty(query) ? url + query : url;
+            RawUrl = url;
 
-            RequestMessage = new HttpRequestMessage(Method, new Uri(url));
+            RestHttpHandler restHttpHandler = new RestHttpHandler();
+            HttpClient = new HttpClient(restHttpHandler, true);
 
             MergeHeaders(DeafultHeaders);
         }
 
-        public async Task<RawResponse> Send()
+        public async Task<RawRestResponse> Send()
         {
             double restTimeout = this.RestConfiguration.RestRequestTimeout;
             double requestTimeout = restTimeout == 0 ? 60000 : restTimeout;
 
-            RestHttpHandler handler = new RestHttpHandler();
-            HttpClient httpClient = new HttpClient(handler, true) { Timeout = TimeSpan.FromMilliseconds(requestTimeout) };
+            HttpClient.Timeout = TimeSpan.FromMilliseconds(requestTimeout);
 
-            if(this.RestOptions.Body != null)
+            HttpRequestMessage RequestMessage = new(Method, RequestUri);
+
+            if(RestOptions.Body != null)
             {
-                StringContent content = new StringContent(this.RestOptions.Body.ToString(), Encoding.UTF8, "application/json");
+                StringContent content = new StringContent(RestOptions.Body.ToString(), Encoding.UTF8, "application/json");
                 RequestMessage.Content = content;
             }
 
-            HttpResponseMessage httpResponse = await httpClient.SendAsync(RequestMessage, HttpCompletionOption.ResponseContentRead, CancellationToken.None); // Error (capture)
+            HttpResponseMessage httpResponse = await HttpClient.SendAsync(RequestMessage, HttpCompletionOption.ResponseContentRead, CancellationToken.None); // Error (capture)
             string httpContent = await httpResponse.Content.ReadAsStringAsync();
             
-            httpClient.Dispose();
             httpResponse.Dispose();
-
             RequestMessage.Dispose();
-            Refresh();
 
-            _ = this.RestOptions.Body != null ? RequestMessage.Content = null : null;
-
-            RawResponse restResponse = new RawResponse(httpResponse, httpContent);
-
+            RawRestResponse restResponse = new(httpResponse, httpContent);
             return restResponse;
         }
-        public async Task<RawResponse> SendAndHandle()
+        public async Task<RawRestResponse> SendAndHandle()
         {
             try
             {
@@ -172,16 +130,12 @@ namespace AirlyAPI.Rest
             }
             catch (Exception ex)
             {
-                throw new HttpError($"{this.RequestMessage.RequestUri}\n{ex.Message}");
+                throw new HttpError($"{RequestUri}\n{ex.Message}");
             }
         }
 
-        public void Refresh() {
-            RequestMessage = new HttpRequestMessage(RequestMessage.Method, RequestMessage.RequestUri);
-            MergeHeaders(DeafultHeaders);
-        }
-        public void AddHeader(string key, string value) => RequestMessage.Headers.Add(key, value);
-        public void RemoveHeader(string key) => RequestMessage.Headers.Remove(key);
+        public void AddHeader(string key, string value) => HttpClient.DefaultRequestHeaders.Add(key, value);
+        public void RemoveHeader(string key) => HttpClient.DefaultRequestHeaders.Remove(key);
         public void MergeHeaders(Dictionary<string, string> headers)
         {
             foreach (var header in headers)
@@ -224,7 +178,7 @@ namespace AirlyAPI.Rest
         {
             if (!_isDisposed)
             {
-                RequestMessage.Dispose();
+                HttpClient.Dispose();
                 this._isDisposed = true;
             }
         }

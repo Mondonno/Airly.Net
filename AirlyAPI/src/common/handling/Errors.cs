@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace AirlyAPI.Handling
+namespace AirlyAPI.Handling.Errors
 {
     [Serializable]
     public class BaseError : Exception
@@ -22,9 +22,12 @@ namespace AirlyAPI.Handling
     {
         public AirlyError(string content) : base(string.Format("The airly get following error.\nMessage: {0}", content)) { }
         public AirlyError(HttpError error) : base(string.Format("Airly get the following http error {0}", error.ToString())) { }
-        public AirlyError(string link, string content) : base(string.Format("The airly get following error.\nMessage: {0}", content))
-        {
-            this.HelpLink = link;
-        }
+        public AirlyError(string link, string content) : base(string.Format("The airly get following error.\nMessage: {0}", content)) => HelpLink = link;
+    }
+
+    public class InvalidApiKeyError : BaseError
+    {
+        public InvalidApiKeyError(string message) : base(string.Format("The provided Api Key is invalid\n{0}", message)) => Data.Add("Token", false);
+        public InvalidApiKeyError() : this(string.Empty) { }
     }
 }

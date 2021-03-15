@@ -4,10 +4,10 @@ namespace AirlyAPI.Utilities
 {
     public static class GeoUtil
     {
-        private static double ToRadians(double degrees) => (degrees / 360) * (2 * Math.PI);
-        private static double ToDegrees(double radians) => (radians / (2 * Math.PI)) * 360;
+        private static double ToRadians(double degrees) => degrees / 360 * (2 * Math.PI);
+        private static double ToDegrees(double radians) => radians / (2 * Math.PI) * 360;
 
-        public static double GetMidpoint(double pointOne, double pointTwo) => (Math.Min(pointOne, pointTwo)) + (Math.Abs(pointOne - pointTwo) / 2);
+        public static double GetMidpoint(double pointOne, double pointTwo) => Math.Min(pointOne, pointTwo) + (Math.Abs(pointOne - pointTwo) / 2);
         public static bool Contains(double point, double begin, double end) => (point >= Math.Min(begin, end)) && (point <= Math.Max(begin, end));
         public static double GreatCircleDistanceInKm(Location pointOne, Location pointTwo)
         {
@@ -37,8 +37,8 @@ namespace AirlyAPI.Utilities
 
         public static double GetKmInArea(LocationArea area)
         {
-            Location sw = area.sw;
-            Location ne = area.ne;
+            Location sw = area.Sw;
+            Location ne = area.Ne;
             Location barycenter = area.GetBarycenter();
 
             double km = Math.Max(

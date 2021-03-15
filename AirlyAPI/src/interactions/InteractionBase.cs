@@ -1,24 +1,20 @@
-﻿using System;
-using System.Threading.Tasks;
-
-using AirlyAPI.Rest;
+﻿using AirlyAPI.Rest;
 
 namespace AirlyAPI.Interactions
 {
-    public interface IBaseInterface { }
-
-    public class InteractionBase : IBaseInterface
+    public class InteractionBase
     {
         private RESTManager Rest { get; set; }
-        protected Airly Airly { get; set; }
 
-        protected string Domain { get => this.Airly.Configuration.Domain; }
-        protected async Task<T> Api<T>(string end, dynamic query) where T : class => await Rest.Api<T>(end, query);
+        protected Airly Airly { get; private set; }
+        protected RestApiClient Api { get; private set; }
+        protected string Domain { get => Airly.Configuration.Domain; }
 
         public InteractionBase(Airly airly)
         {
-            this.Airly = airly;
-            this.Rest = airly.Rest;
+            Airly = airly;
+            Rest = airly.Rest;
+            Api = new RestApiClient(Rest);
         }
     }
 }

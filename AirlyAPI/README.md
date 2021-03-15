@@ -2,7 +2,7 @@
 
 Unoffical powerfull and fast .NET API wrapper for [**Airly**](https://developer.airly.org/docs)
 
-- Async based
+- Async based 
 - 100% converage with the Airly API
 - Fully safe and easy to use
 - No more than one request per invoked method*
@@ -19,10 +19,11 @@ Airly.Net stable builds are avaible on NugGet.org through the Airly.Net meta pac
 
 # Compiling
 You can compile our library with the following dependencies
-    - Visual Studio
-    - .NET Core SDK
+    - Visual Studio 8.8+
+    - .NET Core SDK 5.0+
 Or via .NET Command line CLI
-    - .NET Core SDK
+    - .NET Core SDK 5.0+
+C# 9.0+ for all combinations
 
 # Example of usage
 ```csharp

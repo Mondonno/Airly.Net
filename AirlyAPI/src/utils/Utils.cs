@@ -4,12 +4,23 @@ using System.Net.Http.Headers;
 using System.Linq;
 using System.Reflection;
 using System.Globalization;
-
 using Newtonsoft.Json.Linq;
-using AirlyAPI.Handling;
+
+using AirlyAPI.Rest.Typings;
+using AirlyAPI.Handling.Errors;
 
 namespace AirlyAPI.Utilities
 {
+    public static class ParamsValidator
+    {
+        public static bool CheckIfNegativeNumber(int number) => number.ToString().StartsWith("-");
+        public static void ThrowIfNegativeNumber(int number)
+        {
+            if (CheckIfNegativeNumber(number))
+                throw new InvalidOperationException("The specified number can not be negative number");
+        }
+    }
+
     public sealed class Utils
     {
         // The ratelimits headers names
@@ -56,9 +67,9 @@ namespace AirlyAPI.Utilities
         }
 
         // The method to get the ratlimits from the response message
-        public bool GetRatelimit(AirlyResponse response)
+        public bool GetRatelimit(RestResponse response)
         {
-            HttpResponseHeaders headers = response.headers;
+            HttpResponseHeaders headers = response.ResponseHeaders;
 
             string XRemaining = GetHeader(headers, this.XRemainingName);
             string XLimit = GetHeader(headers, this.XLimitName);
@@ -76,6 +87,7 @@ namespace AirlyAPI.Utilities
         }
 
         // Calculating the ratelimits diffrents
+        public int? CalculateRateLimit(RestResponse res) => CalculateRateLimit(res.ResponseHeaders);
         public int? CalculateRateLimit(HttpResponseHeaders responseHeaders)
         {
             var headers = responseHeaders;
@@ -90,12 +102,10 @@ namespace AirlyAPI.Utilities
 
             return CalculateRateLimit(cnv1, cnv2);
         }
-        public int? CalculateRateLimit(AirlyResponse res) => CalculateRateLimit(res.headers);
-
-        private string GetHeaderBase(IEnumerable<string> values) => this.GetFirstEnumarable(values);
 
         // For response headers
         // Getting the header first value because the headers can have multiple values (Airly API always return one value headers)
+        private string GetHeaderBase(IEnumerable<string> values) => this.GetFirstEnumarable(values);
         public string GetHeader(HttpHeaders headers, string key)
         {
             string values = null;
@@ -106,50 +116,6 @@ namespace AirlyAPI.Utilities
             catch (Exception)
             { }
             return values;
-        }
-
-        public static bool IsAggregated(Exception ex)
-        {
-            try
-            {
-                _ = (AggregateException)ex;
-            }
-            catch (InvalidCastException)
-            {
-                return false;
-            }
-            return true;
-        }
-        public static string GetVersion(int version, bool slash) => $"{(slash ? "/" : string.Empty)}v{version}{(slash ? "/" : string.Empty)}";
-        public static string GetInners(AggregateException ag)
-        {
-            List<string> Messages = new List<string>();
-            foreach (var exception in ag.InnerExceptions) Messages.Add(exception.Message);
-
-            return ArrayUtil.JoinList(Messages,"\n");
-        }
-        public static void ValidateKey(string key)
-        {
-            // Simple airly key validation (eg. key of whitespaces)
-            string toValidate = key;
-
-            AirlyError invalidToken = new AirlyError("Provided airly api key is invalid");
-            invalidToken.Data.Add("Token", false);
-
-            string validatedKey = toValidate.Replace(" ", "").Trim().Normalize();
-
-            if (string.IsNullOrEmpty(toValidate) || string.IsNullOrEmpty(validatedKey) || validatedKey != toValidate) throw invalidToken;
-            else return;
-        }
-
-        public static string GetRoute(string url)
-        {
-            if (url == null) return null;
-            string[] routes = url.Split('/');
-
-            if (routes.Length == 0 || (routes.Length == 1 && routes[0] == url)) return url;
-
-            return routes[0].ToString();
         }
 
         // Simple coping the one dictonary to another without the overwriting
@@ -183,19 +149,6 @@ namespace AirlyAPI.Utilities
 
             string Query = constructedQuery.Query;
             return Query;
-        }
-
-        public string ReplaceDashUpper(string str)
-        {
-            string finalString = "";
-            string[] strs = str.Split('-');
-
-            if (strs.Length == 0 || (strs.Length == 1 && (strs[0] == str))) return str;
-            foreach (string nm in strs)
-            {
-                finalString += string.Format("{0}{1}", nm[0].ToString().ToUpper(), nm.Remove(0, 1));
-            }
-            return finalString;
         }
 
         public class NormalizedProperty
@@ -297,6 +250,61 @@ namespace AirlyAPI.Utilities
             PropertyInfo result = type.GetProperty(name);
 
             return result != null;
+        }
+
+        // Static methods
+
+        public static bool IsAggregated(Exception ex)
+        {
+            try
+            {
+                _ = (AggregateException)ex;
+            }
+            catch (InvalidCastException)
+            {
+                return false;
+            }
+            return true;
+        }
+        public static string GetVersion(int version, bool slash) => $"{(slash ? "/" : string.Empty)}v{version}{(slash ? "/" : string.Empty)}";
+        public static string GetInners(AggregateException ag)
+        {
+            List<string> Messages = new List<string>();
+            foreach (var exception in ag.InnerExceptions) Messages.Add(exception.Message);
+
+            return ArrayUtil.JoinList(Messages, "\n");
+        }
+        public static void ValidateKey(string key)
+        {
+            // Simple airly key validation (eg. key of whitespaces)
+            string toValidate = key;
+            string validatedKey = toValidate.Replace(" ", "").Trim().Normalize();
+
+            if (string.IsNullOrEmpty(toValidate) || string.IsNullOrEmpty(validatedKey) || validatedKey != toValidate) throw new InvalidApiKeyError();
+            else return;
+        }
+
+        public static string GetRoute(string url)
+        {
+            if (url == null) return null;
+            string[] routes = url.Split('/');
+
+            if (routes.Length == 0 || (routes.Length == 1 && routes[0] == url)) return url;
+            else return routes[0].ToString();
+        }
+
+        [Obsolete]
+        public string ReplaceDashUpper(string str)
+        {
+            string finalString = "";
+            string[] strs = str.Split('-');
+
+            if (strs.Length == 0 || (strs.Length == 1 && (strs[0] == str))) return str;
+            foreach (string nm in strs)
+            {
+                finalString += string.Format("{0}{1}", nm[0].ToString().ToUpper(), nm.Remove(0, 1));
+            }
+            return finalString;
         }
     }
 }

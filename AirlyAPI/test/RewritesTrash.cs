@@ -7,6 +7,9 @@ using System.Threading;
 using AirlyAPI;
 using AirlyAPI.Rest;
 using AirlyAPI.Utilities;
+using AirlyAPI.Rest.Typings;
+
+
 using System.Net;
 
 namespace Tests

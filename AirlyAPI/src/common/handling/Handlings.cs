@@ -1,130 +1,206 @@
 ﻿using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
+
 using AirlyAPI.Utilities;
+using AirlyAPI.Rest.Typings;
+using AirlyAPI.Handling.Errors;
 
 namespace AirlyAPI.Handling
 {
     public class ErrorModel
     {
-        public ErrorModel(string errorContent, int? succesor, string code)
-        {
-            this.errorContent = errorContent;
-            this.succesor = succesor;
-            this.code = code;
-        }
-
-        public string code { get; set; }
-        public string errorContent { get; set; }
-        public int? succesor { get; set; }
+        public string Code { get; set; }
+        public string ErrorContent { get; set; }
+        public string Succesor { get; set; }
+        public JToken ErrorDetails { get; set; }
     }
 
-    public class Handler
+    public class ErrorInformation
     {
-        public void MakeRateLimitError(string limits, string all, string customMessage) {
+        public bool IsError { get; set; }
+        public JToken[] RawError { get; set; }
+    }
+
+    public class ErrorDeserializer
+    {
+        private Utils util { get; set; } = new();
+        protected HttpResponseMessage HttpResponse { get; set; }
+
+        private string Json { get; set; }
+
+        public ErrorDeserializer(HttpResponseMessage httpResponse,string json)
+        {
+            Json = json;
+            HttpResponse = httpResponse;
+        }
+
+        private string GetSuccesor(HttpHeaders httpHeaders)
+        {
+            var header = util.GetHeader(httpHeaders, "Location");
+            string value = header != null ? header : null;
+            return value;
+        }
+
+        public ErrorModel Deserialize()
+        {
+            var deserializedError = JsonDeserialize(this.Json);
+            if (!deserializedError.IsError) return new()
+            {
+                Code = null,
+                ErrorContent = null,
+                Succesor = null
+            };
+
+            var errorContent = deserializedError.RawError;
+            var errorInformation = new ErrorModel()
+            {
+                Code = (string)errorContent[0],
+                ErrorContent = (string)errorContent[1],
+                ErrorDetails = errorContent[2],
+                Succesor = GetSuccesor(HttpResponse.Headers)
+            };
+
+            return errorInformation;
+        }
+
+        private ErrorInformation JsonDeserialize(string Json)
+        {
+            var parsedResponseJson = JsonParser.ParseJson(Json);
+            var errorCode = parsedResponseJson["errorCode"];
+
+            if (errorCode == null) return new()
+            {
+                IsError = false
+            };
+
+            var jsonErrorTokens = new JToken[] {
+                parsedResponseJson["errorCode"],
+                parsedResponseJson["message"],
+                parsedResponseJson["details"]
+            };
+
+            return new() {
+                IsError = true,
+                RawError = jsonErrorTokens
+            };
+        }
+    }
+
+    public static class RateLimitThrower
+    {
+        public static void MakeRateLimitError(string limits, string all, string customMessage)
+        {
             string errorMessage = $"Your api key get ratelimited for this day/minut/secound by Airly API\n{customMessage ?? ""}\n{all}/{limits}";
             AirlyError error = new AirlyError(errorMessage);
             error.Data.Add("Ratelimited", true);
 
             throw error;
         }
-        public void MakeRateLimitError(RawResponse res, Utils utils, string customMessage = null)
+        public static void MakeRateLimitError(RawRestResponse res, Utils utils, string customMessage = null)
         {
-            var headers = res.response.Headers;
+            var headers = res.HttpResponse.Headers;
 
             string limits = utils.GetHeader(headers, "X-RateLimit-Limit-day");
             string all = utils.CalculateRateLimit(headers).ToString();
 
             MakeRateLimitError(limits, all, customMessage);
         }
+    }
 
-        public bool IsMalformedResponse(string JsonString)
+    public class JsonErrorHandler
+    {
+        public string Json { get; set; }
+        public JsonErrorHandler(string Json) => Refresh(Json);
+
+        public bool IsMalformedResponse()
         {
             try
-            { HandleMalformed(JsonString.ToString()); }
+            { HandleMalformed(); }
             catch (Exception)
-            { return true; } // Malformed
+            { return true; } 
 
-            return false; // Normal response, non malformed
+            return false;
         }
 
-        // Handling the malformed request and throwing a new error
-        private void HandleMalformed(string rawJSON)
+        public void HandleMalformed()
         {
             try
-            { JsonParser.ParseJson(rawJSON); }
+            { JsonParser.ParseJson(Json); }
             catch (Exception ex)
             { throw new HttpError($"[AIRLY] POSSIBLE MALFORMED RESPONSE\n{ex.Message}"); }
         }
 
-        public void HandleError(int code, RawResponse response)
+        public void Refresh(string newJson) => Json = newJson;
+    }
+
+    public class Handler
+    {
+        private string ResponseJson { get; set; }
+
+        private HttpResponseHeaders ResponseHeaders { get; set; }
+        public JsonErrorHandler JsonHandler { get; set; }
+
+        public Handler(HttpResponseMessage responseMessage, string Json = null)
         {
-            var utils = new Utils();
+            ResponseHeaders = responseMessage.Headers;
+            ResponseJson = Json ?? string.Empty;
+            JsonHandler = new(ResponseJson);
+        }
 
-            var headers = response.response.Headers;
-            string rawJSON = response.rawJSON;
+        public void HandleResponseCode() => InternalHandleResponseCode();
+        protected void InternalHandleResponseCode()
+        {
+            int statusCode = 1;
+            string rawJson = ResponseJson;
 
-            if (code > 0 && code <= 200) return; // all ok, returning
+            Utils utils = new();
+            JsonErrorHandler handler = new(rawJson);
+            HttpResponseHeaders headers = ResponseHeaders;
 
-            // MOVED_PERMANETLY response code 301
-            if(code == 301) {
-                HandleMalformed(rawJSON);
+            if (statusCode > 0 && statusCode <= 200) return; // all ok, returning
+            if (statusCode == 301)
+            {
+                handler.HandleMalformed();
                 return;
             }
-            if (code == 404) {
-                HandleMalformed(rawJSON);
+            if (statusCode == 404)
+            {
+                handler.HandleMalformed();
                 return;
-            }; // Passing null on the 404
+            };
 
             int? limit = utils.CalculateRateLimit(headers);
+
             if (limit == 0) throw new AirlyError($"Get ratelimited by airly api\n{utils.CalculateRateLimit(headers)}");
-            if (code > 200 && code <= 300)
+            if (statusCode > 200 && statusCode <= 300)
             {
-                if(code == 301)
+                if (statusCode == 301)
                 {
-                    HandleMalformed(rawJSON);
+                    handler.HandleMalformed();
                     return;
                 }
                 throw new AirlyError("Unknown invalid request/response");
             }
-            if (code >= 400 && code < 500)
+            if (statusCode >= 400 && statusCode < 500)
             {
-                if (code == 401) throw new AirlyError("The provided API Key is not valid");
-                if (code == 429)
+                if (statusCode == 401) throw new AirlyError("The provided API Key is not valid");
+                if (statusCode == 429)
                 {
-                    MakeRateLimitError(utils.GetHeader(headers, "X-RateLimit-Limit-day"), $"{utils.CalculateRateLimit(headers)}", "");
+                    RateLimitThrower.MakeRateLimitError(utils.GetHeader(headers, "X-RateLimit-Limit-day"), $"{utils.CalculateRateLimit(headers)}", "");
                     return;
                 }
-                HandleMalformed(rawJSON);
-                throw new AirlyError($"[AIRLY_INVALID] [{DateTime.Now}] {rawJSON}");
+                handler.HandleMalformed();
+                throw new AirlyError($"[AIRLY_INVALID] [{DateTime.Now}] {rawJson}");
             }
-            if (code >= 500 && code < 600) throw new HttpError("[AIRLY] INTERNAL PROBLEM WITH AIRLY API");
+            if (statusCode >= 500 && statusCode < 600) throw new HttpError("[AIRLY] INTERNAL PROBLEM WITH AIRLY API");
         }
 
-        public ErrorModel GetErrorFromJson(JToken json)
+        public void Refersh(string json)
         {
-            bool errorCheck = json["errorCode"] == null;
-            if (errorCheck) return null;
-
-            JToken[] tokens = {
-                json["errorCode"],
-                json["message"],
-                json["details"]
-            };
-            JObject[] errors = new Utils().ConvertTokens(tokens);
-
-            string code = errors[0].ToString();
-            string message = errors[1].ToString();
-
-            JObject details = errors[2];
-
-            // Checking the succesors of the error
-            int? succesor;
-            if (code == "INSTALLATION_REPLACED" && details["successorId"] != null) succesor = Convert.ToInt32(details["successorId"].ToString());
-            else succesor = null;
-
-            var errorModel = new ErrorModel(message, succesor, code);
-            return errorModel;
+            ResponseJson = json;
+            JsonHandler = new(ResponseJson);
         }
     }
 }

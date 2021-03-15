@@ -4,13 +4,16 @@ using AirlyAPI.Interactions;
 using AirlyAPI.Rest;
 using AirlyAPI.Utilities;
 
-// todo przekodowac na ConfigureAwait(false) poniewaz jak zrobie synchroniczne to rzuca agregatem i robi sie deadlock (3x exception)
-
 namespace AirlyAPI
 {
+    /// <summary>
+    /// The entry point of the Airly API C# client. Providing the methods wich helps programmer interact with them
+    /// </summary>
     public class Airly : IDisposable
     {
-        public string ApiKey { get; private set;  }
+        protected bool _isDisposed;
+
+        public string ApiKey { get; private set; }
         protected internal RESTManager Rest { get; set; }
 
         public Installations Installations { get; private set; }
@@ -19,78 +22,54 @@ namespace AirlyAPI
 
         public AirlyConfiguration Configuration { get; set; } = new AirlyConfiguration();
         public AirlyLanguage Language {
-            get  {
-                return this.Rest.Lang;
-            }
-            set {
-                this.Rest.Lang = value;
-            }
+            get => Rest.Language;
+            set => Rest.Language = value;
         }
-        protected bool _isDisposed;
+        public bool IsRateLimited { get => Rest.RateLimited; }
 
-        // Indicates if the last request got ratelimited
-        public bool IsRateLimited
+        private Airly(string apiKey, AirlyLanguage? language)
         {
-            get {
-                return this.Rest.RateLimited;
-            }
+            ApiKey = apiKey;
+            Initialize(language);
         }
-
-        // Simply creating a new airly with the same configuration but with new rest
-        public Airly(Airly airly)
+        private Airly(string apiKey, AirlyConfiguration configuration, AirlyLanguage? language)
         {
-            this.ApiKey = airly.ApiKey;
-            this.Language = airly.Language;
-            this.Configuration = airly.Configuration;
-
-            Initialize();
+            ApiKey = apiKey;
+            Configuration = configuration;
+            Initialize(language);
         }
 
-        public Airly(Airly airly, AirlyConfiguration configuration)
+        public Airly(Airly airly) : this(airly.ApiKey, airly.Configuration, airly.Language) { }
+        public Airly(Airly airly, AirlyConfiguration configuration) : this(airly.ApiKey, configuration, airly.Language) { }
+
+        public Airly(string apiKey) : this(apiKey, language: null) { }
+        public Airly(string apiKey, AirlyConfiguration configuration) : this(apiKey, configuration, null) { }
+
+        private void Initialize(AirlyLanguage? language = null)
         {
-            this.ApiKey = airly.ApiKey;
-            this.Language = airly.Language;
-            this.Configuration = configuration;
+            Rest = new(this);
+            Installations = new(this);
+            Meta = new(this);
+            Measurements = new(this);
 
-            Initialize();
+            if (language != null) Language = (AirlyLanguage) language;
+
+            Utils.ValidateKey(ApiKey);
         }
 
-        public Airly(string apiKey)
-        {
-           this.ApiKey = apiKey;
-           
-           Initialize();
-        }
-
-        public Airly(string apiKey, AirlyConfiguration configuration)
-        {
-            this.ApiKey = apiKey;
-            this.Configuration = configuration;
-
-            Initialize();
-        }
-
-        private void Initialize()
-        {
-            Rest = new RESTManager(this);
-
-            Installations = new Installations(this);
-            Meta = new Meta(this);
-            Measurements = new Measurements(this);
-
-            Utils.ValidateKey(this.ApiKey);
-        }
-
-        public override string ToString() => ApiKey;
-
+        /// <summary>
+        /// Destroying and Disposing the Airly API client. After this, the client can not be reused
+        /// </summary>
         public void Dispose()
         {
             if (!_isDisposed)
             {
-                this.Rest.Dispose();
-                this.ApiKey = null;
-                this._isDisposed = true;
+                Rest.Dispose();
+                ApiKey = null;
+                _isDisposed = true;
             }
         }
+
+        public override string ToString() => ApiKey;
     }
 }

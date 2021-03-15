@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http;
 
 using AirlyAPI.Utilities;
+using AirlyAPI.Rest.Typings;
 
 namespace AirlyAPI.Handling
 {
@@ -17,12 +18,15 @@ namespace AirlyAPI.Handling
 
         public RateLimitInfo(HttpHeaders httpHeaders)
         {
-            Limit = Convert.ToInt32(Util.GetHeader(httpHeaders, Util.XLimitName) ?? null);
-            Remain = Convert.ToInt32(Util.GetHeader(httpHeaders, Util.XRemainingName) ?? null);
+            string limit = Util.GetHeader(httpHeaders, Util.XLimitName) ?? null;
+            string remain = Util.GetHeader(httpHeaders, Util.XRemainingName) ?? null;
+
+            Limit = limit != null ? Convert.ToInt32(limit) : null;
+            Remain = remain != null ? Convert.ToInt32(remain) : null;
             Diffrence = Util.CalculateRateLimit(Remain, Limit);
             IsRateLimited = Diffrence == 0;
         }
         public RateLimitInfo(HttpResponseMessage response) : this(response.Headers) { }
-        public RateLimitInfo(RawResponse response) : this(response.response.Headers) { }
+        public RateLimitInfo(RawRestResponse response) : this(response.HttpResponse.Headers) { }
     }
 }

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 using AirlyAPI.Utilities;
 
@@ -28,80 +25,54 @@ namespace AirlyAPI
         PJP
     }
 
-    public class RequestOptions
-    {
-        public string[][] Query { get; set; }
-        public string Body { get; set; }
-        public bool Auth { get; set; } = true;
-        public bool Versioned { get; set; } = true; // True by deafult
-    }
+    // <============>
+    //   Locations
+    // <============>
 
-    public class AirlyResponse
-    {
-        public AirlyResponse(dynamic JSON, HttpResponseHeaders headers, string rawJSON, DateTime timestamp) {
-            this.JSON = JSON;
-            this.rawJSON = rawJSON;
-            this.headers = headers;
-            this.timestamp = timestamp;
-        }
-
-        public AirlyResponse(AirlyResponse response, DateTime timestamp)
-        {
-            this.JSON = response.JSON;
-            this.rawJSON = response.rawJSON;
-            this.headers = response.headers;
-            this.timestamp = timestamp;
-        }
-
-        public JToken JSON { get; } // Added JToken no raw json conversion
-        public string rawJSON { get; }
-
-        public DateTime timestamp { get; }
-        public HttpResponseHeaders headers { get; }
-
-        public HttpResponseMessage response { get; set; }
-    }
-
-    // Simple internal used RateLimitInformation object
-    public class RateLimitInformation
-    {
-        public bool IsRateLimited { get; set; } 
-
-        public int? RateLimitDiffrent { get; set; }
-        public int PerDays { get; set; }
-        public int PerGlobal { get; set; }
-    }
-
-    // Raw Response (for RequestModule.cs) with raw (in string) JSON
-    public class RawResponse
-    {
-        public RawResponse(HttpResponseMessage response, string rawJSON)
-        {
-            this.response = response;
-            this.rawJSON = rawJSON;
-        }
-
-        public HttpResponseMessage response { get; set; }
-        public string rawJSON { get; set; }
-    }
-
-    // Area model class
     public class LocationArea
     {
         public LocationArea(Location sw, Location ne)
         {
-            this.sw = sw ?? throw new ArgumentNullException("sw");
-            this.ne = ne ?? throw new ArgumentNullException("ne");
+            Sw = sw ?? throw new ArgumentNullException("sw");
+            Ne = ne ?? throw new ArgumentNullException("ne");
         }
 
-        public Location sw { get; set; }
-        public Location ne { get; set; }
+        public Location Sw { get; set; }
+        public Location Ne { get; set; }
 
-        public bool Contains(Location location) => GeoUtil.Contains(location.Lat, sw.Lat, ne.Lat) && GeoUtil.Contains(location.Lng, sw.Lng, ne.Lng);
+        public bool Contains(Location location) => GeoUtil.Contains(location.Lat, Sw.Lat, Ne.Lat) && GeoUtil.Contains(location.Lng, Sw.Lng, Ne.Lng);
         public Location GetBarycenter() => new Location(
-            GeoUtil.GetMidpoint(sw.Lat, ne.Lat),
-            GeoUtil.GetMidpoint(sw.Lng, ne.Lng)
+            GeoUtil.GetMidpoint(Sw.Lat, Ne.Lat),
+            GeoUtil.GetMidpoint(Sw.Lng, Ne.Lng)
         );
+
+        public static bool operator ==(LocationArea one, LocationArea two) => one.Ne == two.Ne && one.Sw == two.Sw;
+        public static bool operator !=(LocationArea one, LocationArea two) => one.Ne != two.Ne || one.Sw != two.Sw;
+
+        public override bool Equals(object obj) => base.Equals(obj);
+        public override int GetHashCode() => base.GetHashCode();
+        public override string ToString() => $"{Sw.Lat} {Sw.Lng}\n{Ne.Lat} {Ne.Lng}";
+    }
+    public class Location
+    {
+        public Location(double lat, double lng)
+        {
+            Lat = lat;
+            Lng = lng;
+        }
+
+        [JsonProperty("latitude")]
+        public double Lat { get; set; }
+
+        [JsonProperty("longitude")]
+        public double Lng { get; set; }
+
+        public static bool operator ==(Location one, Location two) => one.Lng == two.Lng && one.Lat == two.Lat;
+        public static bool operator !=(Location one, Location two) => one.Lng != two.Lng || one.Lat != two.Lat;
+
+        public override bool Equals(object obj) => base.Equals(obj);
+        public override int GetHashCode() => base.GetHashCode();
+        public override string ToString() => $"{Lat} {Lng}";
     }
 
     /* <<=============================>>
@@ -185,21 +156,6 @@ namespace AirlyAPI
         public double? Value { get; set; }
     }
 
-    public class Location
-    {
-        public Location(double lat, double lng)
-        {
-            this.Lat = lat;
-            this.Lng = lng;
-        }
-
-        [JsonProperty("latitude")]
-        public double Lat { get; set; }
-
-        [JsonProperty("longitude")]
-        public double Lng { get; set; }
-    }
-
     public class Sponsor
     {
         [JsonProperty("id")]
@@ -230,9 +186,9 @@ namespace AirlyAPI
         public int? Number { get; set; }
 
         [JsonProperty("displayAddress1")]
-        public string DisplayAddress1 { get; set; }
+        public string DisplayAddressOne { get; set; }
         [JsonProperty("displayAddress2")]
-        public string DisplayAddress2 { get; set; }
+        public string DisplayAddressTwo { get; set; }
     }
 
     public class Installation
