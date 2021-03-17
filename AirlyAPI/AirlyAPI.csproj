@@ -60,8 +60,10 @@
     <Compile Include="src\rest\RestTypings.cs" />
     <Compile Include="src\rest\api\RequestModule.cs" />
     <Compile Include="src\rest\api\RequestProviders.cs" />
-    <Compile Include="src\rest\api\RequestQueuers.cs" />
     <Compile Include="src\rest\RestApiClient.cs" />
+    <Compile Include="src\rest\queue\RequestQueuer.cs" />
+    <Compile Include="src\rest\queue\RequestQueueManager.cs" />
+    <Compile Include="src\rest\queue\RequestQueueHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
@@ -73,6 +75,7 @@
     <Folder Include=".github\workflows\" />
     <Folder Include="src\common\handling\" />
     <Folder Include="src\rest\api\" />
+    <Folder Include="src\rest\queue\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

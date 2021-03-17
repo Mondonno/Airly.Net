@@ -19,6 +19,11 @@ namespace AirlyAPI.Utilities
             if (CheckIfNegativeNumber(number))
                 throw new InvalidOperationException("The specified number can not be negative number");
         }
+        public static void ThrowIfNegativeNumberOrZero(int number)
+        {
+            if (number == 0 || CheckIfNegativeNumber(number))
+                throw new InvalidOperationException("The specified number can not be negative number or be Zero");
+        }
     }
 
     public sealed class Utils

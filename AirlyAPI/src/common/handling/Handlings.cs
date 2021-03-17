@@ -11,6 +11,8 @@ namespace AirlyAPI.Handling
 {
     public class ErrorModel
     {
+        public bool HaveError { get; set; }
+
         public string Code { get; set; }
         public string ErrorContent { get; set; }
         public string Succesor { get; set; }
@@ -48,6 +50,7 @@ namespace AirlyAPI.Handling
             var deserializedError = JsonDeserialize(this.Json);
             if (!deserializedError.IsError) return new()
             {
+                HaveError = false,
                 Code = null,
                 ErrorContent = null,
                 Succesor = null
@@ -56,6 +59,7 @@ namespace AirlyAPI.Handling
             var errorContent = deserializedError.RawError;
             var errorInformation = new ErrorModel()
             {
+                HaveError = true,
                 Code = (string)errorContent[0],
                 ErrorContent = (string)errorContent[1],
                 ErrorDetails = errorContent[2],

@@ -7,7 +7,6 @@ using System.Threading;
 using System.Security.Permissions;
 using System.Text;
 
-using AirlyAPI.Handling;
 using AirlyAPI.Utilities;
 using AirlyAPI.Rest.Typings;
 using AirlyAPI.Handling.Errors;
@@ -50,8 +49,8 @@ namespace AirlyAPI.Rest
             set => RequestUri = new Uri(value);
         }
         public string RawMethod {
-            set => Method = GetMethod(value);
             get => Method.Method;
+            set => Method = GetMethod(value);
         }
         public IEnumerable<KeyValuePair<string, IEnumerable<string>>> Headers { get => HttpClient.DefaultRequestHeaders; }
 
@@ -60,13 +59,13 @@ namespace AirlyAPI.Rest
 
         public DeafultRestRequest(RESTManager rest, string end, string method, RequestOptions options)
         {
-            this.Rest = rest;
-            this.RestConfiguration = rest.Airly.Configuration;
-            this.EndPoint = end;
-            this.RestOptions = options;
-            this.Method = !string.IsNullOrEmpty(method) ? GetMethod(method) : GetMethod("GET");
+            Rest = rest;
+            RestConfiguration = rest.Airly.Configuration;
+            EndPoint = end;
+            RestOptions = options;
+            Method = !string.IsNullOrEmpty(method) ? GetMethod(method) : GetMethod("GET");
 
-            DeafultHeaders.Add("User-Agent", this.RestConfiguration.Agent ?? "Airly API C#");
+            DeafultHeaders.Add("User-Agent", RestConfiguration.Agent ?? "Airly.Net");
 
             string url =
                 this.RestConfiguration.Protocol + "://" +
@@ -134,6 +133,11 @@ namespace AirlyAPI.Rest
             }
         }
 
+        public void ToggleHeader(string key, string value)
+        {
+            RemoveHeader(key);
+            AddHeader(key, value);
+        }
         public void AddHeader(string key, string value) => HttpClient.DefaultRequestHeaders.Add(key, value);
         public void RemoveHeader(string key) => HttpClient.DefaultRequestHeaders.Remove(key);
         public void MergeHeaders(Dictionary<string, string> headers)
@@ -163,23 +167,18 @@ namespace AirlyAPI.Rest
         {
             if (!RestOptions.Auth) return;
 
-            RemoveHeader("apikey");
-            AddHeader("apikey", key);
+            ToggleHeader("apikey", key);
         }
 
         public void SetLanguage(AirlyLanguage language) => SetLanguage(language.ToString().ToLower());
-        public void SetLanguage(string language)
-        {
-            RemoveHeader("Accept-Language");
-            AddHeader("Accept-Language", language);
-        }
+        public void SetLanguage(string language) => ToggleHeader("Accept-Language", language);
 
         public void Dispose()
         {
             if (!_isDisposed)
             {
                 HttpClient.Dispose();
-                this._isDisposed = true;
+                _isDisposed = true;
             }
         }
     }

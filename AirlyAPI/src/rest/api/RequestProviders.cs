@@ -22,7 +22,7 @@ namespace AirlyAPI.Rest
         protected DeafultRestRequest RestRequest { get; set; }
         public RESTManager RestManager { get; set; }
         public Uri RequestUri { get => RestRequest.RequestUri; }
-
+         
         public RestRequestProvider(RESTManager rest, string end, string method, RequestOptions options)
         {
             RestManager = rest;

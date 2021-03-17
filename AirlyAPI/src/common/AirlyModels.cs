@@ -46,8 +46,8 @@ namespace AirlyAPI
             GeoUtil.GetMidpoint(Sw.Lng, Ne.Lng)
         );
 
-        public static bool operator ==(LocationArea one, LocationArea two) => one.Ne == two.Ne && one.Sw == two.Sw;
-        public static bool operator !=(LocationArea one, LocationArea two) => one.Ne != two.Ne || one.Sw != two.Sw;
+        public static bool operator ==(LocationArea one, LocationArea two) => one != null && two != null ? one.Ne == two.Ne && one.Sw == two.Sw : one == two;
+        public static bool operator !=(LocationArea one, LocationArea two) => one != null && two != null ? one.Ne != two.Ne || one.Sw != two.Sw : one != two;
 
         public override bool Equals(object obj) => base.Equals(obj);
         public override int GetHashCode() => base.GetHashCode();
@@ -67,8 +67,8 @@ namespace AirlyAPI
         [JsonProperty("longitude")]
         public double Lng { get; set; }
 
-        public static bool operator ==(Location one, Location two) => one.Lng == two.Lng && one.Lat == two.Lat;
-        public static bool operator !=(Location one, Location two) => one.Lng != two.Lng || one.Lat != two.Lat;
+        public static bool operator ==(Location one, Location two) => (one != null && two != null) ? one.Lng == two.Lng && one.Lat == two.Lat : one == two;
+        public static bool operator !=(Location one, Location two) => (one != null && two != null) ? one.Lng != two.Lng || one.Lat != two.Lat : one != two;
 
         public override bool Equals(object obj) => base.Equals(obj);
         public override int GetHashCode() => base.GetHashCode();

@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace AirlyAPI.Rest.Typings
 {
-    internal interface IRequest : IAirlyAuth
+    internal interface IRequest : IAirlyAuth, IRequestHeaders
     {
         RESTManager Rest { get; set; }
         Task<RawRestResponse> Send();
@@ -16,6 +16,12 @@ namespace AirlyAPI.Rest.Typings
     {
         public void SetLanguage(AirlyLanguage language);
         public void SetKey(string key);
+    }
+
+    internal interface IRequestHeaders
+    {
+        public void AddHeader(string key, string value);
+        public void RemoveHeader(string key);
     }
 
     public enum RestRequestMethod

@@ -27,8 +27,8 @@ namespace AirlyAPI.Rest
         public string Auth { get => string.IsNullOrEmpty(ApiKey) ? throw new InvalidApiKeyError("Provided api key is empty") : ApiKey; }
         public bool RateLimited { get => Handlers.Queuers() >= 1 && Handlers.RateLimited(); }
 
-        public string Endpoint { get => this.Airly.Configuration.ApiDomain; }
-        public string Cdn { get => this.Airly.Configuration.Cdn; }
+        public string Endpoint { get => Airly.Configuration.ApiDomain; }
+        public string Cdn { get => Airly.Configuration.Cdn; }
 
         private void SetAirlyPreferedLanguage(Airly airly) => Language = airly.Language;
         public Task<RestResponse> Request(string end, string method = null, RequestOptions options = null)

@@ -24,7 +24,7 @@ namespace AirlyAPI.Handling
             Limit = limit != null ? Convert.ToInt32(limit) : null;
             Remain = remain != null ? Convert.ToInt32(remain) : null;
             Diffrence = Util.CalculateRateLimit(Remain, Limit);
-            IsRateLimited = Diffrence == 0;
+            IsRateLimited = Diffrence == 0 || Diffrence == null; 
         }
         public RateLimitInfo(HttpResponseMessage response) : this(response.Headers) { }
         public RateLimitInfo(RawRestResponse response) : this(response.HttpResponse.Headers) { }

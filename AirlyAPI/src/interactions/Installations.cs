@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using AirlyAPI.Utilities;
+using System;
 
 // IMPORTANT DISTRIBUTION NOTE!
 // What does do redirect?
@@ -14,8 +15,10 @@ namespace AirlyAPI.Interactions
     public class Installations : InteractionBase
     {
         public Installations(Airly airly) : base(airly) { }
-        public async Task<List<Installation>> Nearest(Location location, double maxDistance = 3, int maxResults = 1) => await Nearest(location.Lat, location.Lng, maxDistance, maxResults);
-        public async Task<List<Installation>> Nearest(double lat, double lng, double maxDistance = 3, int maxResults = 1) => await Api.GetInstallationsNearestAsync(lat, lng, maxDistance, maxResults);
+
+        public async Task<List<Installation>> Nearest(Installation installation, double maxDistance = 3, int maxResults = 1) => installation != null ? await Nearest(installation.Location, maxDistance, maxResults) : null;
+        public async Task<List<Installation>> Nearest(Location location, double maxDistance = 3, int maxResults = 1) => location != null ? await Nearest(location.Lat, location.Lng, maxDistance, maxResults) : null;
+        private async Task<List<Installation>> Nearest(double lat, double lng, double maxDistance = 3, int maxResults = 1) => await Api.GetInstallationsNearestAsync(lat, lng, maxDistance, maxResults);
 
         public async Task<Installation> Info(int id) => await Api.GetInstallationByIdAsync(id);
         public async Task<Installation> Info(int id, bool redirect) => await Info(id);

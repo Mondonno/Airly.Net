@@ -13,6 +13,7 @@ namespace AirlyAPI.Rest
         private RESTManager RestManager { get; set; }
         protected RESTManager Api { get => RestManager; }
         protected RestApiClientBase(RESTManager rest) => RestManager = rest;
+
         protected string ResolveIndexType(IndexQueryType type) => type == IndexQueryType.AirlyCAQI ? "AIRLY_CAQI" : (type == IndexQueryType.CAQI ? "CAQI" : (type == IndexQueryType.PJP ? "PJP" : "AIRLY_CAQI"));
     }
 
@@ -31,8 +32,7 @@ namespace AirlyAPI.Rest
                 maxDistance,
                 maxResults
             });
-        public async Task<Measurement> GetMeasurmentByInstallationAsync(int id, bool includeWind = false,
-            IndexQueryType type = IndexQueryType.AirlyCAQI)
+        public async Task<Measurement> GetMeasurmentByInstallationAsync(int id, bool includeWind = false, IndexQueryType type = IndexQueryType.AirlyCAQI)
         {
             ParamsValidator.ThrowIfNegativeNumber(id);
             return await Api.Request<Measurement>("measurements/installation", "GET", new
@@ -42,23 +42,23 @@ namespace AirlyAPI.Rest
                 indexType = ResolveIndexType(type)
             });
         }
-        public async Task<Measurement> GetMeasurmentNearestAsync(double lat, double lng, double maxDistance = 3,
-           IndexQueryType type = IndexQueryType.AirlyCAQI) => await Api.Request<Measurement>("measurements/nearest", "GET", new
+        public async Task<Measurement> GetMeasurmentNearestAsync(double lat, double lng, double maxDistance = 3, IndexQueryType type = IndexQueryType.AirlyCAQI)
+            => await Api.Request<Measurement>("measurements/nearest", "GET", new
            {
                lat,
                lng,
                maxDistanceKM = maxDistance,
                indexType = ResolveIndexType(type)
            });
-        public async Task<Measurement> GetMeasurmentByPointAsync(double lat, double lng,
-            IndexQueryType type = IndexQueryType.AirlyCAQI) => await Api.Request<Measurement>("measurements/point", "GET", new
+        public async Task<Measurement> GetMeasurmentByPointAsync(double lat, double lng, IndexQueryType type = IndexQueryType.AirlyCAQI)
+            => await Api.Request<Measurement>("measurements/point", "GET", new
             {
                 lat,
                 lng,
                 indexType = ResolveIndexType(type)
             });
-        public async Task<Measurement> GetMeasurmentByLocationIdAsync(int locationId, bool includeWind = false,
-            IndexQueryType type = IndexQueryType.AirlyCAQI) => await Api.Request<Measurement>("measurements/location", "GET", new
+        public async Task<Measurement> GetMeasurmentByLocationIdAsync(int locationId, bool includeWind = false, IndexQueryType type = IndexQueryType.AirlyCAQI)
+            => await Api.Request<Measurement>("measurements/location", "GET", new
             {
                 locationId,
                 includeWind,
