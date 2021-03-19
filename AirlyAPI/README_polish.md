@@ -33,3 +33,5 @@ Measurment measurment = await client.Measurments.Nearest(location) // Podaj je
 DateTime fromMeasurmentDateTime = measurment.Current.FromDateTime; // Zdectruktuj datę aktualnego pomairy zanieczyszczeń
 Console.WriteLine(fromMeasurmentDateTime.ToString()); // Pokaz je światu
 ```
+
+# [Wersja w języku Angielskim]()
