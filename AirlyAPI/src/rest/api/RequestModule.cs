@@ -68,9 +68,9 @@ namespace AirlyAPI.Rest
             DeafultHeaders.Add("User-Agent", RestConfiguration.Agent ?? "Airly.Net");
 
             string url =
-                this.RestConfiguration.Protocol + "://" +
-                this.RestConfiguration.ApiDomain + Utils.GetVersion(this.RestConfiguration.Version, true) +
-                this.EndPoint;
+                RestConfiguration.Protocol ?? "https" + "://" +
+                RestConfiguration.ApiDomain + Utils.GetVersion(RestConfiguration.Version, true) +
+                EndPoint;
 
             bool queryExists = options.Query != null && options.Query.Length != 0;
             string query = string.Empty;
@@ -95,13 +95,12 @@ namespace AirlyAPI.Rest
 
         public async Task<RawRestResponse> Send()
         {
-            double restTimeout = this.RestConfiguration.RestRequestTimeout;
+            double restTimeout = RestConfiguration.RestRequestTimeout;
             double requestTimeout = restTimeout == 0 ? 60000 : restTimeout;
 
             HttpClient.Timeout = TimeSpan.FromMilliseconds(requestTimeout);
 
             HttpRequestMessage RequestMessage = new(Method, RequestUri);
-
             if(RestOptions.Body != null)
             {
                 StringContent content = new StringContent(RestOptions.Body.ToString(), Encoding.UTF8, "application/json");
@@ -143,10 +142,7 @@ namespace AirlyAPI.Rest
         public void MergeHeaders(Dictionary<string, string> headers)
         {
             foreach (var header in headers)
-            {
-                RemoveHeader(header.Key);
-                AddHeader(header.Key, header.Value);
-            }
+                ToggleHeader(header.Key, header.Value);
         }
 
         public HttpMethod GetMethod(string method)
@@ -171,7 +167,7 @@ namespace AirlyAPI.Rest
         }
 
         public void SetLanguage(AirlyLanguage language) => SetLanguage(language.ToString().ToLower());
-        public void SetLanguage(string language) => ToggleHeader("Accept-Language", language);
+        public void SetLanguage(string language) => ToggleHeader("Accept-Language", language.ToLower());
 
         public void Dispose()
         {
