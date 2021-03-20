@@ -6,8 +6,6 @@ using AirlyAPI.Utilities;
 
 namespace AirlyAPI.Rest
 {
-    // Preforming all rest actions in the Airly API C# wrapper by simply wrapping it into the methods
-
     public class RestApiClientBase
     {
         private RESTManager RestManager { get; set; }
@@ -58,12 +56,15 @@ namespace AirlyAPI.Rest
                 indexType = ResolveIndexType(type)
             });
         public async Task<Measurement> GetMeasurmentByLocationIdAsync(int locationId, bool includeWind = false, IndexQueryType type = IndexQueryType.AirlyCAQI)
-            => await Api.Request<Measurement>("measurements/location", "GET", new
+        {
+            ParamsValidator.ThrowIfNegativeNumber(locationId);
+            return await Api.Request<Measurement>(end: "measurements/location", "GET", new
             {
                 locationId,
                 includeWind,
                 type = ResolveIndexType(type)
             });
+        }
         public async Task<List<IndexType>> GetMetaIndexesAsync() => await Api.Request<List<IndexType>>(end: "meta/indexes", method: null, options: null);
         public async Task<List<MeasurementType>> GetMetaMeasurmentsAsync() => await Api.Request<List<MeasurementType>>(end: "meta/measurements", method: null, options: null);
 

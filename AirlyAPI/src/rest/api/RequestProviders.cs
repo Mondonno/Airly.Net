@@ -44,13 +44,13 @@ namespace AirlyAPI.Rest
         }
         protected async Task<RawRestResponse> SendAsyncInternal(DeafultRestRequest request, string method, bool handle)
         {
-            request.RawMethod = method.ToUpper(); // Setting method internally
+            request.SetMethod(method.ToUpper()); // Setting method internally
             return await SendAsyncInternal(request, handle);
         }
 
         public void SetLanguage(AirlyLanguage language) => RestRequest.SetLanguage(language);
         public void SetKey(string key) => RestRequest.SetKey(key);
-        public void SetMethod(string method) => RestRequest.RawMethod = method.ToUpper();
+        public void SetMethod(string method) => RestRequest.SetMethod(method.ToUpper());
         public void SetRequest(DeafultRestRequest restRequest) => RestRequest = restRequest;
     }
 }

@@ -48,8 +48,7 @@ namespace AirlyAPI.Rest
             get => RawUrl;
             set => RequestUri = new Uri(value);
         }
-        public string RawMethod {
-            get => Method.Method;
+        private string RawMethod {
             set => Method = GetMethod(value);
         }
         public IEnumerable<KeyValuePair<string, IEnumerable<string>>> Headers { get => HttpClient.DefaultRequestHeaders; }
@@ -165,6 +164,8 @@ namespace AirlyAPI.Rest
 
             ToggleHeader("apikey", key);
         }
+
+        public void SetMethod(string methodName) => this.RawMethod = methodName.Trim().ToUpper();
 
         public void SetLanguage(AirlyLanguage language) => SetLanguage(language.ToString().ToLower());
         public void SetLanguage(string language) => ToggleHeader("Accept-Language", language.ToLower());

@@ -13,8 +13,10 @@ namespace AirlyAPI.Interactions
         public InteractionBase(Airly airly)
         {
             Airly = airly;
-            Rest = airly.Rest;
-            Api = new RestApiClient(Rest);
+            Api = airly.Client;
+
+            //Rest = airly.Rest; 
+            //Api = new RestApiClient(Rest);
         }
     }
 }

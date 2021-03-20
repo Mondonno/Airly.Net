@@ -1,6 +1,7 @@
 # My by mondonno haha
 AirlyAPI/test
-test
+test/
+test/test.csproj
 
 # globs
 Makefile.in

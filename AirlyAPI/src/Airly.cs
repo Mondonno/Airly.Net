@@ -14,7 +14,9 @@ namespace AirlyAPI
         protected bool _isDisposed;
 
         public string ApiKey { get; private set; }
-        protected internal RESTManager Rest { get; set; }
+
+        private RESTManager Rest { get; set; }
+        protected internal RestApiClient Client { get; private set; }
 
         public Installations Installations { get; private set; }
         public Measurements Measurements { get; private set; }
@@ -35,7 +37,7 @@ namespace AirlyAPI
         private Airly(string apiKey, AirlyConfiguration configuration, AirlyLanguage? language)
         {
             ApiKey = apiKey;
-            Configuration = configuration;
+            Configuration = configuration ?? throw new ArgumentNullException("configuration");
             Initialize(language);
         }
 
@@ -47,7 +49,11 @@ namespace AirlyAPI
 
         private void Initialize(AirlyLanguage? language = null)
         {
-            Rest = new(this);
+            RESTManager restManager = new(this);
+
+            Client = new(restManager);
+            Rest = restManager;
+
             Installations = new(this);
             Meta = new(this);
             Measurements = new(this);
@@ -57,9 +63,6 @@ namespace AirlyAPI
             Utils.ValidateKey(ApiKey);
         }
 
-        /// <summary>
-        /// Destroying and Disposing the Airly API client. After this, the client can not be reused
-        /// </summary>
         public void Dispose()
         {
             if (!_isDisposed)
