@@ -144,7 +144,7 @@ namespace AirlyAPI.Rest
                 ToggleHeader(header.Key, header.Value);
         }
 
-        public HttpMethod GetMethod(string method)
+        private HttpMethod GetMethod(string method)
         {
             HttpMethod httpMethod = HttpMethod.Get;
             string validatedMethod = method.Trim().Normalize().Replace(" ", "").ToUpper();

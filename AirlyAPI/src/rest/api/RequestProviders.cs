@@ -50,6 +50,7 @@ namespace AirlyAPI.Rest
 
         public void SetLanguage(AirlyLanguage language) => RestRequest.SetLanguage(language);
         public void SetKey(string key) => RestRequest.SetKey(key);
+
         public void SetMethod(string method) => RestRequest.SetMethod(method.ToUpper());
         public void SetRequest(DeafultRestRequest restRequest) => RestRequest = restRequest;
     }

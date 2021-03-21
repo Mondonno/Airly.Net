@@ -64,16 +64,16 @@ namespace AirlyAPI.Handling
             Utils utils = new();
             RawRestResponse res;
 
-            try { res = await request.InvokeRequest(true); }
+            try { res = await request.InvokeRequest(handle: true); }
             catch (Exception ex) { throw ex; };
 
             if (res == null || string.IsNullOrEmpty(res.RawJson)) throw new HttpError("Can not resolve the Airly api response");
-            if (this.RateLimited)
+            if (RateLimited)
             {
                 var details = new RateLimitInfo(res.HttpResponse);
                 if (details.IsRateLimited) RateLimitThrower.MakeRateLimitError(res, utils, null);
                 else {
-                    this.RateLimited = false;
+                    RateLimited = false;
                     System.Diagnostics.
                         Debug.WriteLine("The ratelimited is detected but it is not authenticated by headers");
                 }

@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using AirlyAPI.Utilities;
 using AirlyAPI.Rest.Typings;
 using AirlyAPI.Handling.Errors;
+using System.Net;
 
 namespace AirlyAPI.Handling
 {
@@ -144,19 +145,23 @@ namespace AirlyAPI.Handling
         private string ResponseJson { get; set; }
 
         private HttpResponseHeaders ResponseHeaders { get; set; }
+        private HttpStatusCode HttpResponseCode { get; set; }
+
         public JsonErrorHandler JsonHandler { get; set; }
 
         public Handler(HttpResponseMessage responseMessage, string Json = null)
         {
             ResponseHeaders = responseMessage.Headers;
+            HttpResponseCode = responseMessage.StatusCode;
+
             ResponseJson = Json ?? string.Empty;
             JsonHandler = new(ResponseJson);
         }
 
-        public void HandleResponseCode() => InternalHandleResponseCode();
-        protected void InternalHandleResponseCode()
+        public void HandleResponseCode(int? responseCode = null) => InternalHandleResponseCode(responseCode);
+        protected void InternalHandleResponseCode(int? responseCode = null)
         {
-            int statusCode = 1;
+            int statusCode = responseCode ?? (int) HttpResponseCode;
             string rawJson = ResponseJson;
 
             Utils utils = new();
@@ -196,9 +201,10 @@ namespace AirlyAPI.Handling
                     return;
                 }
                 handler.HandleMalformed();
-                throw new AirlyError($"[AIRLY_INVALID] [{DateTime.Now}] {rawJson}");
+
+                throw new AirlyError($"[{DateTime.Now}] Invalid response code {rawJson}");
             }
-            if (statusCode >= 500 && statusCode < 600) throw new HttpError("[AIRLY] INTERNAL PROBLEM WITH AIRLY API");
+            if (statusCode >= 500 && statusCode < 600) throw new HttpError("The API throwed 500, internal Airly API problem");
         }
 
         public void Refersh(string json)
