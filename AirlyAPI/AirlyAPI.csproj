@@ -72,16 +72,12 @@
     <Folder Include="src\interactions\" />
     <Folder Include="src\utils\" />
     <Folder Include="src\common\" />
-    <Folder Include=".github\workflows\" />
     <Folder Include="src\common\handling\" />
     <Folder Include="src\rest\api\" />
     <Folder Include="src\rest\queue\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="README.md" />
-    <None Include=".github\CONTRIBUTING.md" />
-    <None Include=".github\workflows\travis.yml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
