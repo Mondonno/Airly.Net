@@ -67,8 +67,8 @@ namespace AirlyAPI
         [JsonProperty("longitude")]
         public double Lng { get; set; }
 
-        public static bool operator ==(Location one, Location two) => (one != null && two != null) ? one.Lng == two.Lng && one.Lat == two.Lat : one == two;
-        public static bool operator !=(Location one, Location two) => (one != null && two != null) ? one.Lng != two.Lng || one.Lat != two.Lat : one != two;
+        public static bool operator ==(Location one, Location two) => (!Equals(one, null) && !Equals(two, null)) ? one.Lng == two.Lng && one.Lat == two.Lat : Equals(one, two);
+        public static bool operator !=(Location one, Location two) => (!Equals(one, null) && !Equals(two, null)) ? one.Lng != two.Lng || one.Lat != two.Lat : !Equals(one, two);
 
         public override bool Equals(object obj) => base.Equals(obj);
         public override int GetHashCode() => base.GetHashCode();
@@ -183,7 +183,7 @@ namespace AirlyAPI
         [JsonProperty("street")]
         public string Street { get; set; }
         [JsonProperty("number")]
-        public int? Number { get; set; }
+        public string Number { get; set; }
 
         [JsonProperty("displayAddress1")]
         public string DisplayAddressOne { get; set; }

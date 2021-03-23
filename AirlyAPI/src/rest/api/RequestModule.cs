@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Security.Permissions;
 using System.Text;
+using System.Diagnostics;
 
 using AirlyAPI.Utilities;
 using AirlyAPI.Rest.Typings;
@@ -46,7 +47,7 @@ namespace AirlyAPI.Rest
         public Uri RequestUri { get; set; }
         private string RawUrl {
             get => RawUrl;
-            set => RequestUri = new Uri(value);
+            set =>  RequestUri = new Uri(value);
         }
         private string RawMethod {
             set => Method = GetMethod(value);
@@ -67,7 +68,7 @@ namespace AirlyAPI.Rest
             DeafultHeaders.Add("User-Agent", RestConfiguration.Agent ?? "Airly.Net");
 
             string url =
-                RestConfiguration.Protocol ?? "https" + "://" +
+                (RestConfiguration.Protocol ?? "https") + "://" +
                 RestConfiguration.ApiDomain + Utils.GetVersion(RestConfiguration.Version, true) +
                 EndPoint;
 
