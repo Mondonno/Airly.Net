@@ -17,8 +17,8 @@ namespace AirlyAPI.Handling
         public Waiter() : base(1, 1) { }
 
         // Shortcuts
-        public int RemainingTasks() => this.CurrentCount;
-        public void Destroy() => this.Dispose(true);
+        public int RemainingTasks() => CurrentCount;
+        public void Destroy() => Dispose(true);
     }
 
     public class RequestQueuer : IDisposable
@@ -43,7 +43,7 @@ namespace AirlyAPI.Handling
             finally { Waiter.Release(); }
         }
 
-        private void ThrowIfJsonError(HttpResponseMessage httpResponse,string responseJson)
+        private void ThrowIfJsonError(HttpResponseMessage httpResponse, string responseJson)
         {
             ErrorDeserializer errorDeserializer = new(httpResponse, responseJson);
             ErrorModel deserializtedError = errorDeserializer.Deserialize();
@@ -67,7 +67,7 @@ namespace AirlyAPI.Handling
             try { res = await request.InvokeRequest(handle: true); }
             catch (Exception ex) { throw ex; };
 
-            if (res == null || string.IsNullOrEmpty(res.RawJson)) throw new HttpError("Can not resolve the Airly api response");
+            if (res == null || string.IsNullOrEmpty(res.RawJson)) throw new AirlyError("Can not resolve the Airly API response");
             if (RateLimited)
             {
                 var details = new RateLimitInfo(res.HttpResponse);
@@ -107,9 +107,9 @@ namespace AirlyAPI.Handling
                 ErrorModel parsedError = errorDeserializer.Deserialize();
                 string succesor = parsedError.Succesor;
 
-                if (succesor == null) throw new HttpError("[301] [INSTALLATION_REPLACED] Installation get replaced and new succesor was not found");
+                if (succesor == null) throw new HttpError("301 Installation get replaced and new succesor was not found");
                 else if (succesor != null) { throw new NotImplementedException(); }
-                else throw new HttpError("[301] [UNHANDLED]");
+                else throw new HttpError("301 throwed but can not get handled");
 
                 // Working on the special information on the {id}_REPLACED (INSTALLATION_REPLACED) errors
             }

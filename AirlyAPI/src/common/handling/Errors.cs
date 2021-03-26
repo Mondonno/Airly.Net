@@ -30,4 +30,10 @@ namespace AirlyAPI.Handling.Errors
         public InvalidApiKeyError(string message) : base(string.Format("The provided Api Key is invalid\n{0}", message)) => Data.Add("Token", false);
         public InvalidApiKeyError() : this(string.Empty) { }
     }
+
+    public class RateLimitError : BaseError
+    {
+        public RateLimitError(string message) : base(string.Format("Airly.Net get restricted by Airly API ratelimit\n{0}", message)) => Data.Add("RateLimited", true);
+        public RateLimitError() : this(string.Empty) { }
+    }
 }

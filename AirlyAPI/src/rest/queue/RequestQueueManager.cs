@@ -10,7 +10,7 @@ namespace AirlyAPI.Handling
         public bool Inactive() => Count == 0;
         public bool RateLimited()
         {
-            if (this.Count == 0) return false;
+            if (Count == 0) return false;
 
             List<bool> originLimits = new(Values.Select((e, b) => e.RateLimited));
 

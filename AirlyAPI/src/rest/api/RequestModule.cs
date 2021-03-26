@@ -14,26 +14,15 @@ using AirlyAPI.Handling.Errors;
 
 namespace AirlyAPI.Rest
 {
-    public class RestHttpHandler : HttpClientHandler
-    {
-        public RestHttpHandler(bool proxy = false, bool cookies = false) : base()
-        { 
-            AutomaticDecompression = DecompressionMethods.GZip;
-            AllowAutoRedirect = true;
-            UseCookies = cookies;
-            UseProxy = proxy;
-        }
-    }
-
     [DnsPermission(SecurityAction.Assert)]
     [WebPermission(SecurityAction.Assert)]
-    public class DeafultRestRequest : IRequest, IDisposable, IAirlyAuth
+    public class DeafultRestRequest : IRequest, IDisposable
     {
         public RESTManager Rest { get; set; }
         public HttpMethod Method { get; set; }
         public RequestOptions RestOptions { get; set; }
         public AirlyConfiguration RestConfiguration { get; set; }
-        public HttpClient HttpClient { get; set; }
+        private HttpClient HttpClient { get; set; }
         public Utils Util { get; set; } = new Utils();
 
         public Dictionary<string, string> DeafultHeaders = new Dictionary<string, string>()
@@ -166,8 +155,7 @@ namespace AirlyAPI.Rest
             ToggleHeader("apikey", key);
         }
 
-        public void SetMethod(string methodName) => this.RawMethod = methodName.Trim().ToUpper();
-
+        public void SetMethod(string methodName) => RawMethod = methodName.Trim().ToUpper();
         public void SetLanguage(AirlyLanguage language) => SetLanguage(language.ToString().ToLower());
         public void SetLanguage(string language) => ToggleHeader("Accept-Language", language.ToLower());
 
@@ -178,6 +166,17 @@ namespace AirlyAPI.Rest
                 HttpClient.Dispose();
                 _isDisposed = true;
             }
+        }
+    }
+
+    public class RestHttpHandler : HttpClientHandler
+    {
+        public RestHttpHandler(bool proxy = false, bool cookies = false) : base()
+        {
+            AutomaticDecompression = DecompressionMethods.GZip;
+            AllowAutoRedirect = true;
+            UseCookies = cookies;
+            UseProxy = proxy;
         }
     }
 }

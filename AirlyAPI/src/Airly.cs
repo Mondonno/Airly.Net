@@ -4,13 +4,15 @@ using AirlyAPI.Interactions;
 using AirlyAPI.Rest;
 using AirlyAPI.Utilities;
 
+// todo dodanie handlingowanie RateLimitami w Querze i w Handlingu bo obecnie nie dziala
+
 namespace AirlyAPI
 {
     /// <summary>
     /// The entry point of the Airly API C# client. Providing the methods wich helps programmer interact with them
     /// </summary>
     public class Airly : IDisposable
-    {
+    { 
         protected bool _isDisposed;
 
         public string ApiKey { get; private set; }

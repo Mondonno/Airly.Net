@@ -62,7 +62,17 @@ namespace AirlyAPI.Utilities
             if (string.IsNullOrEmpty(json)) return default;
 
             string rawjson = json.ToString();
-            T classment = JsonConvert.DeserializeObject<T>(rawjson, SerializerSettings);
+
+            T classment;
+            try
+            {
+                classment = JsonConvert.DeserializeObject<T>(rawjson, SerializerSettings);
+            }catch(Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+                return default;
+            }
+
             return classment;
         }
         public static T DeserializeJson<T>(JToken jsonToken) => DeserializeJson<T>(GetJTokenJson(jsonToken));
