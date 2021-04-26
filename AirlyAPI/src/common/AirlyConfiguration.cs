@@ -1,7 +1,7 @@
 ﻿
 namespace AirlyAPI
 {
-    public sealed class AirlyEndPoints
+    public sealed class AirlyEndpoints
     {
         public string Meta { get; } = "meta";
         public string Installations { get; } = "installations";
@@ -13,7 +13,7 @@ namespace AirlyAPI
 
     public sealed class AirlyConfiguration
     {
-        public string Agent { get; set; } = "Airly.Net";
+        public string Agent { get; } = "Airly.Net";
         public string Protocol { get; set; } = "https";
 
         public double RestRequestTimeout { get; set; } = 60000;
@@ -25,7 +25,7 @@ namespace AirlyAPI
         public string ApiDomain { get; private set; }
         public string Cdn { get; private set; }
 
-        public AirlyEndPoints EndPoints { get; } = new AirlyEndPoints();
+        public AirlyEndpoints EndPoints { get; } = new AirlyEndpoints();
 
         public AirlyConfiguration()
         {

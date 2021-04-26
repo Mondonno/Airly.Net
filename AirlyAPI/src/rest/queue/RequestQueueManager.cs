@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace AirlyAPI.Handling
 {
-    public class RequestQueueManager : Dictionary<string, RequestQueuer>, IDisposable
+    public class RequestQueueManager : Dictionary<string, RequestQueuer>, IDisposable // internal module with exposed parent
     {
         public int Handlers() => Count;
         public bool Inactive() => Count == 0;

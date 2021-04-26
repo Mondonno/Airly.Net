@@ -12,11 +12,10 @@ using System.Net.Http;
 
 namespace AirlyAPI.Handling
 {
-    public class Waiter : SemaphoreSlim // Deafult SemaphoreSlim configuration
+    public class Waiter : SemaphoreSlim // Deafult SemaphoreSlim configuration + shortcuts
     {
         public Waiter() : base(1, 1) { }
 
-        // Shortcuts
         public int RemainingTasks() => CurrentCount;
         public void Destroy() => Dispose(true);
     }
@@ -27,7 +26,7 @@ namespace AirlyAPI.Handling
         public RESTManager Manager { get; private set; }
 
         public bool RateLimited { get; private set; } = false; // The ratelimit error can be handled by user so thats why this variable exists
-        public bool Inactive { get => Waiter.RemainingTasks() == 0 && !this.RateLimited; }
+        public bool Inactive { get => Waiter.RemainingTasks() == 0 && !RateLimited; }
 
         public RequestQueuer(RESTManager manager)
         {
@@ -107,11 +106,11 @@ namespace AirlyAPI.Handling
                 ErrorModel parsedError = errorDeserializer.Deserialize();
                 string succesor = parsedError.Succesor;
 
-                if (succesor == null) throw new HttpError("301 Installation get replaced and new succesor was not found");
-                else if (succesor != null) { throw new NotImplementedException(); }
-                else throw new HttpError("301 throwed but can not get handled");
-
-                // Working on the special information on the {id}_REPLACED (INSTALLATION_REPLACED) errors
+                if (succesor == null) throw new HttpError("301 installation get replaced and new succesor was not found");
+                else if (succesor != null) {
+                    throw new ElementPermentlyReplacedException(succesor.ToString(), "The new succesor get found");
+                }
+                else throw new HttpError("301 thrown but can not get handled");
             }
 
             string rawJson = res.RawJson;

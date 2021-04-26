@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 using AirlyAPI.Utilities;
-using System;
+using AirlyAPI.Handling.Errors;
 
 // IMPORTANT DISTRIBUTION NOTE!
 // What does do redirect?
@@ -20,17 +20,39 @@ namespace AirlyAPI.Interactions
         public async Task<List<Installation>> Nearest(Location location, double maxDistance = 3, int maxResults = 1) => location != null ? await Nearest(location.Lat, location.Lng, maxDistance, maxResults) : null;
         private async Task<List<Installation>> Nearest(double lat, double lng, double maxDistance = 3, int maxResults = 1) => await Api.GetInstallationsNearestAsync(lat, lng, maxDistance, maxResults);
 
-        public async Task<Installation> Info(int id) => await Api.GetInstallationByIdAsync(id);
-        public async Task<Installation> Info(int id, bool redirect) => await Info(id);
+        // the redirect is untested because i can not get the replaced installation id :(
+        public async Task<Installation> Info(int id, bool redirect = false) {
+            if (!redirect) return await Api.GetInstallationByIdAsync(id);
+            else
+            {
+                Installation installationData;
+                try
+                {
+                    installationData = await Info(id);
+                }
+                catch(ElementPermentlyReplacedException error)
+                {
+                    var newSuccesor = (int?) error.Data["succesorId"];
+                    if (newSuccesor == null) return default;
+
+                    var newInstallationData = await Info((int) newSuccesor);
+
+                    return newInstallationData;
+                }
+                catch { return default; }
+
+                return installationData;
+            }
+        }
 
         public async Task<List<Installation>> Area(LocationArea area, int maxResults = 10)
         {
-            double km = GeoUtil.GetKmInArea(area);
+            double areaDistanceKilometers = GeoUtil.GetKmInArea(area);
             Location barycenter = area.GetBarycenter();
 
-            List<Installation> installations = await Nearest(barycenter.Lat, barycenter.Lng, km, maxResults);
+            List<Installation> installations = await Nearest(barycenter.Lat, barycenter.Lng, areaDistanceKilometers, maxResults);
 
-            if (installations == null) return new();
+            if (installations == null) return default;
 
             List<Installation> installationsFiltred = installations.FindAll(installation => area.Contains(installation.Location));
             return installationsFiltred;

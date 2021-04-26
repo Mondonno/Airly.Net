@@ -48,7 +48,10 @@ namespace AirlyAPI.Rest
         public async Task<T> Request<T>(string end, string method = null, RequestOptions options = null)
         {
             RestResponse httpResponse = await Request(end, method, options);
-            return new RestResponseParser<T>(httpResponse.RawJson).Deserializated;
+            var responseData = new RestResponseParser<T>(httpResponse != null ? httpResponse.RawJson : null);
+
+            if (responseData != null) return responseData.Deserializated;
+            else return default;
         }
         public async Task<T> Request<T>(string end, string method = null, dynamic query = null, RequestOptions options = null)
         {

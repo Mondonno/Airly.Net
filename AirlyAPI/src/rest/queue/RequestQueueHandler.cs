@@ -10,7 +10,6 @@ namespace AirlyAPI.Handling
         private readonly RequestQueueManager QueueManager = new RequestQueueManager();
         private RESTManager RestManager { get; set; }
 
-        // shortcuts
         public bool Inactive() => QueueManager.Inactive();
         public bool RateLimited() => QueueManager.RateLimited();
         public int Queuers() => QueueManager.Handlers();

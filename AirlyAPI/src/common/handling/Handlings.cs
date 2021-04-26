@@ -134,7 +134,7 @@ namespace AirlyAPI.Handling
             try
             { JsonParser.ParseJson(Json); }
             catch (Exception ex)
-            { throw new HttpError($"[AIRLY] POSSIBLE MALFORMED RESPONSE\n{ex.Message}"); }
+            { throw new HttpError($"Server sent possible malformed response\n{ex.Message}"); }
         }
 
         public void Refresh(string newJson) => Json = newJson;
@@ -169,11 +169,6 @@ namespace AirlyAPI.Handling
             HttpResponseHeaders headers = ResponseHeaders;
 
             if (statusCode > 0 && statusCode <= 200) return; // all ok, returning
-            if (statusCode == 301)
-            {
-                handler.HandleMalformed();
-                return;
-            }
             if (statusCode == 404)
             {
                 handler.HandleMalformed();

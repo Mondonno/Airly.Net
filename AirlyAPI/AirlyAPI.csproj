@@ -64,6 +64,7 @@
     <Compile Include="src\interactions\structures\Installations.cs" />
     <Compile Include="src\interactions\structures\Measurments.cs" />
     <Compile Include="src\interactions\structures\Meta.cs" />
+    <Compile Include="src\common\cache\Caches.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
@@ -76,6 +77,7 @@
     <Folder Include="src\rest\api\" />
     <Folder Include="src\rest\queue\" />
     <Folder Include="src\interactions\structures\" />
+    <Folder Include="src\common\cache\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

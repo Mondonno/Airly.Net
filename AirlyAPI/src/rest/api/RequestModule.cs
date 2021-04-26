@@ -54,10 +54,10 @@ namespace AirlyAPI.Rest
             RestOptions = options;
             Method = !string.IsNullOrEmpty(method) ? GetMethod(method) : GetMethod("GET");
 
-            DeafultHeaders.Add("User-Agent", RestConfiguration.Agent ?? "Airly.Net");
+            DeafultHeaders.Add("User-Agent", RestConfiguration.Agent);
 
             string url =
-                (RestConfiguration.Protocol ?? "https") + "://" +
+                $"{RestConfiguration.Protocol ?? "https"}://" +
                 RestConfiguration.ApiDomain + Utils.GetVersion(RestConfiguration.Version, true) +
                 EndPoint;
 

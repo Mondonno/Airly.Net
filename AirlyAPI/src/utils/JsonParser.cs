@@ -18,6 +18,18 @@ namespace AirlyAPI.Utilities
         public static Type GetTokenType(JTokenType type) => type.GetType();
         public static string GetJTokenJson(JToken token) => token.ToString();
 
+        private static bool ValidateInternally(string json)
+        {
+            try
+            {
+                _ = JToken.Parse(json);
+                return true;
+            }catch
+            {
+                return false;
+            }
+        }
+
         public static bool CheckJsonArray(string json)
         {
             string jsonValidation = json.Trim().ToString();
@@ -35,7 +47,7 @@ namespace AirlyAPI.Utilities
             bool isJsonObject = CheckJsonObject(json);
             bool isJsonArray = CheckJsonArray(json);
 
-            bool isValidJson = isJsonObject || isJsonArray;
+            bool isValidJson = isJsonObject || isJsonArray || ValidateInternally(json);
             return isValidJson;
         }
 
@@ -96,6 +108,7 @@ namespace AirlyAPI.Utilities
         }
     }
 
+    // depend on the json parser
     public class RestResponseParser<T>
     {
         public string Json { get; set; }

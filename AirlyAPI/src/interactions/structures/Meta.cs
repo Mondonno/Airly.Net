@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using System;
 
 namespace AirlyAPI.Interactions
 {
@@ -9,6 +10,6 @@ namespace AirlyAPI.Interactions
 
         public async Task<List<IndexType>> Indexes() => await Api.GetMetaIndexesAsync();
         public async Task<List<MeasurementType>> Measurements() => await Api.GetMetaMeasurmentsAsync();
-        public async Task<object> Docs() => await Api.GetAirlyOpenDocsAsync();
+        public Task<object> Docs() => throw new NotImplementedException();
     }
 }

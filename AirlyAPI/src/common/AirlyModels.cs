@@ -6,29 +6,6 @@ using AirlyAPI.Utilities;
 
 namespace AirlyAPI
 {
-    public enum AirlyNotFoundHandling
-    {
-        Error,
-        Null
-    }
-
-    public enum AirlyLanguage
-    {
-        pl,
-        en
-    }
-
-    public enum IndexQueryType
-    {
-        AirlyCAQI,
-        CAQI,
-        PJP
-    }
-
-    // <============>
-    //   Locations
-    // <============>
-
     public class LocationArea
     {
         public LocationArea(Location sw, Location ne)
@@ -57,6 +34,8 @@ namespace AirlyAPI
     {
         public Location(double lat, double lng)
         {
+            ParamsValidator.ThrowIfInfinity(lat, lng);
+
             Lat = lat;
             Lng = lng;
         }
@@ -75,10 +54,29 @@ namespace AirlyAPI
         public override string ToString() => $"{Lat} {Lng}";
     }
 
+    public enum AirlyNotFoundHandling
+    {
+        Error,
+        Null
+    }
+
+    public enum AirlyLanguage
+    {
+        pl,
+        en
+    }
+
+    public enum IndexQueryType
+    {
+        AirlyCAQI,
+        CAQI,
+        PJP
+    }
+
     /* <<=============================>>
     *   Models for airly api responses
     *  <<=============================>>
-    *    In use:
+    *
     * * Index Type
     * * Measurment Type
     * * Measurment
@@ -195,6 +193,8 @@ namespace AirlyAPI
     {
         [JsonProperty("id")]
         public int Id { get; set; }
+
+        // can not check the locationId is always avaible because of this isn't documentated
         [JsonProperty("locationId")]
         public int? LocationId { get; set; }
 

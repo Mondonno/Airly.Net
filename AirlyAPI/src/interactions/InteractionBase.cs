@@ -2,9 +2,13 @@
 
 namespace AirlyAPI.Interactions
 {
+    public class InteractionBase<T>
+    {
+
+    }
+
     public class InteractionBase
     {
-        private RESTManager Rest { get; set; }
         protected Airly Airly { get; private set; }
         protected RestApiClient Api { get; private set; }
 
@@ -14,9 +18,6 @@ namespace AirlyAPI.Interactions
         {
             Airly = airly;
             Api = airly.Client;
-
-            //Rest = airly.Rest; 
-            //Api = new RestApiClient(Rest);
         }
     }
 }

@@ -11,21 +11,6 @@ using AirlyAPI.Handling.Errors;
 
 namespace AirlyAPI.Utilities
 {
-    public static class ParamsValidator
-    {
-        public static bool CheckIfNegativeNumber(int number) => number.ToString().StartsWith("-");
-        public static void ThrowIfNegativeNumber(int number)
-        {
-            if (CheckIfNegativeNumber(number))
-                throw new InvalidOperationException("The specified number can not be negative number");
-        }
-        public static void ThrowIfNegativeNumberOrZero(int number)
-        {
-            if (number == 0 || CheckIfNegativeNumber(number))
-                throw new InvalidOperationException("The specified number can not be negative number or be Zero");
-        }
-    }
-
     public sealed class Utils
     {
         // The ratelimits headers names
@@ -130,7 +115,7 @@ namespace AirlyAPI.Utilities
                 target.Add(pair.Key, pair.Value);
         }
 
-        // Simple converting JTokens to the JObjects by exclicting the C# types
+        // Simple converting JTokens to the JObjects by exclipting the C# types
         public JObject[] ConvertTokens(JToken[] tokens)
         {
             JObject[] jObjects = new JObject[0];
@@ -310,6 +295,43 @@ namespace AirlyAPI.Utilities
                 finalString += string.Format("{0}{1}", nm[0].ToString().ToUpper(), nm.Remove(0, 1));
             }
             return finalString;
+        }
+    }
+
+    public static class ParamsValidator
+    {
+        public static double InfinityToDouble(double inifnity)
+        {
+            if (double.IsPositiveInfinity(inifnity))
+                return -1;
+            else if (double.IsNegativeInfinity(inifnity))
+                return 0;
+            else return inifnity;
+        }
+
+        public static bool AreFinity(params double[] numbers)
+        {
+            List<bool> finities = new List<bool>();
+            foreach (var n in numbers) finities.Add(!double.IsInfinity(n));
+
+            return finities.FindAll(e => e == true).Count == numbers.Length;
+        }
+
+        public static void ThrowIfInfinity(params double[] numbers)
+        {
+            if (!AreFinity(numbers)) throw new IndexOutOfRangeException("The specified parameters must be finity double");
+        }
+
+        public static bool CheckIfNegativeNumber(int number) => number.ToString().StartsWith("-");
+        public static void ThrowIfNegativeNumber(int number)
+        {
+            if (CheckIfNegativeNumber(number))
+                throw new InvalidOperationException("The specified number can not be negative number");
+        }
+        public static void ThrowIfNegativeNumberOrZero(int number)
+        {
+            if (number == 0 || CheckIfNegativeNumber(number))
+                throw new InvalidOperationException("The specified number can not be negative number or be Zero");
         }
     }
 }

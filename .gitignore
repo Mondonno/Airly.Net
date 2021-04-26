@@ -2,6 +2,7 @@
 AirlyAPI/test
 test/
 test/test.csproj
+AirlyAPI/src/common/cache/
 
 # globs
 Makefile.in

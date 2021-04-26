@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace AirlyAPI.Rest.Typings
 {
@@ -50,18 +51,19 @@ namespace AirlyAPI.Rest.Typings
         public HttpResponseHeaders ResponseHeaders { get => ResponseMessage?.Headers; set { } }
 
         public DateTime ResponseTimestamp { get; set; }
+
+        public Dictionary<string, object> InternalData = new Dictionary<string, object>();
     }
 
     public class RawRestResponse
     {
-        public RawRestResponse(HttpResponseMessage response, string rawJSON)
+        public RawRestResponse(HttpResponseMessage response, string rawJson)
         {
-            this.HttpResponse = response;
-            this.RawJson = rawJSON;
+            HttpResponse = response;
+            RawJson = rawJson;
         }
 
         public HttpResponseMessage HttpResponse { get; set; }
         public string RawJson { get; set; }
     }
-
 }

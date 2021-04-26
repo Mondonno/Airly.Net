@@ -4,7 +4,8 @@ using AirlyAPI.Interactions;
 using AirlyAPI.Rest;
 using AirlyAPI.Utilities;
 
-// todo dodanie handlingowanie RateLimitami w Querze i w Handlingu bo obecnie nie dziala
+// todo zaimplementowanie CacheService do Airly.Net
+// todo przetestowac nowy system obłsugi 301 (jak znajde replaced)
 
 namespace AirlyAPI
 {
@@ -33,12 +34,12 @@ namespace AirlyAPI
 
         private Airly(string apiKey, AirlyLanguage? language)
         {
-            ApiKey = apiKey;
+            ApiKey = apiKey; // key validation is on the Util.validateKey
             Initialize(language);
         }
         private Airly(string apiKey, AirlyConfiguration configuration, AirlyLanguage? language)
         {
-            ApiKey = apiKey;
+            ApiKey = apiKey; // key validation is on the Util.validateKey
             Configuration = configuration ?? throw new ArgumentNullException("configuration");
             Initialize(language);
         }

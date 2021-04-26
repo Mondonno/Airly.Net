@@ -24,12 +24,15 @@ namespace AirlyAPI.Rest
             return await Api.Request<Installation>($"installations/{id}", method: null, options: null);
         }
         public async Task<List<Installation>> GetInstallationsNearestAsync(double lat, double lng, double maxDistance = 3, int maxResults = 1)
-            => await Api.Request<List<Installation>>("installations/nearest", "GET", new {
+        {
+            return await Api.Request<List<Installation>>("installations/nearest", "GET", new
+            {
                 lat,
                 lng,
-                maxDistance,
+                maxDistanceKM = ParamsValidator.InfinityToDouble(maxDistance),
                 maxResults
             });
+        }
         public async Task<Measurement> GetMeasurmentByInstallationAsync(int id, bool includeWind = false, IndexQueryType type = IndexQueryType.AirlyCAQI)
         {
             ParamsValidator.ThrowIfNegativeNumber(id);
@@ -41,20 +44,24 @@ namespace AirlyAPI.Rest
             });
         }
         public async Task<Measurement> GetMeasurmentNearestAsync(double lat, double lng, double maxDistance = 3, IndexQueryType type = IndexQueryType.AirlyCAQI)
-            => await Api.Request<Measurement>("measurements/nearest", "GET", new
-           {
-               lat,
-               lng,
-               maxDistanceKM = maxDistance,
-               indexType = ResolveIndexType(type)
-           });
+        {
+            return await Api.Request<Measurement>("measurements/nearest", "GET", new
+            {
+                lat,
+                lng,
+                maxDistanceKM = ParamsValidator.InfinityToDouble(maxDistance),
+                indexType = ResolveIndexType(type)
+            });
+        }
         public async Task<Measurement> GetMeasurmentByPointAsync(double lat, double lng, IndexQueryType type = IndexQueryType.AirlyCAQI)
-            => await Api.Request<Measurement>("measurements/point", "GET", new
+        {
+            return await Api.Request<Measurement>("measurements/point", "GET", new
             {
                 lat,
                 lng,
                 indexType = ResolveIndexType(type)
             });
+        }
         public async Task<Measurement> GetMeasurmentByLocationIdAsync(int locationId, bool includeWind = false, IndexQueryType type = IndexQueryType.AirlyCAQI)
         {
             ParamsValidator.ThrowIfNegativeNumber(locationId);
