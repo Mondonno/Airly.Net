@@ -11,7 +11,7 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <PackOnBuild>true</PackOnBuild>
     <PackageId>AirlyNet</PackageId>
-    <PackageVersion>0.1.1</PackageVersion>
+    <PackageVersion>0.1.2</PackageVersion>
     <Authors>Mondonno</Authors>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Owners>Mondonno</Owners>
@@ -20,6 +20,8 @@
     <PackageTags>airly airly.net c# csharp</PackageTags>
     <Title>Airly.Net</Title>
     <Description>Wrapper for the Airly API written 100% in C#</Description>
+    <PackageIconUrl>https://cdn.airly.org/assets/brand/icon/primary/airly-32.png</PackageIconUrl>
+    <Summary>Airly.Net is simple and easy to use wrapper for the Airly measurments service API</Summary>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
