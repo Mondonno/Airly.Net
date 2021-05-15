@@ -16,7 +16,7 @@ Or visit project Wiki
 ## Installation
 
 Airly.Net stable builds are avaible on NugGet.org through the Airly.Net meta package
-- [**Airly.Net**]()
+- [**Airly.Net**](https://www.nuget.org/packages/AirlyNet/)
 
 ## Compiling
 You can compile our library with the following dependencies
@@ -39,6 +39,6 @@ Measurment measurment = await client.Measurments.Nearest(location) // Pass it
 DateTime fromMeasurmentDateTime = measurment.Current.FromDateTime; // Destruct actual measurments from date time
 Console.WriteLine(fromMeasurmentDateTime.ToString()); // Show it over the world
 ```
-*Always remember to add after packet installation `using AirlyAPI`*
+*Always remember to add after packet installation `using AirlyNet`*
 
 #### [Polish Version]()

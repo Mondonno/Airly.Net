@@ -14,7 +14,7 @@ Lub mozesz odwiedzic Wiki naszego projektu
 ## Instalacja
 Stabilne kompilacje **Airly.Net** są dostępne za pośrednictwem platformy Nuget.org
 
-- [**Airly.Net**]()
+- [**Airly.Net**](https://www.nuget.org/packages/AirlyNet/)
 
 ## Kompilowanie
 Skompilować `Airly.Net` mozesz razem z tymi programami
@@ -39,6 +39,6 @@ Measurment measurment = await client.Measurments.Nearest(location) // Podaj je
 DateTime fromMeasurmentDateTime = measurment.Current.FromDateTime; // Zdectruktuj datę aktualnego pomairy zanieczyszczeń
 Console.WriteLine(fromMeasurmentDateTime.ToString()); // Pokaz je światu
 ```
-*Zawsze pamiętaj aby po instalacji pakietu dodać na początku pliku `using AirlyAPI`*
+*Zawsze pamiętaj aby po instalacji pakietu dodać na początku pliku `using AirlyNet`*
 
 #### [Wersja w języku Angielskim](https://github.com/Mondonno/Airly.Net)
