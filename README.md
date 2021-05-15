@@ -41,4 +41,4 @@ Console.WriteLine(fromMeasurmentDateTime.ToString()); // Show it over the world
 ```
 *Always remember to add after packet installation `using AirlyNet`*
 
-#### [Polish Version]()
+#### [Polish Version](./README_POLISH.md)
