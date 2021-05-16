@@ -3,6 +3,7 @@ Airly.Net/test
 test/
 test/test.csproj
 AirlyAPI/src/common/cache/
+Airly.Net/nuget.config/
 
 # globs
 Makefile.in
