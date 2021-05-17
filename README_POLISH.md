@@ -1,5 +1,5 @@
 # Airly.Net
-Nieoficjalny mocny i szybki .NET api wrapper napisany w C# dla [Airly](https://developer.airly.org/docs)<br>
+Nieoficjalny mocny i szybki .NET api wrapper napisany w C# dla [Airly](https://developer.airly.org/pl/docs)<br>
 Jeśli chcesz zintegrować swoja aplikacje z API od airly to jest to czego szukasz
 
 - Bazowany asynchronicznie
