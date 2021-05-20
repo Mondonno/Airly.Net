@@ -39,6 +39,7 @@ Measurment measurment = await client.Measurments.Nearest(location) // Pass it
 DateTime fromMeasurmentDateTime = measurment.Current.FromDateTime; // Destruct actual measurments from date time
 Console.WriteLine(fromMeasurmentDateTime.ToString()); // Show it over the world
 ```
-*Always remember to add after packet installation `using AirlyNet`*
+*Always remember to add after packet installation `using AirlyNet`*<br>
+**Note** you need to add `using AirlyNet.Models` in case to use `Location`, `Address` etc.
 
 #### [Polish Version](./README_POLISH.md)
