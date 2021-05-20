@@ -8,15 +8,12 @@ using Newtonsoft.Json.Linq;
 
 using AirlyNet.Rest.Typings;
 using AirlyNet.Handling.Errors;
+using AirlyNet.Handling;
 
 namespace AirlyNet.Utilities
 {
     public sealed class Utils
     {
-        // The ratelimits headers names
-        public string XRemainingName = "X-RateLimit-Remaining-day";
-        public string XLimitName = "X-RateLimit-Limit-day";
-
         // Checking if the ratelimit is reached
         private bool GetRateLimitBase(string XRemaining, string XLimit)
         {
@@ -49,8 +46,8 @@ namespace AirlyNet.Utilities
         // Getting and calculating the ratelimits for the headers
         public bool GetRatelimit(HttpResponseHeaders headers)
         {
-            string XRemaining = GetHeader(headers, this.XRemainingName);
-            string XLimit = GetHeader(headers, this.XLimitName);
+            string XRemaining = GetHeader(headers, RateLimitInfo.XRemainingName);
+            string XLimit = GetHeader(headers, RateLimitInfo.XLimitName);
 
             object rateLimit = GetRateLimitBase(XRemaining, XLimit);
             return (bool)rateLimit;
@@ -61,8 +58,8 @@ namespace AirlyNet.Utilities
         {
             HttpResponseHeaders headers = response.ResponseHeaders;
 
-            string XRemaining = GetHeader(headers, this.XRemainingName);
-            string XLimit = GetHeader(headers, this.XLimitName);
+            string XRemaining = GetHeader(headers, RateLimitInfo.XRemainingName);
+            string XLimit = GetHeader(headers, RateLimitInfo.XLimitName);
 
             object rateLimit = GetRateLimitBase(XRemaining, XLimit);
             return (bool)rateLimit;
@@ -82,8 +79,8 @@ namespace AirlyNet.Utilities
         {
             var headers = responseHeaders;
 
-            string XRemaining = GetHeader(headers, this.XRemainingName);
-            string XLimit = GetHeader(headers, this.XLimitName);
+            string XRemaining = GetHeader(headers, RateLimitInfo.XRemainingName);
+            string XLimit = GetHeader(headers, RateLimitInfo.XLimitName);
 
             if (XRemaining == null || XLimit == null) return null;
 

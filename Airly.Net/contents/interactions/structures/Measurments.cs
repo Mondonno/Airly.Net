@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 
+using AirlyNet.Models;
+
 namespace AirlyNet.Interactions
 {
     public class Measurements : InteractionBase

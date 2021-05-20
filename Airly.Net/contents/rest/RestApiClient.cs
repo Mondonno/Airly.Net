@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using AirlyNet.Utilities;
+using AirlyNet.Models;
 
 namespace AirlyNet.Rest
 {

@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 using AirlyNet.Utilities;
 
-namespace AirlyNet
+namespace AirlyNet.Models
 {
     public class LocationArea
     {
@@ -172,7 +172,7 @@ namespace AirlyNet
         public Uri Link { get; set; }
     }
 
-    public class Adress
+    public class Address
     {
         [JsonProperty("country")]
         public string Country { get; set; }
@@ -199,7 +199,7 @@ namespace AirlyNet
         public int? LocationId { get; set; }
 
         [JsonProperty("address")]
-        public Adress Address { get; set; }
+        public Address Address { get; set; }
         [JsonProperty("location")]
         public Location Location { get; set; }
         [JsonProperty("sponsor")]

@@ -18,15 +18,20 @@ namespace AirlyNet.Handling
 
         public RateLimitInfo(HttpHeaders httpHeaders)
         {
-            string limit = Util.GetHeader(httpHeaders, Util.XLimitName) ?? null;
-            string remain = Util.GetHeader(httpHeaders, Util.XRemainingName) ?? null;
+            string limit = Util.GetHeader(httpHeaders, XLimitName) ?? null;
+            string remain = Util.GetHeader(httpHeaders, XRemainingName) ?? null;
 
             Limit = limit != null ? Convert.ToInt32(limit) : null;
             Remain = remain != null ? Convert.ToInt32(remain) : null;
             Diffrence = Util.CalculateRateLimit(Remain, Limit);
             IsRateLimited = Diffrence == 0 || Diffrence == null; 
         }
+
         public RateLimitInfo(HttpResponseMessage response) : this(response.Headers) { }
         public RateLimitInfo(RawRestResponse response) : this(response.HttpResponse.Headers) { }
+
+        public static string XRemainingName = "X-RateLimit-Remaining-day";
+        public static string XLimitName = "X-RateLimit-Limit-day";
+
     }
 }

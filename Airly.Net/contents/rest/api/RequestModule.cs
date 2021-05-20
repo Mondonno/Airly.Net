@@ -6,17 +6,17 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Security.Permissions;
 using System.Text;
-using System.Diagnostics;
 
 using AirlyNet.Utilities;
 using AirlyNet.Rest.Typings;
 using AirlyNet.Handling.Errors;
+using AirlyNet.Models;
 
 namespace AirlyNet.Rest
 {
     [DnsPermission(SecurityAction.Assert)]
     [WebPermission(SecurityAction.Assert)]
-    public class DeafultRestRequest : IRequest, IDisposable
+    public class DefaultRestRequest : IRequest, IDisposable
     {
         public RESTManager Rest { get; set; }
         public HttpMethod Method { get; set; }
@@ -25,7 +25,7 @@ namespace AirlyNet.Rest
         private HttpClient HttpClient { get; set; }
         public Utils Util { get; set; } = new Utils();
 
-        public Dictionary<string, string> DeafultHeaders = new Dictionary<string, string>()
+        public Dictionary<string, string> DefaultHeaders = new Dictionary<string, string>()
         {
             { "Accept", "*/*" },
             { "Connection", "keep-alive" },
@@ -46,7 +46,7 @@ namespace AirlyNet.Rest
         protected bool _isDisposed;
         public string EndPoint { get; set; }
 
-        public DeafultRestRequest(RESTManager rest, string end, string method, RequestOptions options)
+        public DefaultRestRequest(RESTManager rest, string end, string method, RequestOptions options)
         {
             Rest = rest;
             RestConfiguration = rest.Airly.Configuration;
@@ -54,7 +54,7 @@ namespace AirlyNet.Rest
             RestOptions = options;
             Method = !string.IsNullOrEmpty(method) ? GetMethod(method) : GetMethod("GET");
 
-            DeafultHeaders.Add("User-Agent", RestConfiguration.Agent);
+            DefaultHeaders.Add("User-Agent", RestConfiguration.Agent);
 
             string url =
                 $"{RestConfiguration.Protocol ?? "https"}://" +
@@ -79,7 +79,7 @@ namespace AirlyNet.Rest
             RestHttpHandler restHttpHandler = new RestHttpHandler();
             HttpClient = new HttpClient(restHttpHandler, true);
 
-            MergeHeaders(DeafultHeaders);
+            MergeHeaders(DefaultHeaders);
         }
 
         public async Task<RawRestResponse> Send()

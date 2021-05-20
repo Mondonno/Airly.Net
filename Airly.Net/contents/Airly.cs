@@ -3,9 +3,7 @@
 using AirlyNet.Interactions;
 using AirlyNet.Rest;
 using AirlyNet.Utilities;
-
-// todo zaimplementowanie CacheService do Airly.Net
-// todo przetestowac nowy system obłsugi 301 (jak znajde replaced)
+using AirlyNet.Models;
 
 namespace AirlyNet
 {

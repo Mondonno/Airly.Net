@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using System;
 
+using AirlyNet.Models;
+
 namespace AirlyNet.Interactions
 {
     public class Meta : InteractionBase

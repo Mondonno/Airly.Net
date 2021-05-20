@@ -1,4 +1,5 @@
-﻿
+﻿using AirlyNet.Models;
+
 namespace AirlyNet
 {
     public sealed class AirlyEndpoints

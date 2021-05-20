@@ -2,17 +2,18 @@
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Net.Http;
 using Newtonsoft.Json.Linq;
 
 using AirlyNet.Utilities;
 using AirlyNet.Rest.Typings;
 using AirlyNet.Rest;
 using AirlyNet.Handling.Errors;
-using System.Net.Http;
+using AirlyNet.Models;
 
 namespace AirlyNet.Handling
 {
-    public class Waiter : SemaphoreSlim // Deafult SemaphoreSlim configuration + shortcuts
+    public class Waiter : SemaphoreSlim // Default SemaphoreSlim configuration + shortcuts
     {
         public Waiter() : base(1, 1) { }
 

@@ -3,12 +3,7 @@ using System.Collections.Generic;
 
 using AirlyNet.Utilities;
 using AirlyNet.Handling.Errors;
-
-// IMPORTANT DISTRIBUTION NOTE!
-// What does do redirect?
-// Redirect do the request to the api with the new id (`INSTALLATION_REPLACED` error) and returns them not error
-// If you do not provide them our module give you error with succesor, message and code
-// If the another installation is moved module give error (this prevents the infinity request loops and limits reaching)
+using AirlyNet.Models;
 
 namespace AirlyNet.Interactions
 {

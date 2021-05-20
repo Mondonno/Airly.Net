@@ -5,6 +5,7 @@ using AirlyNet.Handling;
 using AirlyNet.Utilities;
 using AirlyNet.Rest.Typings;
 using AirlyNet.Handling.Errors;
+using AirlyNet.Models;
 
 namespace AirlyNet.Rest
 {

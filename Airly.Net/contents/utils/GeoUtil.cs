@@ -1,4 +1,5 @@
 ﻿using System;
+using AirlyNet.Models;
 
 namespace AirlyNet.Utilities
 {
