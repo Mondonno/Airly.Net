@@ -40,6 +40,6 @@ DateTime fromMeasurmentDateTime = measurment.Current.FromDateTime; // Zdectruktu
 Console.WriteLine(fromMeasurmentDateTime.ToString()); // Pokaz je światu
 ```
 *Zawsze pamiętaj aby po instalacji pakietu dodać na początku pliku `using AirlyNet`*
-**Notka** musisz dodać `using AirlyNet.Models` jeśli chcesz uzyć `Location`, `Address` itp. itd.
+**Notka**: musisz dodać `using AirlyNet.Models` jeśli chcesz uzyć `Location`, `Address` itp. itd.
 
 #### [Wersja w języku Angielskim](https://github.com/Mondonno/Airly.Net)

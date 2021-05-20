@@ -40,6 +40,6 @@ DateTime fromMeasurmentDateTime = measurment.Current.FromDateTime; // Destruct a
 Console.WriteLine(fromMeasurmentDateTime.ToString()); // Show it over the world
 ```
 *Always remember to add after packet installation `using AirlyNet`*<br>
-**Note** you need to add `using AirlyNet.Models` in case to use `Location`, `Address` etc.
+**Note**: you need to add `using AirlyNet.Models` in case to use `Location`, `Address` etc.
 
 #### [Polish Version](./README_POLISH.md)
