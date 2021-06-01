@@ -6,6 +6,9 @@ using AirlyNet.Utilities;
 
 namespace AirlyNet.Models
 {
+    /// <summary>
+    /// Location area, created from to Location objects.
+    /// </summary>
     public class LocationArea
     {
         public LocationArea(Location sw, Location ne)
@@ -30,6 +33,10 @@ namespace AirlyNet.Models
         public override int GetHashCode() => base.GetHashCode();
         public override string ToString() => $"{Sw.Lat} {Sw.Lng}\n{Ne.Lat} {Ne.Lng}";
     }
+
+    /// <summary>
+    /// Main Location object used when interacting with Airly.
+    /// </summary>
     public class Location
     {
         public Location(double lat, double lng)
@@ -54,22 +61,52 @@ namespace AirlyNet.Models
         public override string ToString() => $"{Lat} {Lng}";
     }
 
+    /// <summary>
+    /// Represents the resource not found Error handling
+    /// </summary>
     public enum AirlyNotFoundHandling
     {
+        /// <summary>
+        /// Throwing error when 404 throwed
+        /// </summary>
         Error,
+        /// <summary>
+        /// Returning null when 404 throwed (deafult)
+        /// </summary>
         Null
     }
 
+    /// <summary>
+    /// Represents the Language used when requesting to API
+    /// </summary>
     public enum AirlyLanguage
     {
+        /// <summary>
+        /// PL Language
+        /// </summary>
         pl,
+        /// <summary>
+        /// EN Language (deafult)
+        /// </summary>
         en
     }
 
+    /// <summary>
+    /// Index Query Type that specifies the returing measurment Index 
+    /// </summary>
     public enum IndexQueryType
     {
+        /// <summary>
+        /// Airly CAQI Index (deafult)
+        /// </summary>
         AirlyCAQI,
+        /// <summary>
+        /// CAQI used in Europe, recommended by WHO
+        /// </summary>
         CAQI,
+        /// <summary>
+        /// Polish measurments index
+        /// </summary>
         PJP
     }
 
