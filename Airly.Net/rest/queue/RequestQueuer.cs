@@ -61,7 +61,6 @@ namespace AirlyNet.Handling
 
         private async Task<RestResponse> Make(RestRequest request)
         {
-            Utils utils = new();
             RawRestResponse res;
 
             try { res = await request.InvokeRequest(handle: true); }
@@ -71,7 +70,7 @@ namespace AirlyNet.Handling
             if (RateLimited)
             {
                 var details = new RateLimitInfo(res.HttpResponse);
-                if (details.IsRateLimited) RateLimitThrower.MakeRateLimitError(res, utils, null);
+                if (details.IsRateLimited) RateLimitThrower.MakeRateLimitError(res, null);
                 else {
                     RateLimited = false;
                     System.Diagnostics.
@@ -83,7 +82,7 @@ namespace AirlyNet.Handling
             HttpResponseHeaders headers = res.HttpResponse.Headers;
 
             int statusCode = (int) res.HttpResponse.StatusCode;
-            string rawDate = utils.GetHeader(headers, "Date");
+            string rawDate = RestUtil.GetHeader(headers, "Date");
 
             RestResponse constructedResponse = new()
             {

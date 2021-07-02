@@ -28,7 +28,6 @@ namespace AirlyNet.Handling
 
     public class ErrorDeserializer
     {
-        private Utils util { get; set; } = new();
         protected HttpResponseMessage HttpResponse { get; set; }
 
         private string Json { get; set; }
@@ -41,7 +40,7 @@ namespace AirlyNet.Handling
 
         private string GetSuccesor(HttpHeaders httpHeaders)
         {
-            var header = util.GetHeader(httpHeaders, "Location");
+            var header = RestUtil.GetHeader(httpHeaders, "Location");
             string value = header != null ? header : null;
             return value;
         }
@@ -103,12 +102,12 @@ namespace AirlyNet.Handling
 
             throw error;
         }
-        public static void MakeRateLimitError(RawRestResponse res, Utils utils, string customMessage = null)
+        public static void MakeRateLimitError(RawRestResponse res, string customMessage = null)
         {
             var headers = res.HttpResponse.Headers;
 
-            string limits = utils.GetHeader(headers, "X-RateLimit-Limit-day");
-            string all = utils.CalculateRateLimit(headers).ToString();
+            string limits = RestUtil.GetHeader(headers, "X-RateLimit-Limit-day");
+            string all = RatelimitsUtil.CalculateRateLimit(headers).ToString();
 
             MakeRateLimitError(limits, all, customMessage);
         }
@@ -164,7 +163,6 @@ namespace AirlyNet.Handling
             int statusCode = responseCode ?? (int) HttpResponseCode;
             string rawJson = ResponseJson;
 
-            Utils utils = new();
             JsonErrorHandler handler = new(rawJson);
             HttpResponseHeaders headers = ResponseHeaders;
 
@@ -175,9 +173,9 @@ namespace AirlyNet.Handling
                 return;
             };
 
-            int? limit = utils.CalculateRateLimit(headers);
+            int? limit = RatelimitsUtil.CalculateRateLimit(headers);
 
-            if (limit == 0) throw new AirlyError($"Get ratelimited by airly api\n{utils.CalculateRateLimit(headers)}");
+            if (limit == 0) throw new AirlyError($"Get ratelimited by airly api\n{RatelimitsUtil.CalculateRateLimit(headers)}");
             if (statusCode > 200 && statusCode <= 300)
             {
                 if (statusCode == 301)
@@ -192,7 +190,7 @@ namespace AirlyNet.Handling
                 if (statusCode == 401) throw new AirlyError("The provided API Key is not valid");
                 if (statusCode == 429)
                 {
-                    RateLimitThrower.MakeRateLimitError(utils.GetHeader(headers, "X-RateLimit-Limit-day"), $"{utils.CalculateRateLimit(headers)}", "");
+                    RateLimitThrower.MakeRateLimitError(RestUtil.GetHeader(headers, "X-RateLimit-Limit-day"), $"{RatelimitsUtil.CalculateRateLimit(headers)}", "");
                     return;
                 }
                 handler.HandleMalformed();

@@ -12,108 +12,17 @@ using AirlyNet.Handling;
 
 namespace AirlyNet.Utilities
 {
-    public sealed class Utils
+    public static class Utils
     {
-        // Checking if the ratelimit is reached
-        private bool GetRateLimitBase(string XRemaining, string XLimit)
-        {
-            int rateLimitRemaining;
-            int rateLimitAll;
-            int rateLimit;
-
-            bool rateLimitCheck = false;
-
-            bool headersExists = XRemaining == null || XRemaining == "" || XLimit == null || XLimit == "";
-
-            if (!headersExists)
-            {
-                rateLimitRemaining = Convert.ToInt32(XRemaining);
-                rateLimitAll = Convert.ToInt32(XLimit);
-
-                // Like
-                // 100 (ratelimit) - 23 (uses) = 77
-                rateLimit = rateLimitAll - rateLimitRemaining;
-
-                // If the ratelimit is reached the rateLimit value is 100 (any avaible request can now be sent after ratelimit reset)
-                rateLimitCheck = rateLimit == 100;
-
-                return rateLimitCheck;
-            }
-
-            return rateLimitCheck;
-        }
-
-        // Getting and calculating the ratelimits for the headers
-        public bool GetRatelimit(HttpResponseHeaders headers)
-        {
-            string XRemaining = GetHeader(headers, RateLimitInfo.XRemainingName);
-            string XLimit = GetHeader(headers, RateLimitInfo.XLimitName);
-
-            object rateLimit = GetRateLimitBase(XRemaining, XLimit);
-            return (bool)rateLimit;
-        }
-
-        // The method to get the ratlimits from the response message
-        public bool GetRatelimit(RestResponse response)
-        {
-            HttpResponseHeaders headers = response.ResponseHeaders;
-
-            string XRemaining = GetHeader(headers, RateLimitInfo.XRemainingName);
-            string XLimit = GetHeader(headers, RateLimitInfo.XLimitName);
-
-            object rateLimit = GetRateLimitBase(XRemaining, XLimit);
-            return (bool)rateLimit;
-        }
-
-        public int? CalculateRateLimit(int? XRemaining, int? XLimit)
-        {
-            if (XRemaining == null || XLimit == null) return null;
-
-            int? calculated = XLimit - (XLimit - XRemaining);
-            return calculated;
-        }
-
-        // Calculating the ratelimits diffrents
-        public int? CalculateRateLimit(RestResponse res) => CalculateRateLimit(res.ResponseHeaders);
-        public int? CalculateRateLimit(HttpResponseHeaders responseHeaders)
-        {
-            var headers = responseHeaders;
-
-            string XRemaining = GetHeader(headers, RateLimitInfo.XRemainingName);
-            string XLimit = GetHeader(headers, RateLimitInfo.XLimitName);
-
-            if (XRemaining == null || XLimit == null) return null;
-
-            int cnv1 = Convert.ToInt32(XRemaining);
-            int cnv2 = Convert.ToInt32(XLimit);
-
-            return CalculateRateLimit(cnv1, cnv2);
-        }
-
-        // For response headers
-        // Getting the header first value because the headers can have multiple values (Airly API always return one value headers)
-        private string GetHeaderBase(IEnumerable<string> values) => this.GetFirstEnumarable(values);
-        public string GetHeader(HttpHeaders headers, string key)
-        {
-            string values = null;
-            try
-            {
-                values = GetHeaderBase(headers.GetValues(key));
-            }
-            catch (Exception)
-            { }
-            return values;
-        }
-
         // Simple coping the one dictonary to another without the overwriting
-        public void CopyDictonaryValues(ref IDictionary<object, object> target, IDictionary<object, object> toCopyInto)
+        public static void CopyDictonaryValues(ref IDictionary<object, object> target, IDictionary<object, object> toCopyInto)
         {
             foreach (var pair in toCopyInto)
                 target.Add(pair.Key, pair.Value);
         }
 
         // Simple converting JTokens to the JObjects by exclipting the C# types
-        public JObject[] ConvertTokens(JToken[] tokens)
+        public static JObject[] ConvertTokens(JToken[] tokens)
         {
             JObject[] jObjects = new JObject[0];
             foreach (var token in tokens)
@@ -124,7 +33,7 @@ namespace AirlyNet.Utilities
         }
 
         // Formmatting web query
-        public string FormatQuery(string query)
+        public static string FormatQuery(string query)
         {
             if (query.StartsWith("?")) query = query.Remove(0, 1);
 
@@ -151,7 +60,7 @@ namespace AirlyNet.Utilities
         }
 
         // Klasy anonimowe sa odczytywane jako normalne klasy bez dziedziczenia oraz bez konstruktora. system wartości PropertyInfo jest identyczny
-        public List<NormalizedProperty> GetClassProperties<T>(T classObject)
+        public static List<NormalizedProperty> GetClassProperties<T>(T classObject)
         {
             Type classType = classObject.GetType();
             PropertyInfo[] props = classType.GetProperties();
@@ -177,7 +86,7 @@ namespace AirlyNet.Utilities
             return normalizedProperties;
         }
 
-        public bool IsDouble(object obj)
+        public static bool IsDouble(object obj)
         {
             double? result;
             try
@@ -192,7 +101,7 @@ namespace AirlyNet.Utilities
             else return false;
         }
 
-        public string[][] ParseQuery(dynamic query)
+        public static string[][] ParseQuery(dynamic query)
         {
             NumberFormatInfo numberInfo = new NumberFormatInfo()
             {
@@ -220,9 +129,9 @@ namespace AirlyNet.Utilities
             return convertedQuery;
         }
 
-        public T GetFirstEnumarable<T>(IEnumerable<T> enumarable) => enumarable.First((e) => true);
+        public static T GetFirstEnumarable<T>(IEnumerable<T> enumarable) => enumarable.First((e) => true);
 
-        public object InvokeMethod<T>(T obj, string methodName, object[] parameters)
+        public static object InvokeMethod<T>(T obj, string methodName, object[] parameters)
         {
             Type type = obj.GetType();
             MethodInfo method = type.GetMethod(methodName);
@@ -231,7 +140,7 @@ namespace AirlyNet.Utilities
             return result;
         }
 
-        public bool IsPropertyExists<T>(T obj, string name)
+        public static bool IsPropertyExists<T>(T obj, string name)
         {
             Type type = obj.GetType();
             PropertyInfo result = type.GetProperty(name);
@@ -281,7 +190,7 @@ namespace AirlyNet.Utilities
         }
 
         [Obsolete]
-        public string ReplaceDashUpper(string str)
+        public static string ReplaceDashUpper(string str)
         {
             string finalString = "";
             string[] strs = str.Split('-');
@@ -292,6 +201,104 @@ namespace AirlyNet.Utilities
                 finalString += string.Format("{0}{1}", nm[0].ToString().ToUpper(), nm.Remove(0, 1));
             }
             return finalString;
+        }
+    }
+
+    public static class RatelimitsUtil
+    {
+        // Checking if the ratelimit is reached
+        private static bool GetRateLimitBase(string XRemaining, string XLimit)
+        {
+            int rateLimitRemaining;
+            int rateLimitAll;
+            int rateLimit;
+
+            bool rateLimitCheck = false;
+
+            bool headersExists = XRemaining == null || XRemaining == "" || XLimit == null || XLimit == "";
+
+            if (!headersExists)
+            {
+                rateLimitRemaining = Convert.ToInt32(XRemaining);
+                rateLimitAll = Convert.ToInt32(XLimit);
+
+                // Like
+                // 100 (ratelimit) - 23 (uses) = 77
+                rateLimit = rateLimitAll - rateLimitRemaining;
+
+                // If the ratelimit is reached the rateLimit value is 100 (any avaible request can now be sent after ratelimit reset)
+                rateLimitCheck = rateLimit == 100;
+
+                return rateLimitCheck;
+            }
+
+            return rateLimitCheck;
+        }
+
+        // Getting and calculating the ratelimits for the headers
+        public static bool GetRatelimit(HttpResponseHeaders headers)
+        {
+            string XRemaining = RestUtil.GetHeader(headers, RateLimitInfo.XRemainingName);
+            string XLimit = RestUtil.GetHeader(headers, RateLimitInfo.XLimitName);
+
+            object rateLimit = GetRateLimitBase(XRemaining, XLimit);
+            return (bool)rateLimit;
+        }
+
+        // The method to get the ratlimits from the response message
+        public static bool GetRatelimit(RestResponse response)
+        {
+            HttpResponseHeaders headers = response.ResponseHeaders;
+
+            string XRemaining = RestUtil.GetHeader(headers, RateLimitInfo.XRemainingName);
+            string XLimit = RestUtil.GetHeader(headers, RateLimitInfo.XLimitName);
+
+            object rateLimit = GetRateLimitBase(XRemaining, XLimit);
+            return (bool)rateLimit;
+        }
+
+        public static int? CalculateRateLimit(int? XRemaining, int? XLimit)
+        {
+            if (XRemaining == null || XLimit == null) return null;
+
+            int? calculated = XLimit - (XLimit - XRemaining);
+            return calculated;
+        }
+
+        // Calculating the ratelimits diffrents
+        public static int? CalculateRateLimit(RestResponse res) => CalculateRateLimit(res.ResponseHeaders);
+        public static int? CalculateRateLimit(HttpResponseHeaders responseHeaders)
+        {
+            var headers = responseHeaders;
+
+            string XRemaining = RestUtil.GetHeader(headers, RateLimitInfo.XRemainingName);
+            string XLimit = RestUtil.GetHeader(headers, RateLimitInfo.XLimitName);
+
+            if (XRemaining == null || XLimit == null) return null;
+
+            int cnv1 = Convert.ToInt32(XRemaining);
+            int cnv2 = Convert.ToInt32(XLimit);
+
+            return CalculateRateLimit(cnv1, cnv2);
+        }
+    }
+
+    public static class RestUtil
+    {
+
+        // For response headers
+        // Getting the header first value because the headers can have multiple values (Airly API always return one value headers)
+        private static string GetHeaderBase(IEnumerable<string> values) => Utils.GetFirstEnumarable(values);
+        public static string GetHeader(HttpHeaders headers, string key)
+        {
+            string values = null;
+            try
+            {
+                values = GetHeaderBase(headers.GetValues(key));
+            }
+            catch (Exception)
+            { }
+            return values;
         }
     }
 

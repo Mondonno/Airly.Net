@@ -23,7 +23,6 @@ namespace AirlyNet.Rest
         public RequestOptions RestOptions { get; set; }
         public AirlyConfiguration RestConfiguration { get; set; }
         private HttpClient HttpClient { get; set; }
-        public Utils Util { get; set; } = new Utils();
 
         public Dictionary<string, string> DefaultHeaders = new Dictionary<string, string>()
         {
@@ -70,7 +69,7 @@ namespace AirlyNet.Rest
                     query += string.Format("{0}={1}&", segment[0], segment[1]);
 
                 query = query.EndsWith("&") ? query.Remove(query.Length - 1, 1) : query;
-                query = Util.FormatQuery(query);
+                query = Utils.FormatQuery(query);
             }
 
             url = !string.IsNullOrEmpty(query) ? url + query : url;

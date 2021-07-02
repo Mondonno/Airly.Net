@@ -9,8 +9,6 @@ namespace AirlyNet.Handling
 {
     public class RateLimitInfo
     {
-        private Utils Util { get; set; }
-
         public bool IsRateLimited { get; set; }
         public int? Limit { get; set; }
         public int? Remain { get; set; }
@@ -18,12 +16,12 @@ namespace AirlyNet.Handling
 
         public RateLimitInfo(HttpHeaders httpHeaders)
         {
-            string limit = Util.GetHeader(httpHeaders, XLimitName) ?? null;
-            string remain = Util.GetHeader(httpHeaders, XRemainingName) ?? null;
+            string limit = RestUtil.GetHeader(httpHeaders, XLimitName) ?? null;
+            string remain = RestUtil.GetHeader(httpHeaders, XRemainingName) ?? null;
 
             Limit = limit != null ? Convert.ToInt32(limit) : null;
             Remain = remain != null ? Convert.ToInt32(remain) : null;
-            Diffrence = Util.CalculateRateLimit(Remain, Limit);
+            Diffrence = RatelimitsUtil.CalculateRateLimit(Remain, Limit);
             IsRateLimited = Diffrence == 0 || Diffrence == null; 
         }
 

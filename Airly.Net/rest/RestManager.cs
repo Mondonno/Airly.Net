@@ -56,9 +56,8 @@ namespace AirlyNet.Rest
         }
         public async Task<T> Request<T>(string end, string method = null, dynamic query = null, RequestOptions options = null)
         {
-            Utils util = new();
             RequestOptions requestOptions = options ?? (new());
-            if (query != null) requestOptions.Query = util.ParseQuery(query);
+            if (query != null) requestOptions.Query = Utils.ParseQuery(query);
 
             return await Request<T>(end, method, requestOptions);
         }
