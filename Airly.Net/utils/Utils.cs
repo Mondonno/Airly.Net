@@ -148,8 +148,6 @@ namespace AirlyNet.Utilities
             return result != null;
         }
 
-        // Static methods
-
         public static bool IsAggregated(Exception ex)
         {
             try

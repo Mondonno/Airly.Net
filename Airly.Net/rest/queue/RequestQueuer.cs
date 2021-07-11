@@ -32,7 +32,7 @@ namespace AirlyNet.Handling
         public RequestQueuer(RESTManager manager)
         {
             Manager = manager;
-            Waiter = new Waiter();
+            Waiter = new();
         }
 
         public async Task<RestResponse> Push(RestRequest request)

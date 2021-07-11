@@ -105,7 +105,7 @@ namespace AirlyNet.Rest
             return restResponse;
         }
         public async Task<RawRestResponse> SendAndHandle()
-        {
+        { 
             try
             {
                 return await Send();
