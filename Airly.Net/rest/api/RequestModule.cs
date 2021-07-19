@@ -104,6 +104,7 @@ namespace AirlyNet.Rest
             RawRestResponse restResponse = new(httpResponse, httpContent);
             return restResponse;
         }
+
         public async Task<RawRestResponse> SendAndHandle()
         { 
             try
@@ -125,8 +126,11 @@ namespace AirlyNet.Rest
             RemoveHeader(key);
             AddHeader(key, value);
         }
+
         public void AddHeader(string key, string value) => HttpClient.DefaultRequestHeaders.Add(key, value);
+
         public void RemoveHeader(string key) => HttpClient.DefaultRequestHeaders.Remove(key);
+
         public void MergeHeaders(Dictionary<string, string> headers)
         {
             foreach (var header in headers)
@@ -155,7 +159,9 @@ namespace AirlyNet.Rest
         }
 
         public void SetMethod(string methodName) => RawMethod = methodName.Trim().ToUpper();
+
         public void SetLanguage(AirlyLanguage language) => SetLanguage(language.ToString().ToLower());
+
         public void SetLanguage(string language) => ToggleHeader("Accept-Language", language.ToLower());
 
         public void Dispose()

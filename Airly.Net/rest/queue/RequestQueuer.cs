@@ -18,6 +18,7 @@ namespace AirlyNet.Handling
         public Waiter() : base(1, 1) { }
 
         public int RemainingTasks() => CurrentCount;
+
         public void Destroy() => Dispose(true);
     }
 
@@ -53,6 +54,7 @@ namespace AirlyNet.Handling
         }
 
         private JToken ConvertJsonString(RawRestResponse res) => ConvertJsonString(res.RawJson);
+
         private JToken ConvertJsonString(string json)
         {
             JToken token = JsonParser.ParseJson(json);

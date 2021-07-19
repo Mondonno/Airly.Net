@@ -33,6 +33,7 @@ namespace AirlyNet.Utilities
         }
 
         public static string JoinList<T>(List<T> list, string character) => JoinArray(list.ToArray(), character);
+
         public static string JoinArray<T>(T[] table, string character)
         {
             string compiledString = string.Empty;
@@ -43,6 +44,7 @@ namespace AirlyNet.Utilities
 
         // Splitting the blank characters in a string (CS1011)
         public static List<string> SplitEveryToList(string str) => new List<string>(SplitEvery(str));
+
         public static string[] SplitEvery(string str)
         {
             string[] array = new string[0];

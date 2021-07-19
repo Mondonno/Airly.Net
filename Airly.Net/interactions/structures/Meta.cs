@@ -21,6 +21,7 @@ namespace AirlyNet.Interactions
         /// </summary>
         /// <returns>List of the Measurment's Meta (MeasurmentType)</returns>
         public async Task<List<MeasurementType>> Measurements() => await Api.GetMetaMeasurmentsAsync();
+
         public Task<object> Docs() => throw new NotImplementedException();
     }
 }

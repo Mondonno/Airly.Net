@@ -7,7 +7,9 @@ namespace AirlyNet.Handling
     public class RequestQueueManager : Dictionary<string, RequestQueuer>, IDisposable // internal module with exposed parent
     {
         public int Handlers() => Count;
+
         public bool Inactive() => Count == 0;
+
         public bool RateLimited()
         {
             if (Count == 0) return false;
@@ -25,12 +27,14 @@ namespace AirlyNet.Handling
             TryGetValue(route, out RequestQueuer queuer);
             return queuer ?? null;
         }
+
         public void Set(string route, RequestQueuer queuer)
         {
             bool contains = ContainsKey(route);
             if (contains) Remove(route);
             Add(route, queuer);
         }
+
         public void Dispose()
         {
             foreach (var avaibleQueuer in this)

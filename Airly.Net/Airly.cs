@@ -11,7 +11,7 @@ namespace AirlyNet
     /// Use this class to interact with the Airly API, main entry of Airly.Net
     /// </summary>
     public class Airly : IDisposable
-    { 
+    {
         protected bool _isDisposed;
 
         /// <summary>
@@ -26,10 +26,12 @@ namespace AirlyNet
         /// Manager on the installations route. Use it when getting informations about Airly Installations
         /// </summary>
         public Installations Installations { get; private set; }
+
         /// <summary>
         /// Manager on measurements route. You can use it when you need to download installation measurment.
         /// </summary>
         public Measurements Measurements { get; private set; }
+
         /// <summary>
         /// Manager on Meta route. Methods here returning mainly some Airly API Constants
         /// </summary>
@@ -39,6 +41,7 @@ namespace AirlyNet
         /// Custom airly configuration.
         /// </summary>
         public AirlyConfiguration Configuration { get; set; } = new AirlyConfiguration();
+
         /// <summary>
         /// Used when sending request to API. Specfies in what language the response will return.
         /// </summary>
@@ -53,6 +56,7 @@ namespace AirlyNet
             ApiKey = apiKey; // key validation is on the Util.validateKey
             Initialize(language);
         }
+
         private Airly(string apiKey, AirlyConfiguration configuration, AirlyLanguage? language)
         {
             ApiKey = apiKey; // key validation is on the Util.validateKey
@@ -61,9 +65,11 @@ namespace AirlyNet
         }
 
         public Airly(Airly airly) : this(airly.ApiKey, airly.Configuration, airly.Language) { }
+
         public Airly(Airly airly, AirlyConfiguration configuration) : this(airly.ApiKey, configuration, airly.Language) { }
 
         public Airly(string apiKey) : this(apiKey, language: null) { }
+
         public Airly(string apiKey, AirlyConfiguration configuration) : this(apiKey, configuration, null) { }
 
         private void Initialize(AirlyLanguage? language = null)
@@ -94,6 +100,7 @@ namespace AirlyNet
                 _isDisposed = true;
             }
         }
+
         /// <summary>
         /// When used, returns the Airly api key
         /// </summary>

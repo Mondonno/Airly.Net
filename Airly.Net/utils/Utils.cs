@@ -160,7 +160,9 @@ namespace AirlyNet.Utilities
             }
             return true;
         }
+
         public static string GetVersion(int version, bool slash) => $"{(slash ? "/" : string.Empty)}v{version}{(slash ? "/" : string.Empty)}";
+
         public static string GetInners(AggregateException ag)
         {
             List<string> Messages = new List<string>();
@@ -168,6 +170,7 @@ namespace AirlyNet.Utilities
 
             return ArrayUtil.JoinList(Messages, "\n");
         }
+
         public static void ValidateKey(string key)
         {
             // Simple airly key validation (eg. key of whitespaces)
@@ -265,6 +268,7 @@ namespace AirlyNet.Utilities
 
         // Calculating the ratelimits diffrents
         public static int? CalculateRateLimit(RestResponse res) => CalculateRateLimit(res.ResponseHeaders);
+
         public static int? CalculateRateLimit(HttpResponseHeaders responseHeaders)
         {
             var headers = responseHeaders;
@@ -287,6 +291,7 @@ namespace AirlyNet.Utilities
         // For response headers
         // Getting the header first value because the headers can have multiple values (Airly API always return one value headers)
         private static string GetHeaderBase(IEnumerable<string> values) => Utils.GetFirstEnumarable(values);
+
         public static string GetHeader(HttpHeaders headers, string key)
         {
             string values = null;
@@ -325,11 +330,13 @@ namespace AirlyNet.Utilities
         }
 
         public static bool CheckIfNegativeNumber(int number) => number.ToString().StartsWith("-");
+
         public static void ThrowIfNegativeNumber(int number)
         {
             if (CheckIfNegativeNumber(number))
                 throw new InvalidOperationException("The specified number can not be negative number");
         }
+
         public static void ThrowIfNegativeNumberOrZero(int number)
         {
             if (number == 0 || CheckIfNegativeNumber(number))

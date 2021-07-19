@@ -6,10 +6,13 @@ namespace AirlyNet.Utilities
     public static class GeoUtil
     {
         private static double ToRadians(double degrees) => degrees / 360 * (2 * Math.PI);
+
         private static double ToDegrees(double radians) => radians / (2 * Math.PI) * 360;
 
         public static double GetMidpoint(double pointOne, double pointTwo) => Math.Min(pointOne, pointTwo) + (Math.Abs(pointOne - pointTwo) / 2);
+
         public static bool Contains(double point, double begin, double end) => (point >= Math.Min(begin, end)) && (point <= Math.Max(begin, end));
+
         public static double GreatCircleDistanceInKm(Location pointOne, Location pointTwo)
         {
             bool simmilarCheck = (pointOne.Lat == pointTwo.Lat) && (pointOne.Lng == pointTwo.Lng);

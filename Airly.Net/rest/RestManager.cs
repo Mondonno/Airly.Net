@@ -32,6 +32,7 @@ namespace AirlyNet.Rest
         public string Cdn { get => Airly.Configuration.Cdn; }
 
         private void SetAirlyPreferedLanguage(Airly airly) => Language = airly.Language;
+
         public Task<RestResponse> Request(string end, string method = null, RequestOptions options = null)
         {
             if (options == null) options = new RequestOptions();
@@ -54,6 +55,7 @@ namespace AirlyNet.Rest
             if (responseData != null) return responseData.Deserializated;
             else return default;
         }
+
         public async Task<T> Request<T>(string end, string method = null, dynamic query = null, RequestOptions options = null)
         {
             RequestOptions requestOptions = options ?? (new());

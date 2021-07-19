@@ -11,10 +11,13 @@ namespace AirlyNet.Handling
         private RESTManager RestManager { get; set; }
 
         public bool Inactive() => QueueManager.Inactive();
+
         public bool RateLimited() => QueueManager.RateLimited();
+
         public int Queuers() => QueueManager.Handlers();
 
         public RequestQueueHandler(RESTManager rest) => RestManager = rest;
+
         public Task<RestResponse> Queue(string route, RestRequest request)
         {
             RequestQueuer handler = QueueManager.Get(route);
@@ -27,6 +30,7 @@ namespace AirlyNet.Handling
 
             return handler.Push(request);
         }
+
         public void UnQueue(string route)
         {
             RequestQueuer queuer = QueueManager.Get(route);

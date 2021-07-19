@@ -28,6 +28,7 @@ namespace AirlyNet.Interactions
         /// <param name="maxResults">Max results, -1 = unlimited, deafult 1, integer</param>
         /// <returns>List of installations near the location</returns>
         public async Task<List<Installation>> Nearest(Location location, double maxDistance = 3, int maxResults = 1) => location != null ? await Nearest(location.Lat, location.Lng, maxDistance, maxResults) : null;
+
         private async Task<List<Installation>> Nearest(double lat, double lng, double maxDistance = 3, int maxResults = 1) => await Api.GetInstallationsNearestAsync(lat, lng, maxDistance, maxResults);
 
         /// <summary>

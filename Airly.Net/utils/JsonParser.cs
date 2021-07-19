@@ -16,6 +16,7 @@ namespace AirlyNet.Utilities
         };
 
         public static Type GetTokenType(JTokenType type) => type.GetType();
+
         public static string GetJTokenJson(JToken token) => token.ToString();
 
         private static bool ValidateInternally(string json)
@@ -36,12 +37,14 @@ namespace AirlyNet.Utilities
             bool arrayCheck = jsonValidation.StartsWith("[") && jsonValidation.EndsWith("]");
             return arrayCheck;
         }
+
         public static bool CheckJsonObject(string json)
         {
             string jsonValidation = json.Trim().ToString();
             bool objectCheck = jsonValidation.StartsWith("{") && jsonValidation.EndsWith("}");
             return objectCheck;
         }
+
         public static bool CheckJsonValidation(string json)
         {
             bool isJsonObject = CheckJsonObject(json);
@@ -87,7 +90,9 @@ namespace AirlyNet.Utilities
 
             return classment;
         }
+
         public static T DeserializeJson<T>(JToken jsonToken) => DeserializeJson<T>(GetJTokenJson(jsonToken));
+
         public static T DeserializeJson<T> (Stream jsonStream)
         {
             using (TextReader text = new StreamReader(jsonStream))
@@ -99,6 +104,7 @@ namespace AirlyNet.Utilities
         }
 
         public static string SerializeJSON(JToken jsonToken) => GetJTokenJson(jsonToken);
+
         public static string SerializeJSON<T>(T obj)
         {
             JsonSerializerSettings settings = SerializerSettings;
@@ -121,6 +127,7 @@ namespace AirlyNet.Utilities
         }
 
         public void Refresh() => Deserializated = Parse();
+
         private T Parse()
         {
             if (Json == null) return default;

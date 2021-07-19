@@ -102,6 +102,7 @@ namespace AirlyNet.Handling
 
             throw error;
         }
+
         public static void MakeRateLimitError(RawRestResponse res, string customMessage = null)
         {
             var headers = res.HttpResponse.Headers;
@@ -158,6 +159,7 @@ namespace AirlyNet.Handling
         }
 
         public void HandleResponseCode(int? responseCode = null) => InternalHandleResponseCode(responseCode);
+
         protected void InternalHandleResponseCode(int? responseCode = null)
         {
             int statusCode = responseCode ?? (int) HttpResponseCode;

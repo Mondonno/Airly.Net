@@ -21,16 +21,20 @@ namespace AirlyNet.Models
         public Location Ne { get; set; }
 
         public bool Contains(Location location) => GeoUtil.Contains(location.Lat, Sw.Lat, Ne.Lat) && GeoUtil.Contains(location.Lng, Sw.Lng, Ne.Lng);
+
         public Location GetBarycenter() => new Location(
             GeoUtil.GetMidpoint(Sw.Lat, Ne.Lat),
             GeoUtil.GetMidpoint(Sw.Lng, Ne.Lng)
         );
 
         public static bool operator ==(LocationArea one, LocationArea two) => one != null && two != null ? one.Ne == two.Ne && one.Sw == two.Sw : one == two;
+
         public static bool operator !=(LocationArea one, LocationArea two) => one != null && two != null ? one.Ne != two.Ne || one.Sw != two.Sw : one != two;
 
         public override bool Equals(object obj) => base.Equals(obj);
+
         public override int GetHashCode() => base.GetHashCode();
+
         public override string ToString() => $"{Sw.Lat} {Sw.Lng}\n{Ne.Lat} {Ne.Lng}";
     }
 
@@ -54,10 +58,13 @@ namespace AirlyNet.Models
         public double Lng { get; set; }
 
         public static bool operator ==(Location one, Location two) => (!Equals(one, null) && !Equals(two, null)) ? one.Lng == two.Lng && one.Lat == two.Lat : Equals(one, two);
+
         public static bool operator !=(Location one, Location two) => (!Equals(one, null) && !Equals(two, null)) ? one.Lng != two.Lng || one.Lat != two.Lat : !Equals(one, two);
 
         public override bool Equals(object obj) => base.Equals(obj);
+
         public override int GetHashCode() => base.GetHashCode();
+
         public override string ToString() => $"{Lat} {Lng}";
     }
 

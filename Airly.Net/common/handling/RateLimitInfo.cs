@@ -26,6 +26,7 @@ namespace AirlyNet.Handling
         }
 
         public RateLimitInfo(HttpResponseMessage response) : this(response.Headers) { }
+
         public RateLimitInfo(RawRestResponse response) : this(response.HttpResponse.Headers) { }
 
         public static string XRemainingName = "X-RateLimit-Remaining-day";

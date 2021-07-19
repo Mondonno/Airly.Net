@@ -9,6 +9,7 @@ using AirlyNet.Models;
 
 namespace AirlyNet.Rest.Typings
 {
+    // interfaces
     internal interface IRequest : IAirlyAuth, IRequestHeaders
     {
         RESTManager Rest { get; set; }
@@ -27,6 +28,7 @@ namespace AirlyNet.Rest.Typings
         public void RemoveHeader(string key);
     }
 
+    // enums
     public enum RestRequestMethod
     {
         GET,
@@ -36,6 +38,7 @@ namespace AirlyNet.Rest.Typings
         PUT
     }
 
+    // models
     public class RequestOptions
     {
         public string[][] Query { get; set; }
