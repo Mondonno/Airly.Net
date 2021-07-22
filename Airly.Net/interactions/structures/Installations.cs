@@ -51,7 +51,7 @@ namespace AirlyNet.Interactions
                     var newSuccesor = (int?) error.Data["succesorId"];
                     if (newSuccesor == null) return default;
 
-                    var newInstallationData = await Info((int) newSuccesor); // it will automaticly rethrow inside (loops preventing)
+                    var newInstallationData = await Info((int) newSuccesor);
                     return newInstallationData;
                 }
                 catch { return default; }

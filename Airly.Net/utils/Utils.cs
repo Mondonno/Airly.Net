@@ -59,7 +59,6 @@ namespace AirlyNet.Utilities
             public object value { get; set; }
         }
 
-        // Klasy anonimowe sa odczytywane jako normalne klasy bez dziedziczenia oraz bez konstruktora. system wartości PropertyInfo jest identyczny
         public static List<NormalizedProperty> GetClassProperties<T>(T classObject)
         {
             Type classType = classObject.GetType();
@@ -207,7 +206,6 @@ namespace AirlyNet.Utilities
 
     public static class RatelimitsUtil
     {
-        // Checking if the ratelimit is reached
         private static bool GetRateLimitBase(string XRemaining, string XLimit)
         {
             int rateLimitRemaining;
@@ -236,7 +234,6 @@ namespace AirlyNet.Utilities
             return rateLimitCheck;
         }
 
-        // Getting and calculating the ratelimits for the headers
         public static bool GetRatelimit(HttpResponseHeaders headers)
         {
             string XRemaining = RestUtil.GetHeader(headers, RateLimitInfo.XRemainingName);
@@ -246,7 +243,6 @@ namespace AirlyNet.Utilities
             return (bool)rateLimit;
         }
 
-        // The method to get the ratlimits from the response message
         public static bool GetRatelimit(RestResponse response)
         {
             HttpResponseHeaders headers = response.ResponseHeaders;
@@ -266,7 +262,6 @@ namespace AirlyNet.Utilities
             return calculated;
         }
 
-        // Calculating the ratelimits diffrents
         public static int? CalculateRateLimit(RestResponse res) => CalculateRateLimit(res.ResponseHeaders);
 
         public static int? CalculateRateLimit(HttpResponseHeaders responseHeaders)
