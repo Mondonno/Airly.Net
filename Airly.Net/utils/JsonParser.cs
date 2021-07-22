@@ -61,8 +61,8 @@ namespace AirlyNet.Utilities
             {
                 var arr = JArray.Parse(json);
 
-                foreach (JObject obj in arr) ArrayUtil.ArrayPush(ref finalArrayResult, obj);
-                finalArrayResult = ArrayUtil.RemoveNullValues(finalArrayResult);
+                foreach (JObject obj in arr) CollectionsUtil.ArrayPush(ref finalArrayResult, obj);
+                finalArrayResult = CollectionsUtil.RemoveNullValues(finalArrayResult);
 
                 if (finalArrayResult.Length == 0) return new JArray();
 

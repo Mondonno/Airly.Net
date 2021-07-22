@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AirlyNet.Utilities
 {
-    public static class ArrayUtil
+    public static class CollectionsUtil
     {
         public static void ArrayPush<T>(ref T[] table, object value)
         {

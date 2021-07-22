@@ -5,10 +5,6 @@ namespace AirlyNet.Utilities
 {
     public static class GeoUtil
     {
-        private static double ToRadians(double degrees) => degrees / 360 * (2 * Math.PI);
-
-        private static double ToDegrees(double radians) => radians / (2 * Math.PI) * 360;
-
         public static double GetMidpoint(double pointOne, double pointTwo) => Math.Min(pointOne, pointTwo) + (Math.Abs(pointOne - pointTwo) / 2);
 
         public static bool Contains(double point, double begin, double end) => (point >= Math.Min(begin, end)) && (point <= Math.Max(begin, end));
@@ -21,8 +17,8 @@ namespace AirlyNet.Utilities
             double oneLat = pointOne.Lat;
             double twoLat = pointTwo.Lat;
 
-            double oneRadian = ToRadians(oneLat);
-            double twoRadian = ToRadians(twoLat);
+            double oneRadian = MathUtil.ToRadians(oneLat);
+            double twoRadian = MathUtil.ToRadians(twoLat);
 
             double theta = pointOne.Lng - pointTwo.Lng;
             double dist = Math.Sin(oneRadian) *
@@ -30,10 +26,10 @@ namespace AirlyNet.Utilities
                 Math.Cos(oneRadian) *
                 Math.Cos(twoRadian) *
 
-                Math.Cos(ToRadians(theta));
+                Math.Cos(MathUtil.ToRadians(theta));
 
             dist = Math.Acos(dist);
-            dist = ToDegrees(dist);
+            dist = MathUtil.ToDegrees(dist);
 
             double finalDist = dist * 60.0 * 1.1515 * 1.609344;
             return finalDist;
@@ -52,5 +48,12 @@ namespace AirlyNet.Utilities
 
             return km;
         }
+    }
+
+    public static class MathUtil
+    {
+        public static double ToRadians(double degrees) => degrees / 360 * (2 * Math.PI);
+
+        public static double ToDegrees(double radians) => radians / (2 * Math.PI) * 360;
     }
 }

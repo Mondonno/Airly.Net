@@ -13,7 +13,7 @@ using AirlyNet.Handling;
 namespace AirlyNet.Utilities
 {
     public static class Utils
-    {
+    { 
         // Simple coping the one dictonary to another without the overwriting
         public static void CopyDictonaryValues(ref IDictionary<object, object> target, IDictionary<object, object> toCopyInto)
         {
@@ -27,7 +27,7 @@ namespace AirlyNet.Utilities
             JObject[] jObjects = new JObject[0];
             foreach (var token in tokens)
             {
-                ArrayUtil.ArrayPush(ref jObjects, (JObject)token);
+                CollectionsUtil.ArrayPush(ref jObjects, (JObject)token);
             }
             return jObjects;
         }
@@ -122,7 +122,7 @@ namespace AirlyNet.Utilities
                 _ = value == null ? value = "" : null;
 
                 string[] constructedArray = { name, value };
-                ArrayUtil.ArrayPush(ref convertedQuery, constructedArray);
+                CollectionsUtil.ArrayPush(ref convertedQuery, constructedArray);
             }
 
             return convertedQuery;
@@ -167,7 +167,7 @@ namespace AirlyNet.Utilities
             List<string> Messages = new List<string>();
             foreach (var exception in ag.InnerExceptions) Messages.Add(exception.Message);
 
-            return ArrayUtil.JoinList(Messages, "\n");
+            return CollectionsUtil.JoinList(Messages, "\n");
         }
 
         public static void ValidateKey(string key)
