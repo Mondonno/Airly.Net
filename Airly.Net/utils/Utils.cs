@@ -282,7 +282,6 @@ namespace AirlyNet.Utilities
 
     public static class RestUtil
     {
-
         // For response headers
         // Getting the header first value because the headers can have multiple values (Airly API always return one value headers)
         private static string GetHeaderBase(IEnumerable<string> values) => Utils.GetFirstEnumarable(values);
