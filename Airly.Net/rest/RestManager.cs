@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using AirlyNet.Handling;
 using AirlyNet.Utilities;
 using AirlyNet.Rest.Typings;
-using AirlyNet.Handling.Errors;
+using AirlyNet.Handling.Exceptions;
 using AirlyNet.Models;
 
 namespace AirlyNet.Rest
@@ -25,7 +25,7 @@ namespace AirlyNet.Rest
             Handlers = new RequestQueueHandler(this);
         }
 
-        public string Auth { get => string.IsNullOrEmpty(ApiKey) ? throw new InvalidApiKeyError("Provided api key is empty") : ApiKey; }
+        public string Auth { get => string.IsNullOrEmpty(ApiKey) ? throw new InvalidApiKeyException("Provided api key is empty") : ApiKey; }
         public bool RateLimited { get => Handlers.Queuers() >= 1 && Handlers.RateLimited(); }
 
         public string Endpoint { get => Airly.Configuration.ApiDomain; }

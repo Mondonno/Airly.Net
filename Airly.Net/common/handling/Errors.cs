@@ -1,48 +1,48 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace AirlyNet.Handling.Errors
+namespace AirlyNet.Handling.Exceptions
 {
     [Serializable]
-    public class BaseError : Exception
+    public class BaseException : Exception
     {
-        public BaseError() : base() { }
-        public BaseError(string message) : base(message) { }
-        public BaseError(string message, Exception innerException) : base(message, innerException) { }
-        public BaseError(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        public BaseException() : base() { }
+        public BaseException(string message) : base(message) { }
+        public BaseException(string message, Exception innerException) : base(message, innerException) { }
+        public BaseException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 
     [Serializable]
-    public class HttpError : BaseError
+    public class HttpException : BaseException
     {
-        public HttpError(string content) : base(string.Format("New http error {0}", content)) { }
-        public HttpError(Exception rawError) : base("New http error WITH the unknown stack trace", rawError) { }
+        public HttpException(string content) : base(string.Format("New http Exception {0}", content)) { }
+        public HttpException(Exception rawException) : base("New http Exception WITH the unknown stack trace", rawException) { }
     }
 
     [Serializable]
-    public class AirlyError : BaseError
+    public class AirlyException : BaseException
     {
-        public AirlyError(string content) : base(string.Format("The airly get following error.\nMessage: {0}", content)) { }
-        public AirlyError(HttpError error) : base(string.Format("Airly get the following http error {0}", error.ToString())) { }
-        public AirlyError(string link, string content) : base(string.Format("The airly get following error.\nMessage: {0}", content)) => HelpLink = link;
+        public AirlyException(string content) : base(string.Format("The airly get following Exception.\nMessage: {0}", content)) { }
+        public AirlyException(HttpException Exception) : base(string.Format("Airly get the following http Exception {0}", Exception.ToString())) { }
+        public AirlyException(string link, string content) : base(string.Format("The airly get following Exception.\nMessage: {0}", content)) => HelpLink = link;
     }
 
     [Serializable]
-    public class InvalidApiKeyError : BaseError
+    public class InvalidApiKeyException : BaseException
     {
-        public InvalidApiKeyError(string message) : base(string.Format("The provided Api Key is invalid\n{0}", message)) => Data.Add("Token", false);
-        public InvalidApiKeyError() : this(string.Empty) { }
+        public InvalidApiKeyException(string message) : base(string.Format("The provided Api Key is invalid\n{0}", message)) => Data.Add("Token", false);
+        public InvalidApiKeyException() : this(string.Empty) { }
     }
 
     [Serializable]
-    public class RateLimitError : BaseError
+    public class RateLimitException : BaseException
     {
-        public RateLimitError(string message) : base(string.Format("Airly.Net get restricted by Airly API ratelimit\n{0}", message)) => Data.Add("RateLimited", true);
-        public RateLimitError() : this(string.Empty) { }
+        public RateLimitException(string message) : base(string.Format("Airly.Net get restricted by Airly API ratelimit\n{0}", message)) => Data.Add("RateLimited", true);
+        public RateLimitException() : this(string.Empty) { }
     }
 
     [Serializable]
-    public class ElementPermentlyReplacedException : BaseError
+    public class ElementPermentlyReplacedException : BaseException
     {
         public ElementPermentlyReplacedException(string newLocation, string optionalMessage = "") : base($"Airly element got permently replaced {optionalMessage}")
         {

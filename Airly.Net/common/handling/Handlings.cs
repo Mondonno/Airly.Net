@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 using AirlyNet.Utilities;
 using AirlyNet.Rest.Typings;
-using AirlyNet.Handling.Errors;
+using AirlyNet.Handling.Exceptions;
 using System.Net;
 
 namespace AirlyNet.Handling
@@ -97,7 +97,7 @@ namespace AirlyNet.Handling
         public static void MakeRateLimitError(string limits, string all, string customMessage)
         {
             string errorMessage = $"Your api key get ratelimited for this day/minut/secound by Airly API\n{customMessage ?? ""}\n{all}/{limits}";
-            AirlyError error = new AirlyError(errorMessage);
+            AirlyException error = new AirlyException(errorMessage);
             error.Data.Add("Ratelimited", true);
 
             throw error;
@@ -134,7 +134,7 @@ namespace AirlyNet.Handling
             try
             { JsonParser.ParseJson(Json); }
             catch (Exception ex)
-            { throw new HttpError($"Server sent possible malformed response\n{ex.Message}"); }
+            { throw new HttpException($"Server sent possible malformed response\n{ex.Message}"); }
         }
 
         public void Refresh(string newJson) => Json = newJson;
@@ -177,7 +177,7 @@ namespace AirlyNet.Handling
 
             int? limit = RatelimitsUtil.CalculateRateLimit(headers);
 
-            if (limit == 0) throw new AirlyError($"Get ratelimited by airly api\n{RatelimitsUtil.CalculateRateLimit(headers)}");
+            if (limit == 0) throw new AirlyException($"Get ratelimited by airly api\n{RatelimitsUtil.CalculateRateLimit(headers)}");
             if (statusCode > 200 && statusCode <= 300)
             {
                 if (statusCode == 301)
@@ -185,11 +185,11 @@ namespace AirlyNet.Handling
                     handler.HandleMalformed();
                     return;
                 }
-                throw new AirlyError("Unknown invalid request/response");
+                throw new AirlyException("Unknown invalid request/response");
             }
             if (statusCode >= 400 && statusCode < 500)
             {
-                if (statusCode == 401) throw new AirlyError("The provided API Key is not valid");
+                if (statusCode == 401) throw new AirlyException("The provided API Key is not valid");
                 if (statusCode == 429)
                 {
                     RateLimitThrower.MakeRateLimitError(RestUtil.GetHeader(headers, "X-RateLimit-Limit-day"), $"{RatelimitsUtil.CalculateRateLimit(headers)}", "");
@@ -197,9 +197,9 @@ namespace AirlyNet.Handling
                 }
                 handler.HandleMalformed();
 
-                throw new AirlyError($"[{DateTime.Now}] Invalid response code {rawJson}");
+                throw new AirlyException($"[{DateTime.Now}] Invalid response code {rawJson}");
             }
-            if (statusCode >= 500 && statusCode < 600) throw new HttpError("The API throwed 500, internal Airly API problem");
+            if (statusCode >= 500 && statusCode < 600) throw new HttpException("The API throwed 500, internal Airly API problem");
         }
 
         public void Refersh(string json)

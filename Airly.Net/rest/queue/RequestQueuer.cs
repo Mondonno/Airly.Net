@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 using AirlyNet.Utilities;
 using AirlyNet.Rest.Typings;
 using AirlyNet.Rest;
-using AirlyNet.Handling.Errors;
+using AirlyNet.Handling.Exceptions;
 using AirlyNet.Models;
 
 namespace AirlyNet.Handling
@@ -50,7 +50,7 @@ namespace AirlyNet.Handling
             ErrorModel deserializtedError = errorDeserializer.Deserialize();
 
             if (!deserializtedError.HaveError) return;
-            else throw new AirlyError($"The api resolved the Json Error:\n{deserializtedError.ErrorDetails}");
+            else throw new AirlyException($"The api resolved the Json Error:\n{deserializtedError.ErrorDetails}");
         }
 
         private JToken ConvertJsonString(RawRestResponse res) => ConvertJsonString(res.RawJson);
@@ -68,7 +68,7 @@ namespace AirlyNet.Handling
             try { res = await request.InvokeRequest(handle: true); }
             catch (Exception ex) { throw ex; };
 
-            if (res == null || string.IsNullOrEmpty(res.RawJson)) throw new AirlyError("Can not resolve the Airly API response");
+            if (res == null || string.IsNullOrEmpty(res.RawJson)) throw new AirlyException("Can not resolve the Airly API response");
             if (RateLimited)
             {
                 var details = new RateLimitInfo(res.HttpResponse);
@@ -99,7 +99,7 @@ namespace AirlyNet.Handling
             {
                 var notFound = Manager.Airly.Configuration.NotFoundHandling;
 
-                if (notFound != AirlyNotFoundHandling.Null) throw new HttpError($"The content for {request.RequestUri}\nWas not found"); // or throwing the error on the AirlyNotFound handling setting
+                if (notFound != AirlyNotFoundHandling.Null) throw new HttpException($"The content for {request.RequestUri}\nWas not found"); // or throwing the error on the AirlyNotFound handling setting
                 else return null; // returning the null value from the 404 (user known)
             }
             if (statusCode == 301)
@@ -108,11 +108,12 @@ namespace AirlyNet.Handling
                 ErrorModel parsedError = errorDeserializer.Deserialize();
                 string succesor = parsedError.Succesor;
 
-                if (succesor == null) throw new HttpError("301 installation get replaced and new succesor was not found");
+                if (succesor == null)
+                    throw new HttpException("301 installation get replaced and new succesor was not found");
                 else if (succesor != null) {
                     throw new ElementPermentlyReplacedException(succesor.ToString(), "The new succesor get found");
                 }
-                else throw new HttpError("301 thrown but can not get handled");
+                else throw new HttpException("301 thrown but can not get handled");
             }
 
             string rawJson = res.RawJson;
@@ -123,14 +124,14 @@ namespace AirlyNet.Handling
             bool malformedCheck = handler.JsonHandler.IsMalformedResponse();
 
             if (malformedCheck)
-                throw new HttpError("The Airly API response get malformed or it is not fully normally");
+                throw new HttpException("The Airly API response get malformed or it is not fully normally");
 
             var convertedJson = ConvertJsonString(rawJson);
             bool jsonValidCheck = !string.IsNullOrEmpty(convertedJson.ToString());
             
             if (jsonValidCheck) return constructedResponse;
             else if(!jsonValidCheck)
-                throw new HttpError("The Airly API returned json is null or empty");
+                throw new HttpException("The Airly API returned json is null or empty");
 
             ThrowIfJsonError(res.HttpResponse, res.RawJson);
             return null; // Fallback value (when all other statments do not react with the response)

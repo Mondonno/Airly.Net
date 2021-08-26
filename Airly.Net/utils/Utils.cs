@@ -7,46 +7,13 @@ using System.Globalization;
 using Newtonsoft.Json.Linq;
 
 using AirlyNet.Rest.Typings;
-using AirlyNet.Handling.Errors;
+using AirlyNet.Handling.Exceptions;
 using AirlyNet.Handling;
 
 namespace AirlyNet.Utilities
 {
     public static class Utils
-    { 
-        // Simple coping the one dictonary to another without the overwriting
-        public static void CopyDictonaryValues(ref IDictionary<object, object> target, IDictionary<object, object> toCopyInto)
-        {
-            foreach (var pair in toCopyInto)
-                target.Add(pair.Key, pair.Value);
-        }
-
-        // Simple converting JTokens to the JObjects by exclipting the C# types
-        public static JObject[] ConvertTokens(JToken[] tokens)
-        {
-            JObject[] jObjects = new JObject[0];
-            foreach (var token in tokens)
-            {
-                CollectionsUtil.ArrayPush(ref jObjects, (JObject)token);
-            }
-            return jObjects;
-        }
-
-        // Formmatting web query
-        public static string FormatQuery(string query)
-        {
-            if (query.StartsWith("?")) query = query.Remove(0, 1);
-
-            string virtualHost = "https://example.com";
-            Uri constructedQuery = new Uri(string.Format("{0}{1}{2}", virtualHost, "/",
-                    (!string.IsNullOrEmpty(query) ? string.Format("?{0}",
-                    query.Replace("#", "%23").Replace("@", "%40")) // Replacing # and @ to the own URL code (Uri does not support # and @ in query)
-                    : ""))); // no need to parse the Query (eg. % === %25) (the Uri class do this for me)
-
-            string Query = constructedQuery.Query;
-            return Query;
-        }
-
+    {
         public class NormalizedProperty
         {
             public NormalizedProperty(string name, object value)
@@ -57,6 +24,21 @@ namespace AirlyNet.Utilities
 
             public string name { get; set; }
             public object value { get; set; }
+        }
+
+        // Formmatting web query
+        public static string FormatQuery(string query)
+        {
+            if (query.StartsWith("?")) query = query.Remove(0, 1);
+
+            string virtualHost = "http://127.0.0.1";
+            Uri constructedQuery = new Uri(string.Format("{0}{1}{2}", virtualHost, "/",
+                    (!string.IsNullOrEmpty(query) ? string.Format("?{0}",
+                    query.Replace("#", "%23").Replace("@", "%40")) // Replacing # and @ to the own URL code (Uri does not support # and @ in query)
+                    : ""))); // no need to parse the Query (eg. % === %25) (the Uri class do this for me)
+
+            string Query = constructedQuery.Query;
+            return Query;
         }
 
         public static List<NormalizedProperty> GetClassProperties<T>(T classObject)
@@ -73,9 +55,7 @@ namespace AirlyNet.Utilities
                 if (!prop.CanRead) continue;
                 if (method == null) continue;
 
-                Type propType = prop.PropertyType; // cs-unused
                 object desiredValue = method.Invoke(classObject, null);
-
                 object[] values = new object[2] { name, desiredValue };
 
                 NormalizedProperty normalized = new NormalizedProperty((string)values[0], values[1]);
@@ -130,36 +110,6 @@ namespace AirlyNet.Utilities
 
         public static T GetFirstEnumarable<T>(IEnumerable<T> enumarable) => enumarable.First((e) => true);
 
-        public static object InvokeMethod<T>(T obj, string methodName, object[] parameters)
-        {
-            Type type = obj.GetType();
-            MethodInfo method = type.GetMethod(methodName);
-
-            object result = method.Invoke(obj, parameters);
-            return result;
-        }
-
-        public static bool IsPropertyExists<T>(T obj, string name)
-        {
-            Type type = obj.GetType();
-            PropertyInfo result = type.GetProperty(name);
-
-            return result != null;
-        }
-
-        public static bool IsAggregated(Exception ex)
-        {
-            try
-            {
-                _ = (AggregateException)ex;
-            }
-            catch (InvalidCastException)
-            {
-                return false;
-            }
-            return true;
-        }
-
         public static string GetVersion(int version, bool slash) => $"{(slash ? "/" : string.Empty)}v{version}{(slash ? "/" : string.Empty)}";
 
         public static string GetInners(AggregateException ag)
@@ -176,7 +126,8 @@ namespace AirlyNet.Utilities
             string toValidate = key;
             string validatedKey = toValidate.Replace(" ", "").Trim().Normalize();
 
-            if (string.IsNullOrEmpty(toValidate) || string.IsNullOrEmpty(validatedKey) || validatedKey != toValidate) throw new InvalidApiKeyError();
+            if (string.IsNullOrEmpty(toValidate) || string.IsNullOrEmpty(validatedKey) || validatedKey != toValidate)
+                throw new InvalidApiKeyException();
             else return;
         }
 
@@ -187,20 +138,6 @@ namespace AirlyNet.Utilities
 
             if (routes.Length == 0 || (routes.Length == 1 && routes[0] == url)) return url;
             else return routes[0].ToString();
-        }
-
-        [Obsolete]
-        public static string ReplaceDashUpper(string str)
-        {
-            string finalString = "";
-            string[] strs = str.Split('-');
-
-            if (strs.Length == 0 || (strs.Length == 1 && (strs[0] == str))) return str;
-            foreach (string nm in strs)
-            {
-                finalString += string.Format("{0}{1}", nm[0].ToString().ToUpper(), nm.Remove(0, 1));
-            }
-            return finalString;
         }
     }
 

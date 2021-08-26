@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 using AirlyNet.Utilities;
-using AirlyNet.Handling.Errors;
+using AirlyNet.Handling.Exceptions;
 using AirlyNet.Models;
 
 namespace AirlyNet.Interactions

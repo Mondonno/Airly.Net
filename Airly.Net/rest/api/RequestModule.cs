@@ -9,7 +9,7 @@ using System.Text;
 
 using AirlyNet.Utilities;
 using AirlyNet.Rest.Typings;
-using AirlyNet.Handling.Errors;
+using AirlyNet.Handling.Exceptions;
 using AirlyNet.Models;
 
 namespace AirlyNet.Rest
@@ -117,7 +117,7 @@ namespace AirlyNet.Rest
             }
             catch (Exception ex)
             {
-                throw new HttpError($"{RequestUri}\n{ex.Message}");
+                throw new HttpException($"{RequestUri}\n{ex.Message}");
             }
         }
 

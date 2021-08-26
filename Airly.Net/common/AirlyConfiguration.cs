@@ -21,6 +21,7 @@ namespace AirlyNet
         /// HTTP Agent used when requesting to API
         /// </summary>
         public string Agent { get; } = "Airly.Net";
+
         /// <summary>
         /// The protocol of the API request.
         /// </summary>
