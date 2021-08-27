@@ -111,12 +111,13 @@ namespace AirlyNet.Utilities
 
         public static string GetVersion(int version, bool slash) => $"{(slash ? "/" : string.Empty)}v{version}{(slash ? "/" : string.Empty)}";
 
-        public static string GetInners(AggregateException ag)
+        [Obsolete]
+        public static List<string> GetInners(AggregateException ag)
         {
             List<string> Messages = new List<string>();
             foreach (var exception in ag.InnerExceptions) Messages.Add(exception.Message);
 
-            return CollectionsUtil.Join(Messages, "\n");
+            return Messages;
         }
 
         public static void ValidateKey(string key)
