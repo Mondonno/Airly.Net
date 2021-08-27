@@ -96,7 +96,7 @@ namespace AirlyNet.Handling
     {
         public static void MakeRateLimitError(string limits, string all, string customMessage)
         {
-            string errorMessage = $"Your api key get ratelimited for this day/minut/secound by Airly API\n{customMessage ?? ""}\n{all}/{limits}";
+            string errorMessage = $"Your api key get ratelimited for this days/minuts/secounds by Airly API\n{customMessage ?? ""}\n{all}/{limits}";
             AirlyException error = new AirlyException(errorMessage);
             error.Data.Add("Ratelimited", true);
 

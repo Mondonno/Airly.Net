@@ -2,8 +2,6 @@
 
 namespace AirlyNet.Interactions
 {
-    public class InteractionBase<T> {}
-
     public class InteractionBase
     {
         protected Airly Airly { get; private set; }

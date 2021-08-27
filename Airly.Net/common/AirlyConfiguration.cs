@@ -1,4 +1,5 @@
 ﻿using AirlyNet.Models;
+using AirlyNet.Rest.Typings;
 
 namespace AirlyNet
 {
@@ -25,7 +26,7 @@ namespace AirlyNet
         /// <summary>
         /// The protocol of the API request.
         /// </summary>
-        public string Protocol { get; set; } = "https";
+        public RestRequestProtocol Protocol { get; set; } = RestRequestProtocol.HTTPS;
 
         /// <summary>
         /// HTTP request timeout, change this if you have slow internet connection.

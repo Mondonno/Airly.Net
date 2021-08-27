@@ -44,21 +44,21 @@ namespace AirlyNet.Handling
             finally { Waiter.Release(); }
         }
 
-        private void ThrowIfJsonError(HttpResponseMessage httpResponse, string responseJson)
-        {
-            ErrorDeserializer errorDeserializer = new(httpResponse, responseJson);
-            ErrorModel deserializtedError = errorDeserializer.Deserialize();
-
-            if (!deserializtedError.HaveError) return;
-            else throw new AirlyException($"The api resolved the Json Error:\n{deserializtedError.ErrorDetails}");
-        }
-
         private JToken ConvertJsonString(RawRestResponse res) => ConvertJsonString(res.RawJson);
 
         private JToken ConvertJsonString(string json)
         {
             JToken token = JsonParser.ParseJson(json);
             return token;
+        }
+
+        private void ThrowIfJsonError(HttpResponseMessage httpResponse, string responseJson)
+        {
+            ErrorDeserializer errorDeserializer = new(httpResponse, responseJson);
+            ErrorModel deserializatedError = errorDeserializer.Deserialize();
+
+            if (!deserializatedError.HaveError) return;
+            else throw new AirlyException($"The api resolved the Json Error:\n{deserializatedError.ErrorDetails}");
         }
 
         private async Task<RestResponse> Make(RestRequest request)
@@ -75,8 +75,8 @@ namespace AirlyNet.Handling
                 if (details.IsRateLimited) RateLimitThrower.MakeRateLimitError(res, null);
                 else {
                     RateLimited = false;
-                    System.Diagnostics.
-                        Debug.WriteLine("The ratelimited is detected but it is not authenticated by headers");
+                    System.Diagnostics. // should not happen
+                        Debug.WriteLine("Ratelimited is detected but it is not authenticated by headers");
                 }
             }
 
@@ -111,9 +111,9 @@ namespace AirlyNet.Handling
                 if (succesor == null)
                     throw new HttpException("301 installation get replaced and new succesor was not found");
                 else if (succesor != null) {
-                    throw new ElementPermentlyReplacedException(succesor.ToString(), "The new succesor get found");
+                    throw new ElementPermentlyReplacedException(succesor.ToString(), "New succesor found");
                 }
-                else throw new HttpException("301 thrown but can not get handled");
+                else throw new HttpException("301 thrown but isn't begin handled");
             }
 
             string rawJson = res.RawJson;
@@ -124,7 +124,7 @@ namespace AirlyNet.Handling
             bool malformedCheck = handler.JsonHandler.IsMalformedResponse();
 
             if (malformedCheck)
-                throw new HttpException("The Airly API response get malformed or it is not fully normally");
+                throw new HttpException("The Airly API JSON response got malformed");
 
             var convertedJson = ConvertJsonString(rawJson);
             bool jsonValidCheck = !string.IsNullOrEmpty(convertedJson.ToString());

@@ -32,24 +32,13 @@ namespace AirlyNet.Utilities
             table = removedArray;
         }
 
-        public static string JoinList<T>(List<T> list, string character) => JoinArray(list.ToArray(), character);
-
-        public static string JoinArray<T>(T[] table, string character)
+        public static string Join<T>(List<T> table, string character)
         {
             string compiledString = string.Empty;
-            foreach (var item in table) compiledString += string.Format("{0}{1}", item, character);
+            foreach (var item in table)
+                compiledString += string.Format("{0}{1}", item, character);
 
             return compiledString.Remove(compiledString.Length - 1, 1);
-        }
-
-        // Splitting the blank characters in a string (CS1011)
-        public static List<string> SplitEveryToList(string str) => new List<string>(SplitEvery(str));
-
-        public static string[] SplitEvery(string str)
-        {
-            string[] array = new string[0];
-            foreach (var s in str) ArrayPush(ref array, s);
-            return array;
         }
 
         public static T[] AssignArray<T>(T[] source, T[] target)

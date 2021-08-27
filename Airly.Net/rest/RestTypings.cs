@@ -9,7 +9,6 @@ using AirlyNet.Models;
 
 namespace AirlyNet.Rest.Typings
 {
-    // interfaces
     internal interface IRequest : IAirlyAuth, IRequestHeaders
     {
         RESTManager Rest { get; set; }
@@ -28,7 +27,6 @@ namespace AirlyNet.Rest.Typings
         public void RemoveHeader(string key);
     }
 
-    // enums
     public enum RestRequestMethod
     {
         GET,
@@ -38,10 +36,21 @@ namespace AirlyNet.Rest.Typings
         PUT
     }
 
-    // models
+    public enum RestRequestProtocol
+    {
+        /// <summary>
+        /// Secure, recommended
+        /// </summary>
+        HTTPS,
+        /// <summary>
+        /// Not secure, not recommended
+        /// </summary>
+        HTTP
+    }
+
     public class RequestOptions
     {
-        public string[][] Query { get; set; }
+        public List<List<string>> Query { get; set; }
         public string Body { get; set; }
         public bool Auth { get; set; } = true;
         public bool Versioned { get; set; } = true;

@@ -56,17 +56,12 @@ namespace AirlyNet.Utilities
 
         public static JToken ParseJson(string json)
         {
-            JObject[] finalArrayResult = new JObject[0];
             if (CheckJsonArray(json))
             {
                 var arr = JArray.Parse(json);
 
-                foreach (JObject obj in arr) CollectionsUtil.ArrayPush(ref finalArrayResult, obj);
-                finalArrayResult = CollectionsUtil.RemoveNullValues(finalArrayResult);
-
-                if (finalArrayResult.Length == 0) return new JArray();
-
-                return arr;
+                if (arr.Count == 0) return new JArray();
+                else return arr;
             }
             else if (CheckJsonObject(json)) return JObject.Parse(json);
             else return new JObject();

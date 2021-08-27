@@ -55,12 +55,18 @@ namespace AirlyNet.Rest
 
             DefaultHeaders.Add("User-Agent", RestConfiguration.Agent);
 
+            string parsedProtocol;
+            if (RestConfiguration.Protocol == RestRequestProtocol.HTTP)
+                parsedProtocol = "http";
+            else
+                parsedProtocol = "https";
+
             string url =
-                $"{RestConfiguration.Protocol ?? "https"}://" +
+                $"{parsedProtocol}://" +
                 RestConfiguration.ApiDomain + Utils.GetVersion(RestConfiguration.Version, true) +
                 EndPoint;
 
-            bool queryExists = options.Query != null && options.Query.Length != 0;
+            bool queryExists = options.Query != null && options.Query.Count != 0;
             string query = string.Empty;
 
             if (queryExists)

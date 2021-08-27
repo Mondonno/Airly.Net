@@ -4,7 +4,6 @@ using System.Net.Http.Headers;
 using System.Linq;
 using System.Reflection;
 using System.Globalization;
-using Newtonsoft.Json.Linq;
 
 using AirlyNet.Rest.Typings;
 using AirlyNet.Handling.Exceptions;
@@ -80,29 +79,29 @@ namespace AirlyNet.Utilities
             else return false;
         }
 
-        public static string[][] ParseQuery(dynamic query)
+        public static List<List<string>> ParseQuery(dynamic query)
         {
             NumberFormatInfo numberInfo = new NumberFormatInfo()
             {
                 NumberDecimalSeparator = "."
             };
 
-            if (query == null) return new string[0][];
-            List<NormalizedProperty> properties = GetClassProperties(query);
+            if (query == null)
+                return new List<List<string>>();
 
-            string[][] convertedQuery = { };
+            List<NormalizedProperty> properties = GetClassProperties(query);
+            List<List<string>> convertedQuery = new List<List<string>>();
+
             foreach (var p in properties)
             {
                 string name = p.name;
+                string value; // Converting the object value to string (without the explict type)
 
-                string value = ""; // Converting the object value to string (without the explict type)
                 if (IsDouble(p.value)) value = ((double)p.value).ToString(numberInfo);
                 else value = p.value.ToString();
 
-                _ = value == null ? value = "" : null;
-
-                string[] constructedArray = { name, value };
-                CollectionsUtil.ArrayPush(ref convertedQuery, constructedArray);
+                List<string> constructedArray = new List<string>() { name, value };
+                convertedQuery.Add(constructedArray);
             }
 
             return convertedQuery;
@@ -117,7 +116,7 @@ namespace AirlyNet.Utilities
             List<string> Messages = new List<string>();
             foreach (var exception in ag.InnerExceptions) Messages.Add(exception.Message);
 
-            return CollectionsUtil.JoinList(Messages, "\n");
+            return CollectionsUtil.Join(Messages, "\n");
         }
 
         public static void ValidateKey(string key)
@@ -136,7 +135,8 @@ namespace AirlyNet.Utilities
             if (url == null) return null;
             string[] routes = url.Split('/');
 
-            if (routes.Length == 0 || (routes.Length == 1 && routes[0] == url)) return url;
+            // || (routes.Length == 1 && routes[0] == url)
+            if (routes.Length == 0) return url;
             else return routes[0].ToString();
         }
     }
@@ -164,8 +164,6 @@ namespace AirlyNet.Utilities
 
                 // If the ratelimit is reached the rateLimit value is 100 (any avaible request can now be sent after ratelimit reset)
                 rateLimitCheck = rateLimit == 100;
-
-                return rateLimitCheck;
             }
 
             return rateLimitCheck;
@@ -250,7 +248,8 @@ namespace AirlyNet.Utilities
         public static bool AreFinity(params double[] numbers)
         {
             List<bool> finities = new List<bool>();
-            foreach (var n in numbers) finities.Add(!double.IsInfinity(n));
+            foreach (var n in numbers)
+                finities.Add(!double.IsInfinity(n));
 
             return finities.FindAll(e => e == true).Count == numbers.Length;
         }
