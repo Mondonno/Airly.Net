@@ -39,7 +39,7 @@ Measurment measurment = await client.Measurments.Nearest(location) // Podaj je
 DateTime fromMeasurmentDateTime = measurment.Current.FromDateTime; // Zdectruktuj datę aktualnego pomairy zanieczyszczeń
 Console.WriteLine(fromMeasurmentDateTime.ToString()); // Pokaz je światu
 ```
-*Zawsze pamiętaj aby po instalacji pakietu dodać na początku pliku `using AirlyNet`*
+*Zawsze pamiętaj aby po instalacji pakietu dodać na początku pliku `using AirlyNet`*<br>
 **Notka**: musisz dodać `using AirlyNet.Models` jeśli chcesz uzyć `Location`, `Address` itp. itd.
 
 #### [Wersja w języku Angielskim](https://github.com/Mondonno/Airly.Net)
