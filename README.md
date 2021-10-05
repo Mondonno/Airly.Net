@@ -15,7 +15,7 @@ Or visit project Wiki
 
 ## Installation
 
-Airly.Net stable builds are avaible on NugGet.org through the Airly.Net meta package
+Airly.Net stable builds are avaible on NuGet.org through the Airly.Net meta package
 - [**Airly.Net**](https://www.nuget.org/packages/AirlyNet/)
 
 ## Compiling
