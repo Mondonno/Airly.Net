@@ -1,6 +1,6 @@
 # Airly.Net
 
-**Important! Breaking change!** 
+**Breaking changes** <br>
 After some time we decided to prefix the data models of `Airly.Net` by `Air` so now measurment is not `Measurment` but `AirMeasurment`
 
 Unoffical powerfull and fast .NET API client for [**Airly**](https://developer.airly.org/docs)<br>
