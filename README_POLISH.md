@@ -2,7 +2,9 @@
 
 **Najnowsze zmiany** <br>
 Po jakimś czasie zdezydowaliśmy na to zeby sprefkisować wszystkie modele danych `Airly.Net` przez `Air` czyli pomiar to juz nie będzie `Measurment` ale `AirMeasurment`
-
+<br>
+<br>
+<br>
 Nieoficjalny mocny i szybki .NET api wrapper napisany w C# dla [Airly](https://developer.airly.org/pl/docs)<br>
 Jeśli chcesz zintegrować swoja aplikacje z API od airly to jest to czego szukasz
 
