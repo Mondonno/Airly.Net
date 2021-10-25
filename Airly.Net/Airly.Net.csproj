@@ -6,13 +6,13 @@
     <RootNamespace>AirlyNet</RootNamespace>
     <AssemblyName>AirlyNet</AssemblyName>    
     <PackOnBuild>true</PackOnBuild>
-    <PackageId>AirlyNet</PackageId>
+    <PackageId>Airly.Net</PackageId>
     <PackageVersion>0.1.9</PackageVersion>
     <Authors>Mondonno</Authors>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Owners>Mondonno</Owners>
     <PackageProjectUrl>https://github.com/Mondonno/Airly.Net</PackageProjectUrl>
-    <PackageReleaseNotes>All changelog informations are avaible on our github repository</PackageReleaseNotes>
+    <PackageReleaseNotes>All release informations are avaible on our github repository linked in the package.</PackageReleaseNotes>
     <PackageTags>airly airly.net c# csharp api client api-client</PackageTags>
     <Title>Airly.Net</Title>
     <Description>Wrapper for the Airly API written 100% in C#</Description>
@@ -21,9 +21,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="System.Security.Permissions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>
 
 </Project>

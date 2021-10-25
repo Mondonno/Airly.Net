@@ -87,7 +87,7 @@ namespace AirlyNet.Utilities
             };
 
             if (query == null)
-                return new List<List<string>>();
+                return default;
 
             List<NormalizedProperty> properties = GetClassProperties(query);
             List<List<string>> convertedQuery = new List<List<string>>();

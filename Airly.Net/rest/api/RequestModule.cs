@@ -4,7 +4,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Threading;
-using System.Security.Permissions;
 using System.Text;
 
 using AirlyNet.Utilities;
@@ -14,8 +13,6 @@ using AirlyNet.Models;
 
 namespace AirlyNet.Rest
 {
-    [DnsPermission(SecurityAction.Assert)]
-    [WebPermission(SecurityAction.Assert)]
     public class DefaultRestRequest : IRequest, IDisposable
     {
         public RESTManager Rest { get; set; }

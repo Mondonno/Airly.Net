@@ -31,6 +31,5 @@ namespace AirlyNet.Handling
 
         public static string XRemainingName = "X-RateLimit-Remaining-day";
         public static string XLimitName = "X-RateLimit-Limit-day";
-
     }
 }
