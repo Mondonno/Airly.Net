@@ -91,17 +91,17 @@ namespace AirlyNet.Models
         /// <summary>
         /// PL Language
         /// </summary>
-        pl,
+        PL,
         /// <summary>
         /// EN Language (deafult)
         /// </summary>
-        en
+        EN
     }
 
     /// <summary>
     /// Index Query Type that specifies the returing measurment Index 
     /// </summary>
-    public enum IndexQueryType
+    public enum AirlyIndexQueryType
     {
         /// <summary>
         /// Airly CAQI Index (deafult)
@@ -128,7 +128,7 @@ namespace AirlyNet.Models
     * * Installation
     */
 
-    public class IndexLevel
+    public class AirIndexLevel
     {
         [JsonProperty("maxValue")]
         public int? MaxValue { get; set; }
@@ -146,7 +146,7 @@ namespace AirlyNet.Models
         public string Color { get; set; }
     }
 
-    public class Standard
+    public class AirStandard
     {
         [JsonProperty("name")]
         public string Name { get; set; }
@@ -162,7 +162,7 @@ namespace AirlyNet.Models
         public double? Percent { get; set; }
     }
 
-    public class Index
+    public class AirIndex
     {
         [JsonProperty("name")]
         public string Name { get; set; }
@@ -180,16 +180,16 @@ namespace AirlyNet.Models
         public string Color { get; set; }
     }
 
-    public class IndexType
+    public class AirIndexType
     {
         [JsonProperty("name")]
         public string Name { get; set; }
 
         [JsonProperty("levels")]
-        public List<IndexLevel> Levels { get; set; }
+        public List<AirIndexLevel> Levels { get; set; }
     }
 
-    public class UnitValue
+    public class AirUnitValue
     {
         [JsonProperty("name")]
         public string Name { get; set; }
@@ -198,7 +198,7 @@ namespace AirlyNet.Models
         public double? Value { get; set; }
     }
 
-    public class Sponsor
+    public class AirSponsor
     {
         [JsonProperty("id")]
         public int Id { get; set; }
@@ -216,7 +216,7 @@ namespace AirlyNet.Models
         public Uri Link { get; set; }
     }
 
-    public class Address
+    public class AirAddress
     {
         [JsonProperty("country")]
         public string Country { get; set; }
@@ -233,7 +233,7 @@ namespace AirlyNet.Models
         public string DisplayAddressTwo { get; set; }
     }
 
-    public class Installation
+    public class AirInstallation
     {
         [JsonProperty("id")]
         public int Id { get; set; }
@@ -243,11 +243,11 @@ namespace AirlyNet.Models
         public int? LocationId { get; set; }
 
         [JsonProperty("address")]
-        public Address Address { get; set; }
+        public AirAddress Address { get; set; }
         [JsonProperty("location")]
         public Location Location { get; set; }
         [JsonProperty("sponsor")]
-        public Sponsor Sponsor { get; set; }
+        public AirSponsor Sponsor { get; set; }
 
         [JsonProperty("elevation")]
         public double Elevation { get; set; }
@@ -255,18 +255,18 @@ namespace AirlyNet.Models
         public bool Airly { get; set; }
     }
 
-    public class Measurement
+    public class AirMeasurement
     {
         [JsonProperty("current")]
-        public SingleMeasurement Current { get; set; }
+        public AirSingleMeasurement Current { get; set; }
 
         [JsonProperty("history")]
-        public List<SingleMeasurement> History { get; set; }
+        public List<AirSingleMeasurement> History { get; set; }
         [JsonProperty("forecast")]
-        public List<SingleMeasurement> Forecast { get; set; }
+        public List<AirSingleMeasurement> Forecast { get; set; }
     }
 
-    public class MeasurementType
+    public class AirMeasurementType
     {
         [JsonProperty("name")]
         public string Name { get; set; }
@@ -276,7 +276,7 @@ namespace AirlyNet.Models
         public string Unit { get; set; }
     }
 
-    public class SingleMeasurement
+    public class AirSingleMeasurement
     {
         [JsonProperty("fromDateTime")]
         public DateTime FromDateTime { get; set; }
@@ -284,10 +284,10 @@ namespace AirlyNet.Models
         public DateTime TillDateTime { get; set; }
 
         [JsonProperty("values")]
-        public List<UnitValue> Values { get; set; }
+        public List<AirUnitValue> Values { get; set; }
         [JsonProperty("indexes")]
-        public List<Index> Indexes { get; set; }
+        public List<AirIndex> Indexes { get; set; }
         [JsonProperty("standards")]
-        public List<Standard> Standards { get; set; }
+        public List<AirStandard> Standards { get; set; }
     }
 }

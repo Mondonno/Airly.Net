@@ -1,5 +1,8 @@
 # Airly.Net
 
+**Important! Breaking change!** 
+After some time we decided to prefix the data models of `Airly.Net` by `Air` so now measurment is not `Measurment` but `AirMeasurment`
+
 Unoffical powerfull and fast .NET API client for [**Airly**](https://developer.airly.org/docs)<br>
 If you want to integrate your application with the API from Airly this is what you're looking for
 
@@ -34,12 +37,12 @@ string myApiKey = "myFullyGoodAirlyApiKey"; // Define your apikey
 Airly client = new Airly(myApiKey); // Create new instance of the Api Client
 
 Location location = new Location(0, 0) // Provide coordinates (lat, lng)
-Measurment measurment = await client.Measurments.Nearest(location) // Pass it
+AirMeasurment measurment = await client.Measurments.Nearest(location) // Pass it
 
 DateTime fromMeasurmentDateTime = measurment.Current.FromDateTime; // Destruct actual measurments from date time
 Console.WriteLine(fromMeasurmentDateTime.ToString()); // Show it over the world
 ```
 *Always remember to add after packet installation `using AirlyNet`*<br>
-**Note**: you need to add `using AirlyNet.Models` in case to use `Location`, `Address` etc.
+**Note**: you need to add `using AirlyNet.Models` in case to use `Location`, `AirAddress` etc.
 
 #### [Polish Version](./README_POLISH.md)

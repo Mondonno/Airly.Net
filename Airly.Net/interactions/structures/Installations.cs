@@ -18,7 +18,7 @@ namespace AirlyNet.Interactions
         /// <param name="maxDistance">Max distance, deafult 3, double</param>
         /// <param name="maxResults">Max results, -1 = unlimited, deafult 1, integer</param>
         /// <returns>List of installations near the installation</returns>
-        public async Task<List<Installation>> Nearest(Installation installation, double maxDistance = 3, int maxResults = 1) => installation != null ? await Nearest(installation.Location, maxDistance, maxResults) : null;
+        public async Task<List<AirInstallation>> Nearest(AirInstallation installation, double maxDistance = 3, int maxResults = 1) => installation != null ? await Nearest(installation.Location, maxDistance, maxResults) : null;
 
         /// <summary>
         /// Getting nearest installations in the specified location. If no results, returning null or empty null.
@@ -27,9 +27,9 @@ namespace AirlyNet.Interactions
         /// <param name="maxDistance">Max distance, deafult 3, double</param>
         /// <param name="maxResults">Max results, -1 = unlimited, deafult 1, integer</param>
         /// <returns>List of installations near the location</returns>
-        public async Task<List<Installation>> Nearest(Location location, double maxDistance = 3, int maxResults = 1) => location != null ? await Nearest(location.Lat, location.Lng, maxDistance, maxResults) : null;
+        public async Task<List<AirInstallation>> Nearest(Location location, double maxDistance = 3, int maxResults = 1) => location != null ? await Nearest(location.Lat, location.Lng, maxDistance, maxResults) : null;
 
-        private async Task<List<Installation>> Nearest(double lat, double lng, double maxDistance = 3, int maxResults = 1) => await Api.GetInstallationsNearestAsync(lat, lng, maxDistance, maxResults);
+        private async Task<List<AirInstallation>> Nearest(double lat, double lng, double maxDistance = 3, int maxResults = 1) => await Api.GetInstallationsNearestAsync(lat, lng, maxDistance, maxResults);
 
         /// <summary>
         /// Getting informations about installation by providing the installation ID.
@@ -37,11 +37,11 @@ namespace AirlyNet.Interactions
         /// <param name="id">Installation id, integer</param>
         /// <param name="redirect">If specified, redirecting to valid resource when the 301 returned</param>
         /// <returns>Single installation</returns>
-        public async Task<Installation> Info(int id, bool redirect = false) {
+        public async Task<AirInstallation> Info(int id, bool redirect = false) {
             if (!redirect) return await Api.GetInstallationByIdAsync(id);
             else
             {
-                Installation installationData;
+                AirInstallation installationData;
                 try
                 {
                     installationData = await Info(id);
@@ -49,7 +49,13 @@ namespace AirlyNet.Interactions
                 catch(ElementPermentlyReplacedException error)
                 {
                     var newSuccesor = (int?) error.Data["succesorId"];
-                    if (newSuccesor == null) return default;
+                    if (newSuccesor == null)
+                    {
+                        var config = Airly.Configuration;
+                        if (config.NotFoundHandling == AirlyNotFoundHandling.Error)
+                            throw new ElementPermentlyReplacedException(null, "Location was not found");
+                        else return default;
+                    }
 
                     var newInstallationData = await Info((int) newSuccesor);
                     return newInstallationData;
@@ -66,16 +72,16 @@ namespace AirlyNet.Interactions
         /// <param name="area">The LocationArea object</param>
         /// <param name="maxResults">Max results of the installations, deafult 10</param>
         /// <returns>List of installations in the specified area</returns>
-        public async Task<List<Installation>> Area(LocationArea area, int maxResults = 10)
+        public async Task<List<AirInstallation>> Area(LocationArea area, int maxResults = 10)
         {
             double areaDistanceKilometers = GeoUtil.GetKmInArea(area);
             Location barycenter = area.GetBarycenter();
 
-            List<Installation> installations = await Nearest(barycenter.Lat, barycenter.Lng, areaDistanceKilometers, maxResults);
+            List<AirInstallation> installations = await Nearest(barycenter.Lat, barycenter.Lng, areaDistanceKilometers, maxResults);
 
             if (installations == null) return default;
 
-            List<Installation> installationsFiltred = installations.FindAll(installation => area.Contains(installation.Location));
+            List<AirInstallation> installationsFiltred = installations.FindAll(installation => area.Contains(installation.Location));
             return installationsFiltred;
         }
     }

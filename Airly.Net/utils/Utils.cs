@@ -131,15 +131,6 @@ namespace AirlyNet.Utilities
             if (routes.Length == 0) return url;
             else return routes[0].ToString();
         }
-
-        [Obsolete]
-        public static List<string> GetInners(AggregateException ag)
-        {
-            List<string> Messages = new List<string>();
-            foreach (var exception in ag.InnerExceptions) Messages.Add(exception.Message);
-
-            return Messages;
-        }
     }
 
     public static class RatelimitsUtil

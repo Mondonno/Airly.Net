@@ -16,7 +16,7 @@ namespace AirlyNet.Interactions
         /// <param name="maxDistance">Max distance, deafult to 3, double</param>
         /// <param name="type">Type of the measurment index</param>
         /// <returns></returns>
-        public async Task<Measurement> Nearest(Installation installation, double maxDistance = 3, IndexQueryType type = IndexQueryType.AirlyCAQI) => await Nearest(installation.Location, maxDistance, type);
+        public async Task<AirMeasurement> Nearest(AirInstallation installation, double maxDistance = 3, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) => await Nearest(installation.Location, maxDistance, type);
         /// <summary>
         /// Getting the nearest measurment's of the specified location.
         /// </summary>
@@ -24,9 +24,9 @@ namespace AirlyNet.Interactions
         /// <param name="maxDistance">Max distance, deafult to 3, double</param>
         /// <param name="type">Type of the measurment index</param>
         /// <returns></returns>
-        public async Task<Measurement> Nearest(Location location, double maxDistance = 3, IndexQueryType type = IndexQueryType.AirlyCAQI) => await Nearest(location.Lat, location.Lng, maxDistance, type);
+        public async Task<AirMeasurement> Nearest(Location location, double maxDistance = 3, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) => await Nearest(location.Lat, location.Lng, maxDistance, type);
 
-        private async Task<Measurement> Nearest(double lat, double lng, double maxDistance = 3, IndexQueryType type = IndexQueryType.AirlyCAQI) => await Api.GetMeasurmentNearestAsync(lat, lng, maxDistance, type);
+        private async Task<AirMeasurement> Nearest(double lat, double lng, double maxDistance = 3, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) => await Api.GetMeasurmentNearestAsync(lat, lng, maxDistance, type);
 
         /// <summary>
         /// Use Point when you need to get the measurment from the point. Else use Nearest to get the measurment nearest the point.
@@ -35,7 +35,7 @@ namespace AirlyNet.Interactions
         /// <param name="installation">Installation object</param>
         /// <param name="type">Type of the measurment Index</param>
         /// <returns>Single measurment</returns>
-        public async Task<Measurement> Point(Installation installation, IndexQueryType type = IndexQueryType.AirlyCAQI) => await Point(installation.Location, type);
+        public async Task<AirMeasurement> Point(AirInstallation installation, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) => await Point(installation.Location, type);
 
         /// <summary>
         /// Getting the Point() but of the geografic Location.
@@ -43,9 +43,9 @@ namespace AirlyNet.Interactions
         /// <param name="location">Location object</param>
         /// <param name="type">Index of the measurment Index</param>
         /// <returns>Single measurment</returns>
-        public async Task<Measurement> Point(Location location, IndexQueryType type = IndexQueryType.AirlyCAQI) => await Point(location.Lat, location.Lng, type);
+        public async Task<AirMeasurement> Point(Location location, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) => await Point(location.Lat, location.Lng, type);
 
-        private async Task<Measurement> Point(double lat, double lng, IndexQueryType type = IndexQueryType.AirlyCAQI) => await Api.GetMeasurmentByPointAsync(lat, lng, type);
+        private async Task<AirMeasurement> Point(double lat, double lng, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) => await Api.GetMeasurmentByPointAsync(lat, lng, type);
 
         /// <summary>
         /// Use this when you need to get the informations about installation by ID
@@ -54,7 +54,7 @@ namespace AirlyNet.Interactions
         /// <param name="includeWind">Check this if you want to include the wind measurments</param>
         /// <param name="type">Type of the measurment Index</param>
         /// <returns>Single measurment</returns>
-        public async Task<Measurement> Installation(int id, bool includeWind = false, IndexQueryType type = IndexQueryType.AirlyCAQI) => await Api.GetMeasurmentByInstallationAsync(id, includeWind, type);
+        public async Task<AirMeasurement> Installation(int id, bool includeWind = false, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) => await Api.GetMeasurmentByInstallationAsync(id, includeWind, type);
 
         /// <summary>
         /// Getting the installation pinned measurment.
@@ -63,7 +63,7 @@ namespace AirlyNet.Interactions
         /// <param name="includeWind">Check this if you want to include the wind measurments</param>
         /// <param name="type">Type of the measurment index</param>
         /// <returns>Single measurment</returns>
-        public async Task<Measurement> Installation(Installation installation, bool includeWind = false, IndexQueryType type = IndexQueryType.AirlyCAQI) => installation != null ? await Installation(installation.Id, includeWind, type) : null;
+        public async Task<AirMeasurement> Installation(AirInstallation installation, bool includeWind = false, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) => installation != null ? await Installation(installation.Id, includeWind, type) : null;
 
         /// <summary>
         /// Use this to get the measurment's by the locationId.
@@ -72,7 +72,7 @@ namespace AirlyNet.Interactions
         /// <param name="includeWind">Check this if you want to include the wind measurments</param>
         /// <param name="type">Type of the measurment Index</param>
         /// <returns>Single measurment</returns>
-        public async Task<Measurement> Location(int locationId, bool includeWind = false, IndexQueryType type = IndexQueryType.AirlyCAQI) => await Api.GetMeasurmentByLocationIdAsync(locationId, includeWind, type);
+        public async Task<AirMeasurement> Location(int locationId, bool includeWind = false, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) => await Api.GetMeasurmentByLocationIdAsync(locationId, includeWind, type);
 
         /// <summary>
         /// Getting the measurment by the location id from installation. Remember that the location id is nullable property
@@ -81,7 +81,7 @@ namespace AirlyNet.Interactions
         /// <param name="includeWind">Check this if you want to include the wind measurments</param>
         /// <param name="type">Type of the measurment Index</param>
         /// <returns>Single measurment</returns>
-        public async Task<Measurement> Location(Installation installation, bool includeWind = false, IndexQueryType type = IndexQueryType.AirlyCAQI) =>
+        public async Task<AirMeasurement> Location(AirInstallation installation, bool includeWind = false, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) =>
             installation == null || installation.LocationId == null
                 ? null
                 : await Location((int) installation.LocationId, includeWind, type);

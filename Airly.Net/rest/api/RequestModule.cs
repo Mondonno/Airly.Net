@@ -116,7 +116,7 @@ namespace AirlyNet.Rest
             }
             catch (AggregateException ag)
             {
-                throw new Exception($"New agregated error (potential thread lock)\n{Utils.GetInners(ag)}");
+                throw new BaseException($"Aggregate Exception was thrown in RequestModule\n" + ag);
             }
             catch (Exception ex)
             {

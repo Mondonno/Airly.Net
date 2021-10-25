@@ -34,7 +34,7 @@ string myApiKey = "mójStuprocentowoDobryApiKey"; // Zdefinuj swój klucz api
 Airly client = new Airly(myApiKey); // Stwórz nową instancję klienta Airly API
 
 Location location = new Location(0, 0) // Zdefiniuj koordynaty (lat, lng)
-Measurment measurment = await client.Measurments.Nearest(location) // Podaj je
+AirMeasurment measurment = await client.Measurments.Nearest(location) // Podaj je
 
 DateTime fromMeasurmentDateTime = measurment.Current.FromDateTime; // Zdectruktuj datę aktualnego pomairy zanieczyszczeń
 Console.WriteLine(fromMeasurmentDateTime.ToString()); // Pokaz je światu
