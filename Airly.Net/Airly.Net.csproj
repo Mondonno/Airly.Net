@@ -12,7 +12,9 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <Owners>Mondonno</Owners>
     <PackageProjectUrl>https://github.com/Mondonno/Airly.Net</PackageProjectUrl>
-    <PackageReleaseNotes>All release informations are avaible on our github repository linked in the package.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixes bunch of bugs and typos in class names.
+
+More informations at our github repository, linked to this package.</PackageReleaseNotes>
     <PackageTags>airly airly.net c# csharp api client api-client</PackageTags>
     <Title>Airly.Net</Title>
     <Description>Wrapper for the Airly API written 100% in C#</Description>
