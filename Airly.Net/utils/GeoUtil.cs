@@ -9,7 +9,7 @@ namespace AirlyNet.Utilities
 
         public static bool Contains(double point, double begin, double end) => (point >= Math.Min(begin, end)) && (point <= Math.Max(begin, end));
 
-        public static double GreatCircleDistanceInKm(Location pointOne, Location pointTwo)
+        public static double GreatCircleDistanceInKm(AirLocation pointOne, AirLocation pointTwo)
         {
             bool simmilarCheck = (pointOne.Lat == pointTwo.Lat) && (pointOne.Lng == pointTwo.Lng);
             if (simmilarCheck) return 0.0;
@@ -35,11 +35,11 @@ namespace AirlyNet.Utilities
             return finalDist;
         }
 
-        public static double GetKmInArea(LocationArea area)
+        public static double GetKmInArea(AirLocationArea area)
         {
-            Location sw = area.Sw;
-            Location ne = area.Ne;
-            Location barycenter = area.GetBarycenter();
+            AirLocation sw = area.Sw;
+            AirLocation ne = area.Ne;
+            AirLocation barycenter = area.GetBarycenter();
 
             double km = Math.Max(
                 GreatCircleDistanceInKm(sw, barycenter),

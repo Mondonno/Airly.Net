@@ -6,27 +6,27 @@ namespace AirlyNet.Common.Models
     /// <summary>
     /// Location area, created from to Location objects.
     /// </summary>
-    public class LocationArea
+    public class AirLocationArea
     {
-        public LocationArea(Location sw, Location ne)
+        public AirLocationArea(AirLocation sw, AirLocation ne)
         {
             Sw = sw ?? throw new ArgumentNullException("sw");
             Ne = ne ?? throw new ArgumentNullException("ne");
         }
 
-        public Location Sw { get; set; }
-        public Location Ne { get; set; }
+        public AirLocation Sw { get; set; }
+        public AirLocation Ne { get; set; }
 
-        public bool Contains(Location location) => GeoUtil.Contains(location.Lat, Sw.Lat, Ne.Lat) && GeoUtil.Contains(location.Lng, Sw.Lng, Ne.Lng);
+        public bool Contains(AirLocation location) => GeoUtil.Contains(location.Lat, Sw.Lat, Ne.Lat) && GeoUtil.Contains(location.Lng, Sw.Lng, Ne.Lng);
 
-        public Location GetBarycenter() => new Location(
+        public AirLocation GetBarycenter() => new AirLocation(
             GeoUtil.GetMidpoint(Sw.Lat, Ne.Lat),
             GeoUtil.GetMidpoint(Sw.Lng, Ne.Lng)
         );
 
-        public static bool operator ==(LocationArea one, LocationArea two) => one != null && two != null ? one.Ne == two.Ne && one.Sw == two.Sw : one == two;
+        public static bool operator ==(AirLocationArea one, AirLocationArea two) => one != null && two != null ? one.Ne == two.Ne && one.Sw == two.Sw : one == two;
 
-        public static bool operator !=(LocationArea one, LocationArea two) => one != null && two != null ? one.Ne != two.Ne || one.Sw != two.Sw : one != two;
+        public static bool operator !=(AirLocationArea one, AirLocationArea two) => one != null && two != null ? one.Ne != two.Ne || one.Sw != two.Sw : one != two;
 
         public override bool Equals(object obj) => base.Equals(obj);
 

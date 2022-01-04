@@ -24,7 +24,7 @@ namespace AirlyNet.Interactions.Structures
         /// <param name="maxDistance">Max distance, deafult to 3, double</param>
         /// <param name="type">Type of the measurment index</param>
         /// <returns></returns>
-        public async Task<AirMeasurement> Nearest(Location location, double maxDistance = 3, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) => await Nearest(location.Lat, location.Lng, maxDistance, type);
+        public async Task<AirMeasurement> Nearest(AirLocation location, double maxDistance = 3, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) => await Nearest(location.Lat, location.Lng, maxDistance, type);
 
         private async Task<AirMeasurement> Nearest(double lat, double lng, double maxDistance = 3, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) => await Api.GetMeasurementNearestAsync(lat, lng, maxDistance, type);
 
@@ -43,7 +43,7 @@ namespace AirlyNet.Interactions.Structures
         /// <param name="location">Location object</param>
         /// <param name="type">Index of the measurment Index</param>
         /// <returns>Single measurment</returns>
-        public async Task<AirMeasurement> Point(Location location, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) => await Point(location.Lat, location.Lng, type);
+        public async Task<AirMeasurement> Point(AirLocation location, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) => await Point(location.Lat, location.Lng, type);
 
         private async Task<AirMeasurement> Point(double lat, double lng, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) => await Api.GetMeasurementByPointAsync(lat, lng, type);
 

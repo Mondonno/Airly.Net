@@ -15,7 +15,7 @@ namespace AirlyNet.Common.Models
         [JsonProperty("address")]
         public AirAddress Address { get; set; }
         [JsonProperty("location")]
-        public Location Location { get; set; }
+        public AirLocation Location { get; set; }
         [JsonProperty("sponsor")]
         public AirSponsor Sponsor { get; set; }
 

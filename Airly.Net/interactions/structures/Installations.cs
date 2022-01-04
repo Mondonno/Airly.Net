@@ -27,7 +27,7 @@ namespace AirlyNet.Interactions.Structures
         /// <param name="maxDistance">Max distance, deafult 3, double</param>
         /// <param name="maxResults">Max results, -1 = unlimited, deafult 1, integer</param>
         /// <returns>List of installations near the location</returns>
-        public async Task<List<AirInstallation>> Nearest(Location location, double maxDistance = 3, int maxResults = 1) => location != null ? await Nearest(location.Lat, location.Lng, maxDistance, maxResults) : null;
+        public async Task<List<AirInstallation>> Nearest(AirLocation location, double maxDistance = 3, int maxResults = 1) => location != null ? await Nearest(location.Lat, location.Lng, maxDistance, maxResults) : null;
 
         private async Task<List<AirInstallation>> Nearest(double lat, double lng, double maxDistance = 3, int maxResults = 1) => await Api.GetInstallationsNearestAsync(lat, lng, maxDistance, maxResults);
 
@@ -65,10 +65,10 @@ namespace AirlyNet.Interactions.Structures
         /// <param name="area">The LocationArea object</param>
         /// <param name="maxResults">Max results of the installations, deafult 10</param>
         /// <returns>List of installations in the specified area</returns>
-        public async Task<List<AirInstallation>> Area(LocationArea area, int maxResults = 10)
+        public async Task<List<AirInstallation>> Area(AirLocationArea area, int maxResults = 10)
         {
             double areaDistanceKilometers = GeoUtil.GetKmInArea(area);
-            Location barycenter = area.GetBarycenter();
+            AirLocation barycenter = area.GetBarycenter();
 
             List<AirInstallation> installations = await Nearest(barycenter.Lat, barycenter.Lng, areaDistanceKilometers, maxResults);
 

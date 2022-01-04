@@ -74,6 +74,8 @@ namespace AirlyNet
 
         private void Initialize(AirlyLanguage? language = null)
         {
+            Utils.ValidateKey(ApiKey);
+
             RESTManager restManager = new(this);
 
             Client = new(restManager);
@@ -84,8 +86,6 @@ namespace AirlyNet
             Measurements = new(this);
 
             if (language != null) Language = (AirlyLanguage) language;
-
-            Utils.ValidateKey(ApiKey);
         }
 
         /// <summary>

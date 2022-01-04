@@ -7,14 +7,14 @@ namespace AirlyNet.Common.Models
     /// <summary>
     /// Main Location object used when interacting with Airly.
     /// </summary>
-    public class Location
+    public class AirLocation
     {
         /// <summary>
         /// Create new location instance by passing Latidude nad Longatidude
         /// </summary>
         /// <param name="lat"></param>
         /// <param name="lng"></param>
-        public Location(double lat, double lng)
+        public AirLocation(double lat, double lng)
         {
             ParamsValidator.ThrowIfInfinity(lat, lng);
 
@@ -28,9 +28,9 @@ namespace AirlyNet.Common.Models
         [JsonProperty("longitude")]
         public double Lng { get; set; }
 
-        public static bool operator ==(Location one, Location two) => (!Equals(one, null) && !Equals(two, null)) ? one.Lng == two.Lng && one.Lat == two.Lat : Equals(one, two);
+        public static bool operator ==(AirLocation one, AirLocation two) => (!Equals(one, null) && !Equals(two, null)) ? one.Lng == two.Lng && one.Lat == two.Lat : Equals(one, two);
 
-        public static bool operator !=(Location one, Location two) => (!Equals(one, null) && !Equals(two, null)) ? one.Lng != two.Lng || one.Lat != two.Lat : !Equals(one, two);
+        public static bool operator !=(AirLocation one, AirLocation two) => (!Equals(one, null) && !Equals(two, null)) ? one.Lng != two.Lng || one.Lat != two.Lat : !Equals(one, two);
 
         public override bool Equals(object obj) => base.Equals(obj);
 
