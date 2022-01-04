@@ -8,10 +8,11 @@ using System.Text;
 
 using AirlyNet.Utilities;
 using AirlyNet.Rest.Typings;
-using AirlyNet.Handling.Exceptions;
-using AirlyNet.Models;
+using AirlyNet.Common.Handling.Exceptions;
+using AirlyNet.Common.Models;
+using AirlyNet.Common;
 
-namespace AirlyNet.Rest
+namespace AirlyNet.Rest.Api
 {
     public class DefaultRestRequest : IRequest, IDisposable
     {

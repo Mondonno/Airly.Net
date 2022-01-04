@@ -5,7 +5,7 @@ using System.Net.Http;
 using AirlyNet.Utilities;
 using AirlyNet.Rest.Typings;
 
-namespace AirlyNet.Handling
+namespace AirlyNet.Common.Handling
 {
     public class RateLimitInfo
     {

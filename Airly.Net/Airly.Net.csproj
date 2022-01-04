@@ -27,4 +27,10 @@ More informations at our github repository, linked to this package.</PackageRele
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="common\models\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Common\Models\" />
+  </ItemGroup>
 </Project>

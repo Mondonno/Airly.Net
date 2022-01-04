@@ -1,9 +1,9 @@
 ﻿using System;
 
-using AirlyNet.Interactions;
 using AirlyNet.Rest;
 using AirlyNet.Utilities;
-using AirlyNet.Models; 
+using AirlyNet.Interactions.Structures;
+using AirlyNet.Common;
 
 namespace AirlyNet
 {

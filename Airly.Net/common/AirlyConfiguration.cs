@@ -1,7 +1,7 @@
-﻿using AirlyNet.Models;
+﻿using AirlyNet.Common.Models;
 using AirlyNet.Rest.Typings;
 
-namespace AirlyNet
+namespace AirlyNet.Common
 {
     public sealed class AirlyEndpoints
     {

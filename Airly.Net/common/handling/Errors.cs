@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace AirlyNet.Handling.Exceptions
+namespace AirlyNet.Common.Handling.Exceptions
 {
     [Serializable]
     public class BaseException : Exception

@@ -5,10 +5,10 @@ using Newtonsoft.Json.Linq;
 
 using AirlyNet.Utilities;
 using AirlyNet.Rest.Typings;
-using AirlyNet.Handling.Exceptions;
+using AirlyNet.Common.Handling.Exceptions;
 using System.Net;
 
-namespace AirlyNet.Handling
+namespace AirlyNet.Common.Handling
 {
     public class ErrorModel
     {

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
-using AirlyNet.Models;
+using AirlyNet.Common;
 
 namespace AirlyNet.Rest.Typings
 {

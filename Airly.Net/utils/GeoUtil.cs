@@ -1,5 +1,5 @@
 ﻿using System;
-using AirlyNet.Models;
+using AirlyNet.Common.Models;
 
 namespace AirlyNet.Utilities
 {

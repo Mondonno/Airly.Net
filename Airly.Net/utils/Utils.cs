@@ -6,8 +6,8 @@ using System.Reflection;
 using System.Globalization;
 
 using AirlyNet.Rest.Typings;
-using AirlyNet.Handling.Exceptions;
-using AirlyNet.Handling;
+using AirlyNet.Common.Handling.Exceptions;
+using AirlyNet.Common.Handling;
 
 namespace AirlyNet.Utilities
 {

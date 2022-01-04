@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using AirlyNet.Handling;
 using AirlyNet.Utilities;
 using AirlyNet.Rest.Typings;
-using AirlyNet.Handling.Exceptions;
-using AirlyNet.Models;
+using AirlyNet.Common.Handling.Exceptions;
+using AirlyNet.Common;
+using AirlyNet.Queue;
 
 namespace AirlyNet.Rest
 {

@@ -8,10 +8,11 @@ using Newtonsoft.Json.Linq;
 using AirlyNet.Utilities;
 using AirlyNet.Rest.Typings;
 using AirlyNet.Rest;
-using AirlyNet.Handling.Exceptions;
-using AirlyNet.Models;
+using AirlyNet.Common.Handling.Exceptions;
+using AirlyNet.Common.Handling;
+using AirlyNet.Common;
 
-namespace AirlyNet.Handling
+namespace AirlyNet.Queue
 {
     public class Waiter : SemaphoreSlim // Default SemaphoreSlim configuration + shortcuts
     {

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using AirlyNet.Rest;
 using AirlyNet.Rest.Typings;
 
-namespace AirlyNet.Handling
+namespace AirlyNet.Queue
 {
     public class RequestQueueHandler : IDisposable
     {

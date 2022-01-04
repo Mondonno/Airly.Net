@@ -3,7 +3,8 @@ using System.Threading.Tasks;
 
 using AirlyNet.Utilities;
 using AirlyNet.Rest.Typings;
-using AirlyNet.Models;
+using AirlyNet.Rest.Api;
+using AirlyNet.Common;
 
 namespace AirlyNet.Rest
 {

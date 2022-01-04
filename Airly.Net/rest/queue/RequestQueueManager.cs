@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AirlyNet.Handling
+namespace AirlyNet.Queue
 {
     public class RequestQueueManager : Dictionary<string, RequestQueuer>, IDisposable // internal module with exposed parent
     {

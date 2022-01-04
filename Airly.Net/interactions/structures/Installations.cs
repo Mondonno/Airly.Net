@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 
 using AirlyNet.Utilities;
-using AirlyNet.Handling.Exceptions;
-using AirlyNet.Models;
+using AirlyNet.Common.Handling.Exceptions;
+using AirlyNet.Common.Models;
 
-namespace AirlyNet.Interactions
+namespace AirlyNet.Interactions.Structures
 {
     public class Installations : InteractionBase
     {
