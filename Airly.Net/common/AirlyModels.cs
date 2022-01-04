@@ -98,7 +98,7 @@ namespace AirlyNet.Models
         /// </summary>
         PL,
         /// <summary>
-        /// EN Language (deafult)
+        /// EN Language (default)
         /// </summary>
         EN
     }
