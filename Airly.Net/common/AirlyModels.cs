@@ -59,7 +59,7 @@ namespace AirlyNet.Models
         [JsonProperty("latitude")]
         public double Lat { get; set; }
 
-        [JsonProperty("longitude")]
+        [JsonProperty("longitude")] 
         public double Lng { get; set; }
 
         public static bool operator ==(Location one, Location two) => (!Equals(one, null) && !Equals(two, null)) ? one.Lng == two.Lng && one.Lat == two.Lat : Equals(one, two);
