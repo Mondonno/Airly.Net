@@ -5,7 +5,7 @@ using AirlyNet.Utilities;
 using AirlyNet.Interactions.Structures;
 using AirlyNet.Common;
 
-namespace AirlyNet
+namespace AirlyNet 
 {
     /// <summary>
     /// Use this class to interact with the Airly API, main entry of Airly.Net
