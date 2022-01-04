@@ -13,9 +13,30 @@ namespace AirlyNet.Utilities
 {
     public static class Utils
     {
-        public class NormalizedProperty
+        public static string FormatQuery(string query)
         {
-            public NormalizedProperty(string name, object value)
+            if (query.StartsWith("?")) query = query.Remove(0, 1);
+
+            string virtualHost = "http://127.0.0.1";
+            Uri constructedQuery = new Uri(string.Format("{0}{1}{2}", virtualHost, "/",
+                    string.IsNullOrEmpty(query) ? string.Empty // no need to parse the Query (eg. % === %25) (the Uri class do this for me)
+                    : string.Format("?{0}", query // Replacing # and @ to the own URL code (Uri does not support # and @ in query)
+                        .Replace("#", "%23")
+                        .Replace("@", "%40"))));
+
+            string Query = constructedQuery.Query;
+            return Query;
+        }
+
+        public static string GetVersion(int version, bool slash)
+        {
+            string sreperator = (slash ? "/" : string.Empty);
+            return $"{sreperator}v{version}{sreperator}";
+        }
+
+        public class QueryProperty
+        {
+            public QueryProperty(string name, object value)
             {
                 this.name = name;
                 this.value = value;
@@ -25,26 +46,11 @@ namespace AirlyNet.Utilities
             public object value { get; set; }
         }
 
-        // Formmatting web query
-        public static string FormatQuery(string query)
-        {
-            if (query.StartsWith("?")) query = query.Remove(0, 1);
-
-            string virtualHost = "http://127.0.0.1";
-            Uri constructedQuery = new Uri(string.Format("{0}{1}{2}", virtualHost, "/",
-                    (!string.IsNullOrEmpty(query) ? string.Format("?{0}",
-                    query.Replace("#", "%23").Replace("@", "%40")) // Replacing # and @ to the own URL code (Uri does not support # and @ in query)
-                    : ""))); // no need to parse the Query (eg. % === %25) (the Uri class do this for me)
-
-            string Query = constructedQuery.Query;
-            return Query;
-        }
-
-        public static List<NormalizedProperty> GetClassProperties<T>(T classObject)
+        public static List<QueryProperty> GetClassProperties<T>(T classObject)
         {
             Type classType = classObject.GetType();
             PropertyInfo[] props = classType.GetProperties();
-            List<NormalizedProperty> normalizedProperties = new List<NormalizedProperty>();
+            List<QueryProperty> normalizedProperties = new List<QueryProperty>();
 
             foreach (var prop in props)
             {
@@ -57,7 +63,7 @@ namespace AirlyNet.Utilities
                 object desiredValue = method.Invoke(classObject, null);
                 object[] values = new object[2] { name, desiredValue };
 
-                NormalizedProperty normalized = new NormalizedProperty((string)values[0], values[1]);
+                QueryProperty normalized = new QueryProperty((string)values[0], values[1]);
                 normalizedProperties.Add(normalized);
             }
 
@@ -75,6 +81,7 @@ namespace AirlyNet.Utilities
             {
                 return false;
             }
+
             if (result != null) return true;
             else return false;
         }
@@ -89,7 +96,7 @@ namespace AirlyNet.Utilities
             if (query == null)
                 return default;
 
-            List<NormalizedProperty> properties = GetClassProperties(query);
+            List<QueryProperty> properties = GetClassProperties(query);
             List<List<string>> convertedQuery = new List<List<string>>();
 
             foreach (var p in properties)
@@ -109,11 +116,8 @@ namespace AirlyNet.Utilities
 
         public static T GetFirstEnumarable<T>(IEnumerable<T> enumarable) => enumarable.First((e) => true);
 
-        public static string GetVersion(int version, bool slash) => $"{(slash ? "/" : string.Empty)}v{version}{(slash ? "/" : string.Empty)}";
-
         public static void ValidateKey(string key)
         {
-            // Simple airly key validation (eg. key of whitespaces)
             string toValidate = key;
             string validatedKey = toValidate.Replace(" ", "").Trim().Normalize();
 
@@ -127,7 +131,6 @@ namespace AirlyNet.Utilities
             if (url == null) return null;
             string[] routes = url.Split('/');
 
-            // || (routes.Length == 1 && routes[0] == url)
             if (routes.Length == 0) return url;
             else return routes[0].ToString();
         }

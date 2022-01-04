@@ -37,7 +37,7 @@ namespace AirlyNet.Rest
             });
         }
 
-        public async Task<AirMeasurement> GetMeasurmentByInstallationAsync(int id, bool includeWind = false, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI)
+        public async Task<AirMeasurement> GetMeasurementByInstallationAsync(int id, bool includeWind = false, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI)
         {
             ParamsValidator.ThrowIfNegativeNumber(id);
             return await Api.Request<AirMeasurement>("measurements/installation", "GET", new
@@ -48,7 +48,7 @@ namespace AirlyNet.Rest
             });
         }
 
-        public async Task<AirMeasurement> GetMeasurmentNearestAsync(double lat, double lng, double maxDistance = 3, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI)
+        public async Task<AirMeasurement> GetMeasurementNearestAsync(double lat, double lng, double maxDistance = 3, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI)
         {
             return await Api.Request<AirMeasurement>("measurements/nearest", "GET", new
             {
@@ -59,7 +59,7 @@ namespace AirlyNet.Rest
             });
         }
 
-        public async Task<AirMeasurement> GetMeasurmentByPointAsync(double lat, double lng, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI)
+        public async Task<AirMeasurement> GetMeasurementByPointAsync(double lat, double lng, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI)
         {
             return await Api.Request<AirMeasurement>("measurements/point", "GET", new
             {
@@ -69,7 +69,7 @@ namespace AirlyNet.Rest
             });
         }
 
-        public async Task<AirMeasurement> GetMeasurmentByLocationIdAsync(int locationId, bool includeWind = false, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI)
+        public async Task<AirMeasurement> GetMeasurementByLocationIdAsync(int locationId, bool includeWind = false, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI)
         {
             ParamsValidator.ThrowIfNegativeNumber(locationId);
             return await Api.Request<AirMeasurement>(end: "measurements/location", "GET", new

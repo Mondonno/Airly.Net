@@ -98,8 +98,8 @@ namespace AirlyNet.Handling
         {
             string errorMessage = $"Your api key get ratelimited for this days/minuts/secounds by Airly API\n{customMessage ?? ""}\n{all}/{limits}";
             AirlyException error = new AirlyException(errorMessage);
-            error.Data.Add("Ratelimited", true);
 
+            error.Data.Add("Ratelimited", true);
             throw error;
         }
 

@@ -10,13 +10,17 @@ namespace AirlyNet.Rest
     // provides modified functions and wraps the original DeafultRestRequest
     public class RestRequest : RestRequestProvider
     {
-        public RestRequest(RESTManager rest, string end) : base(rest, end, null, new()) { }
+        public RestRequest(RESTManager rest, string end)
+            : base(rest, end, null, new()) { }
 
-        public RestRequest(RESTManager rest, string end, RequestOptions options) : base(rest, end, null, options) { }
+        public RestRequest(RESTManager rest, string end, RequestOptions options)
+            : base(rest, end, null, options) { }
 
-        public RestRequest(RESTManager rest, string end, string method, RequestOptions options = null) : base(rest, end, method, options) { }
+        public RestRequest(RESTManager rest, string end, string method, RequestOptions options = null)
+            : base(rest, end, method, options) { }
 
-        public RestRequest(RESTManager rest, string end, RestRequestMethod requestMethod, RequestOptions options = null) : base(rest, end, requestMethod.ToString(), options) { }
+        public RestRequest(RESTManager rest, string end, RestRequestMethod requestMethod, RequestOptions options = null)
+            : base(rest, end, requestMethod.ToString(), options) { }
 
         public async Task<RawRestResponse> InvokeRequest(bool handle = true) => await SendAsync(handle);
 

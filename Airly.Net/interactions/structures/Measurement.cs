@@ -38,7 +38,7 @@ namespace AirlyNet.Interactions
         public async Task<AirMeasurement> Point(AirInstallation installation, AirlyIndexQueryType type = AirlyIndexQueryType.AirlyCAQI) => await Point(installation.Location, type);
 
         /// <summary>
-        /// Getting the Point() but of the geografic Location.
+        /// Does the same as the `Point` method wich have in parameter Installation, but instead the geografic Location.
         /// </summary>
         /// <param name="location">Location object</param>
         /// <param name="type">Index of the measurment Index</param>

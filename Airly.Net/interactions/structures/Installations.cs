@@ -48,16 +48,9 @@ namespace AirlyNet.Interactions
                 }
                 catch(ElementPermentlyReplacedException error)
                 {
-                    var newSuccesor = (int?) error.Data["succesorId"];
-                    if (newSuccesor == null)
-                    {
-                        var config = Airly.Configuration;
-                        if (config.NotFoundHandling == AirlyNotFoundHandling.Error)
-                            throw new ElementPermentlyReplacedException(null, "Location was not found");
-                        else return default;
-                    }
-
+                    var newSuccesor = (int?) error.Data["succesorId"]; // null is begin handled in the RequestQueuer
                     var newInstallationData = await Info((int) newSuccesor);
+
                     return newInstallationData;
                 }
                 catch { return default; }

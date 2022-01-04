@@ -99,7 +99,8 @@ namespace AirlyNet.Handling
             {
                 var notFound = Manager.Airly.Configuration.NotFoundHandling;
 
-                if (notFound != AirlyNotFoundHandling.Null) throw new HttpException($"The content for {request.RequestUri}\nWas not found"); // or throwing the error on the AirlyNotFound handling setting
+                if (notFound != AirlyNotFoundHandling.Null)
+                    throw new HttpException($"The content for {request.RequestUri}\nWas not found"); // or throwing the error on the AirlyNotFound handling setting
                 else return null; // returning the null value from the 404 (user known)
             }
             if (statusCode == 301)
@@ -124,14 +125,14 @@ namespace AirlyNet.Handling
             bool malformedCheck = handler.JsonHandler.IsMalformedResponse();
 
             if (malformedCheck)
-                throw new HttpException("The Airly API JSON response got malformed");
+                throw new HttpException("JSON response is malformed");
 
             var convertedJson = ConvertJsonString(rawJson);
             bool jsonValidCheck = !string.IsNullOrEmpty(convertedJson.ToString());
             
             if (jsonValidCheck) return constructedResponse;
             else if(!jsonValidCheck)
-                throw new HttpException("The Airly API returned json is null or empty");
+                throw new HttpException("Returned JSON is null or empty");
 
             ThrowIfJsonError(res.HttpResponse, res.RawJson);
             return null; // Fallback value (when all other statments do not react with the response)

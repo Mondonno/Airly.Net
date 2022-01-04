@@ -43,6 +43,11 @@ namespace AirlyNet.Models
     /// </summary>
     public class Location
     {
+        /// <summary>
+        /// Create new location instance by passing Latidude nad Longatidude
+        /// </summary>
+        /// <param name="lat"></param>
+        /// <param name="lng"></param>
         public Location(double lat, double lng)
         {
             ParamsValidator.ThrowIfInfinity(lat, lng);
