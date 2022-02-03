@@ -43,7 +43,7 @@ namespace AirlyNet
         public AirlyConfiguration Configuration { get; set; } = new AirlyConfiguration();
 
         /// <summary>
-        /// Used when sending request to API. Specfies in what language the response will return.
+        /// Used when sending request to API. Specifies in what language the response will return.
         /// </summary>
         public AirlyLanguage Language {
             get => Rest.Language;

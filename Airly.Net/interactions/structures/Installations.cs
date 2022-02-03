@@ -44,12 +44,12 @@ namespace AirlyNet.Interactions.Structures
                 AirInstallation installationData;
                 try
                 {
-                    installationData = await Info(id);
+                    installationData = await Info(id); // not recursive because passing redirect = false;
                 }
                 catch(ElementPermentlyReplacedException error)
                 {
                     var newSuccesor = (int?) error.Data["succesorId"]; // null is begin handled in the RequestQueuer
-                    var newInstallationData = await Info((int) newSuccesor);
+                    var newInstallationData = await Info((int) newSuccesor); // not recursive because passing redirect = false;
 
                     return newInstallationData;
                 }

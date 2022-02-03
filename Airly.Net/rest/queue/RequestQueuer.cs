@@ -115,7 +115,6 @@ namespace AirlyNet.Queue
                 else if (succesor != null) {
                     throw new ElementPermentlyReplacedException(succesor.ToString(), "New succesor found");
                 }
-                else throw new HttpException("301 thrown but isn't begin handled");
             }
 
             string rawJson = res.RawJson;
@@ -130,10 +129,8 @@ namespace AirlyNet.Queue
 
             var convertedJson = ConvertJsonString(rawJson);
             bool jsonValidCheck = !string.IsNullOrEmpty(convertedJson.ToString());
-            
+
             if (jsonValidCheck) return constructedResponse;
-            else if(!jsonValidCheck)
-                throw new HttpException("Returned JSON is null or empty");
 
             ThrowIfJsonError(res.HttpResponse, res.RawJson);
             return null; // Fallback value (when all other statments do not react with the response)

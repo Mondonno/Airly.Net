@@ -32,7 +32,7 @@ namespace AirlyNet.Rest.Api
 
         public Uri RequestUri { get; set; }
         private string RawUrl {
-            get => RawUrl;
+            get => RequestUri.AbsoluteUri;
             set =>  RequestUri = new Uri(value);
         }
         private string RawMethod {
@@ -91,19 +91,19 @@ namespace AirlyNet.Rest.Api
             double requestTimeout = restTimeout == 0 ? 60000 : restTimeout;
 
             HttpClient.Timeout = TimeSpan.FromMilliseconds(requestTimeout);
-
-            HttpRequestMessage RequestMessage = new(Method, RequestUri);
+    
+            HttpRequestMessage requestMessage = new(Method, RequestUri);
             if(RestOptions.Body != null)
             {
                 StringContent content = new StringContent(RestOptions.Body.ToString(), Encoding.UTF8, "application/json");
-                RequestMessage.Content = content;
+                requestMessage.Content = content;
             }
 
-            HttpResponseMessage httpResponse = await HttpClient.SendAsync(RequestMessage, HttpCompletionOption.ResponseContentRead, CancellationToken.None); // Error (capture)
+            HttpResponseMessage httpResponse = await HttpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseContentRead, CancellationToken.None); // Error (capture)
             string httpContent = await httpResponse.Content.ReadAsStringAsync();
             
             httpResponse.Dispose();
-            RequestMessage.Dispose();
+            requestMessage.Dispose();
 
             RawRestResponse restResponse = new(httpResponse, httpContent);
             return restResponse;

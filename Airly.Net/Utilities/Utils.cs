@@ -24,26 +24,25 @@ namespace AirlyNet.Utilities
                         .Replace("#", "%23")
                         .Replace("@", "%40"))));
 
-            string Query = constructedQuery.Query;
-            return Query;
+            return constructedQuery.Query;
         }
 
         public static string GetVersion(int version, bool slash)
         {
-            string sreperator = (slash ? "/" : string.Empty);
-            return $"{sreperator}v{version}{sreperator}";
+            string separator = slash ? "/" : string.Empty;
+            return $"{separator}v{version}{separator}";
         }
 
         public class QueryProperty
         {
             public QueryProperty(string name, object value)
             {
-                this.name = name;
-                this.value = value;
+                Name = name;
+                Value = value;
             }
 
-            public string name { get; set; }
-            public object value { get; set; }
+            public string Name { get; set; }
+            public object Value { get; set; }
         }
 
         public static List<QueryProperty> GetClassProperties<T>(T classObject)
@@ -72,18 +71,16 @@ namespace AirlyNet.Utilities
 
         public static bool IsDouble(object obj)
         {
-            double? result;
             try
             {
-                result = (double)obj;
+                _ = (double) obj;
             }
             catch (InvalidCastException)
             {
                 return false;
             }
 
-            if (result != null) return true;
-            else return false;
+            return true;
         }
 
         public static List<List<string>> ParseQuery(dynamic query)
@@ -101,11 +98,11 @@ namespace AirlyNet.Utilities
 
             foreach (var p in properties)
             {
-                string name = p.name;
+                string name = p.Name;
                 string value; // Converting the object value to string (without the explict type)
 
-                if (IsDouble(p.value)) value = ((double)p.value).ToString(numberInfo);
-                else value = p.value.ToString();
+                if (IsDouble(p.Value)) value = ((double)p.Value).ToString(numberInfo);
+                else value = p.Value.ToString();
 
                 List<string> constructedArray = new List<string>() { name, value };
                 convertedQuery.Add(constructedArray);
@@ -114,7 +111,7 @@ namespace AirlyNet.Utilities
             return convertedQuery;
         }
 
-        public static T GetFirstEnumarable<T>(IEnumerable<T> enumarable) => enumarable.First((e) => true);
+        public static T GetFirstEnumarable<T>(IEnumerable<T> enumarable) => enumarable.First((_) => true);
 
         public static void ValidateKey(string key)
         {
@@ -123,7 +120,6 @@ namespace AirlyNet.Utilities
 
             if (string.IsNullOrEmpty(toValidate) || string.IsNullOrEmpty(validatedKey) || validatedKey != toValidate)
                 throw new InvalidApiKeyException();
-            else return;
         }
 
         public static string GetRoute(string url)
@@ -132,7 +128,7 @@ namespace AirlyNet.Utilities
             string[] routes = url.Split('/');
 
             if (routes.Length == 0) return url;
-            else return routes[0].ToString();
+            else return routes[0];
         }
     }
 
@@ -254,7 +250,7 @@ namespace AirlyNet.Utilities
             if (!AreFinity(numbers)) throw new IndexOutOfRangeException("The specified parameters must be finity double");
         }
 
-        public static bool CheckIfNegativeNumber(int number) => number.ToString().StartsWith("-");
+        private static bool CheckIfNegativeNumber(int number) => number < 0;
 
         public static void ThrowIfNegativeNumber(int number)
         {

@@ -14,7 +14,7 @@ namespace AirlyNet.Common
     }
 
     /// <summary>
-    /// Airly Configuration, used if you want to change the deafult settings.
+    /// Airly Configuration, used if you want to change the default settings.
     /// </summary>
     public sealed class AirlyConfiguration
     {
