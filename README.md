@@ -1,8 +1,11 @@
 # Airly.Net
 
-**Breaking changes** <br>
-After some time we decided to prefix the data models of `Airly.Net` by `Air` so now measurment is not `Measurment` but `AirMeasurment`
 <br>
+
+**Breaking changes**
+<!-- <br> -->
+After some time we decided to prefix the data models of `Airly.Net` by `Air` so now measurment is not `Measurment` but `AirMeasurment`
+<!-- <br> -->
 ---------------------------------------
 <br>
 
