@@ -13,6 +13,7 @@ Unoffical powerfull and fast .NET API client for [**Airly**](https://developer.a
 If you want to integrate your application with the API from Airly this is what you're looking for
 
 - Async based 
+- Super light
 - 100% coverage with the Airly API
 - Fully safe and easy to use
 - No more than one request per invoked method*

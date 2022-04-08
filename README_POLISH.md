@@ -9,6 +9,7 @@ Nieoficjalny mocny i szybki .NET api wrapper napisany w C# dla [Airly](https://d
 Jeśli chcesz zintegrować swoja aplikacje z API od airly to jest to czego szukasz
 
 - Bazowany asynchronicznie
+- Bardzo mała wielkość pliku pakietu
 - 100% pokryty z Airly API
 - W pełni bezpieczny i szybki
 - Nie więcej niz 1 zapytanie na wywołaną metode*
