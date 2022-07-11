@@ -1,5 +1,7 @@
 # My by mondonno haha
 Airly.Net/test
+Airly.Net.Test/*
+!Airly.Net.Test/Airly.Net.Test.csproj
 test/
 test/test.csproj
 AirlyAPI/src/common/cache/

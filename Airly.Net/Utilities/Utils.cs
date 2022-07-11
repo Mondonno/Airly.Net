@@ -11,45 +11,14 @@ using AirlyNet.Common.Handling;
 
 namespace AirlyNet.Utilities
 {
+    // General utilities class
     public static class Utils
     {
-        public static string FormatQuery(string query)
-        {
-            if (query.StartsWith("?")) query = query.Remove(0, 1);
-
-            string virtualHost = "http://127.0.0.1";
-            Uri constructedQuery = new Uri(string.Format("{0}{1}{2}", virtualHost, "/",
-                    string.IsNullOrEmpty(query) ? string.Empty // no need to parse the Query (eg. % === %25) (the Uri class do this for me)
-                    : string.Format("?{0}", query // Replacing # and @ to the own URL code (Uri does not support # and @ in query)
-                        .Replace("#", "%23")
-                        .Replace("@", "%40"))));
-
-            return constructedQuery.Query;
-        }
-
-        public static string GetVersion(int version, bool slash)
-        {
-            string separator = slash ? "/" : string.Empty;
-            return $"{separator}v{version}{separator}";
-        }
-
-        public class QueryProperty
-        {
-            public QueryProperty(string name, object value)
-            {
-                Name = name;
-                Value = value;
-            }
-
-            public string Name { get; set; }
-            public object Value { get; set; }
-        }
-
-        public static List<QueryProperty> GetClassProperties<T>(T classObject)
+        public static List<(string, object)> GetClassProperties<T>(T classObject)
         {
             Type classType = classObject.GetType();
             PropertyInfo[] props = classType.GetProperties();
-            List<QueryProperty> normalizedProperties = new List<QueryProperty>();
+            List<(string, object)> normalizedProperties = new();
 
             foreach (var prop in props)
             {
@@ -60,27 +29,10 @@ namespace AirlyNet.Utilities
                 if (method == null) continue;
 
                 object desiredValue = method.Invoke(classObject, null);
-                object[] values = new object[2] { name, desiredValue };
-
-                QueryProperty normalized = new QueryProperty((string)values[0], values[1]);
-                normalizedProperties.Add(normalized);
+                normalizedProperties.Add((name, desiredValue));
             }
 
             return normalizedProperties;
-        }
-
-        public static bool IsDouble(object obj)
-        {
-            try
-            {
-                _ = (double) obj;
-            }
-            catch (InvalidCastException)
-            {
-                return false;
-            }
-
-            return true;
         }
 
         public static List<List<string>> ParseQuery(dynamic query)
@@ -93,15 +45,21 @@ namespace AirlyNet.Utilities
             if (query == null)
                 return default;
 
-            List<QueryProperty> properties = GetClassProperties(query);
+            List<(string, object)> properties = GetClassProperties(query);
             List<List<string>> convertedQuery = new List<List<string>>();
 
-            foreach (var p in properties)
+            foreach (var op in properties)
             {
+                var p = new
+                {
+                    Name = op.Item1,
+                    Value = op.Item2
+                };
+
                 string name = p.Name;
                 string value; // Converting the object value to string (without the explict type)
 
-                if (IsDouble(p.Value)) value = ((double)p.Value).ToString(numberInfo);
+                if (p.Value.GetType() == typeof(double)) value = ((double)p.Value).ToString(numberInfo);
                 else value = p.Value.ToString();
 
                 List<string> constructedArray = new List<string>() { name, value };
@@ -110,8 +68,6 @@ namespace AirlyNet.Utilities
 
             return convertedQuery;
         }
-
-        public static T GetFirstEnumarable<T>(IEnumerable<T> enumarable) => enumarable.First((_) => true);
 
         public static void ValidateKey(string key)
         {
@@ -141,7 +97,6 @@ namespace AirlyNet.Utilities
             int rateLimit;
 
             bool rateLimitCheck = false;
-
             bool headersExists = XRemaining == null || XRemaining == "" || XLimit == null || XLimit == "";
 
             if (!headersExists)
@@ -210,7 +165,7 @@ namespace AirlyNet.Utilities
     {
         // For response headers
         // Getting the header first value because the headers can have multiple values (Airly API always return one value headers)
-        private static string GetHeaderBase(IEnumerable<string> values) => Utils.GetFirstEnumarable(values);
+        private static string GetHeaderBase(IEnumerable<string> values) => values.FirstOrDefault();
 
         public static string GetHeader(HttpHeaders headers, string key)
         {
@@ -238,16 +193,13 @@ namespace AirlyNet.Utilities
 
         public static bool AreFinity(params double[] numbers)
         {
-            List<bool> finities = new List<bool>();
-            foreach (var n in numbers)
-                finities.Add(!double.IsInfinity(n));
-
-            return finities.FindAll(e => e == true).Count == numbers.Length;
+            return numbers.ToList().Select(e => double.IsFinite(e)).ToList().Count(e => e == true) == numbers.Length;
         }
 
         public static void ThrowIfInfinity(params double[] numbers)
         {
-            if (!AreFinity(numbers)) throw new IndexOutOfRangeException("The specified parameters must be finity double");
+            if (!AreFinity(numbers))
+                throw new IndexOutOfRangeException("The specified parameters must be finity double");
         }
 
         private static bool CheckIfNegativeNumber(int number) => number < 0;

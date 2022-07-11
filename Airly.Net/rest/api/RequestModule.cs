@@ -11,9 +11,20 @@ using AirlyNet.Rest.Typings;
 using AirlyNet.Common.Handling.Exceptions;
 using AirlyNet.Common.Models;
 using AirlyNet.Common;
+using System.Net.Mime;
 
 namespace AirlyNet.Rest.Api
 {
+    public static class RestRequestConstants
+    {
+        public static string ApiKeyHeader { get; } = "apikey";
+        public static string AcceptLanguageHeader { get; } = "Accept-Language";
+        public static string UserAgentHeader { get; } = "User-Agent";
+
+        public static string HttpProtocol { get; } = "http";
+        public static string HttpSecuredProtocol { get; } = "https";
+    }
+
     public class DefaultRestRequest : IRequest, IDisposable
     {
         public RESTManager Rest { get; set; }
@@ -31,11 +42,10 @@ namespace AirlyNet.Rest.Api
         };
 
         public Uri RequestUri { get; set; }
-        private string RawUrl {
-            get => RequestUri.AbsoluteUri;
-            set =>  RequestUri = new Uri(value);
+        public string RawUrl {
+            set => RequestUri = new Uri(value);
         }
-        private string RawMethod {
+        public string RawMethod {
             set => Method = GetMethod(value);
         }
         public IEnumerable<KeyValuePair<string, IEnumerable<string>>> Headers { get => HttpClient.DefaultRequestHeaders; }
@@ -49,35 +59,23 @@ namespace AirlyNet.Rest.Api
             RestConfiguration = rest.Airly.Configuration;
             EndPoint = end;
             RestOptions = options;
-            Method = !string.IsNullOrEmpty(method) ? GetMethod(method) : GetMethod("GET");
+            Method = !string.IsNullOrEmpty(method) ? GetMethod(method) : GetMethod(HttpMethod.Get.Method);
 
-            DefaultHeaders.Add("User-Agent", RestConfiguration.Agent);
+            DefaultHeaders.Add(RestRequestConstants.UserAgentHeader, RestConfiguration.Agent);
 
             string parsedProtocol;
-            if (RestConfiguration.Protocol == RestRequestProtocol.HTTP)
-                parsedProtocol = "http";
+            if (RestConfiguration.Protocol == RestRequestProtocol.HTTPS)
+                parsedProtocol = RestRequestConstants.HttpSecuredProtocol;
             else
-                parsedProtocol = "https";
+                parsedProtocol = RestRequestConstants.HttpProtocol;
 
-            string url =
-                $"{parsedProtocol}://" +
-                RestConfiguration.ApiDomain + Utils.GetVersion(RestConfiguration.Version, true) +
-                EndPoint;
-
-            bool queryExists = options.Query != null && options.Query.Count != 0;
             string query = string.Empty;
+            bool queryExists = options.Query != null && options.Query.Count != 0;
 
             if (queryExists)
-            {
-                foreach (var segment in options.Query)
-                    query += string.Format("{0}={1}&", segment[0], segment[1]);
+                query = DecodeQuery(options.Query);
 
-                query = query.EndsWith("&") ? query.Remove(query.Length - 1, 1) : query;
-                query = Utils.FormatQuery(query);
-            }
-
-            url = !string.IsNullOrEmpty(query) ? url + query : url;
-            RawUrl = url;
+            RawUrl = $"{parsedProtocol}://{RestConfiguration.ApiDomain}/v{RestConfiguration.Version}/{EndPoint}{query}";
 
             RestHttpHandler restHttpHandler = new RestHttpHandler();
             HttpClient = new HttpClient(restHttpHandler, true);
@@ -88,14 +86,15 @@ namespace AirlyNet.Rest.Api
         public async Task<RawRestResponse> Send()
         {
             double restTimeout = RestConfiguration.RestRequestTimeout;
-            double requestTimeout = restTimeout == 0 ? 60000 : restTimeout;
+            double requestTimeout = restTimeout == 0 ? TimeSpan.FromMinutes(1).TotalMilliseconds : restTimeout;
 
             HttpClient.Timeout = TimeSpan.FromMilliseconds(requestTimeout);
     
             HttpRequestMessage requestMessage = new(Method, RequestUri);
             if(RestOptions.Body != null)
             {
-                StringContent content = new StringContent(RestOptions.Body.ToString(), Encoding.UTF8, "application/json");
+                StringContent content = new StringContent(RestOptions.Body.ToString(),
+                    Encoding.UTF8, MediaTypeNames.Application.Json);
                 requestMessage.Content = content;
             }
 
@@ -141,6 +140,26 @@ namespace AirlyNet.Rest.Api
                 ToggleHeader(header.Key, header.Value);
         }
 
+        private string DecodeQuery(List<List<string>> queryObject)
+        {
+            string query = string.Empty;
+            foreach (var segment in queryObject)
+                query += string.Format("{0}={1}&", segment[0], segment[1]);
+
+            query = query.EndsWith("&") ? query.Remove(query.Length - 1, 1) : query;
+
+            if (query.StartsWith("?")) query = query.Remove(0, 1);
+
+            string virtualHost = "http://127.0.0.1";
+            Uri constructedQuery = new Uri(string.Format("{0}{1}{2}", virtualHost, "/",
+                    string.IsNullOrEmpty(query) ? string.Empty // no need to parse the Query (eg. % === %25) (the Uri class do this for me)
+                    : string.Format("?{0}", query // Replacing # and @ to the own URL code (Uri does not support # and @ in query)
+                        .Replace("#", "%23")
+                        .Replace("@", "%40"))));
+
+            return constructedQuery.Query;
+        }
+
         private HttpMethod GetMethod(string method)
         {
             HttpMethod httpMethod = HttpMethod.Get;
@@ -159,14 +178,14 @@ namespace AirlyNet.Rest.Api
         {
             if (!RestOptions.Auth) return;
 
-            ToggleHeader("apikey", key);
+            ToggleHeader(RestRequestConstants.ApiKeyHeader, key);
         }
 
         public void SetMethod(string methodName) => RawMethod = methodName.Trim().ToUpper();
 
         public void SetLanguage(AirlyLanguage language) => SetLanguage(language.ToString().ToLower());
 
-        public void SetLanguage(string language) => ToggleHeader("Accept-Language", language.ToLower());
+        public void SetLanguage(string language) => ToggleHeader(RestRequestConstants.AcceptLanguageHeader, language.ToLower());
 
         public void Dispose()
         {
